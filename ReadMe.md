@@ -71,3 +71,7 @@ ffmpeg 常用命令
 技术链接
 --------
         Java Fx: http://www.javafxchina.net/main/   
+        FFmpeg: https://ffmpeg.org/ffmpeg.html#Complex-filtergraphs
+        jave1.0: http://www.sauronsoftware.it/projects/jave/download.php
+        jave2.0: https://github.com/a-schild/jave2
+        
