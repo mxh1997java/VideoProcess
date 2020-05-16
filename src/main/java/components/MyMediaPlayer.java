@@ -1,6 +1,10 @@
 package components;
 
 import java.io.File;
+import java.math.BigDecimal;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 import executor.VideoExecutor;
 import javafx.beans.InvalidationListener;
@@ -23,6 +27,7 @@ import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.Handler;
 import ws.schild.jave.MultimediaInfo;
 
 /**
@@ -57,6 +62,17 @@ public class MyMediaPlayer {
         BorderPane pane = new BorderPane();
         pane.setPrefWidth(600);
         pane.setPrefHeight(600);
+
+//        mView.fitWidthProperty().bind(pane.widthProperty());
+//        mView.fitHeightProperty().bind(pane.heightProperty());
+        mView.setFitWidth(600);
+        mView.setFitHeight(400);
+
+        //计算播放画面大小
+//        BorderPane pane1 = pane1 = calculationRatio(new File(source));
+//        mView.fitWidthProperty().bind(pane1.widthProperty());
+//        mView.fitHeightProperty().bind(pane1.heightProperty());
+//        LOG.info("mVie width: {}, height: {}", mView.getFitWidth(), mView.getFitHeight());
 
         /* Button */
         btnPlay = new Button("播放");
@@ -162,8 +178,10 @@ public class MyMediaPlayer {
 
         //计算播放画面大小
         BorderPane pane = calculationRatio(file);
-        mView.fitWidthProperty().bind(pane.widthProperty());
-        mView.fitHeightProperty().bind(pane.heightProperty());
+//        mView.fitWidthProperty().bind(pane.widthProperty());
+//        mView.fitHeightProperty().bind(pane.heightProperty());
+        mView.setFitWidth(pane.getPrefWidth());
+        mView.setFitHeight(pane.getPrefHeight());
         LOG.info("mVie width: {}, height: {}", mView.getFitWidth(), mView.getFitHeight());
 
         mplayer.stop();
@@ -207,20 +225,35 @@ public class MyMediaPlayer {
      * @return
      */
     public static BorderPane calculationRatio(File file) {
+        LOG.info("文件路径: {}", file.getAbsolutePath());
         //获取视频信息计算播放画面大小
         MultimediaInfo videoInfo = videoExecutor.getVideoInfo(file.getAbsolutePath());
         double width = videoInfo.getVideo().getSize().getWidth();
         double height = videoInfo.getVideo().getSize().getHeight();
+        BigDecimal standardValue = new BigDecimal("0.5");
+        BigDecimal standardValue1 = new BigDecimal("0.75");
+        BigDecimal standardValue2 = new BigDecimal("1");
+        BigDecimal widthValue = new BigDecimal(String.valueOf(width));
+        BigDecimal heightValue = new BigDecimal(String.valueOf(height));
         if(width > 1000) {
-            width = width * 0.5;
-            height = height * 0.5;
+            widthValue = widthValue.multiply(standardValue);
+            heightValue = heightValue.multiply(standardValue);
+            Handler.setScale(standardValue);
         } else if(width > 800) {
-            width = width * 0.75;
-            height = height * 0.75;
+            widthValue = widthValue.multiply(standardValue1);
+            heightValue = heightValue.multiply(standardValue1);
+            Handler.setScale(standardValue1);
+        } else if(height > 600) {
+            //针对手机做出的优化
+            heightValue = heightValue.multiply(standardValue);
+            Handler.setScale(standardValue);
+        }
+        if(width < 600 && height < 600) {
+            Handler.setScale(standardValue2);
         }
         BorderPane pane = new BorderPane();
-        pane.setPrefSize(width, height);
-        pane.setMaxSize(width, height);
+        pane.setPrefSize(widthValue.doubleValue(), heightValue.doubleValue());
+        pane.setMaxSize(widthValue.doubleValue(), heightValue.doubleValue());
         return pane;
     }
 

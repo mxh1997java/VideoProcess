@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -34,6 +35,8 @@ public class Handler {
     private static Map<String, List<String>> dataListMap = new HashMap<>();
 
     private static Map<String, MyListView> listViewMap = new HashMap<>();
+
+    private static BigDecimal scale = null;
 
     static {
         fileTypeSet.add("mp4");
@@ -80,6 +83,22 @@ public class Handler {
      */
     public static void put(String key, MyListView listView) {
         listViewMap.put(key, listView);
+    }
+
+    /**
+     * 设置当前比例
+     * @param value
+     */
+    public static void setScale(BigDecimal value){
+        scale = value;
+    }
+
+    /**
+     * 获取当前比例
+     * @return
+     */
+    public static BigDecimal getScale() {
+        return scale;
     }
 
 
