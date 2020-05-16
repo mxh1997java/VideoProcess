@@ -2,6 +2,11 @@ package components;
 
 import java.io.File;
 
+import executor.VideoExecutor;
+import javafx.beans.InvalidationListener;
+import javafx.beans.binding.Bindings;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -16,6 +21,9 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import ws.schild.jave.MultimediaInfo;
 
 /**
  * @author xinhai.ma
@@ -24,12 +32,15 @@ import javafx.util.Duration;
  */
 public class MyMediaPlayer {
 
+    private static final Logger LOG = LoggerFactory.getLogger(MyMediaPlayer.class);
+
+    private static final VideoExecutor videoExecutor = new VideoExecutor();
+
     private static Double endTime = new Double(0);
     private static Double currentTime = new Double(0);
-    //private static File file = new File("");
-    private static Media media = new Media("https://gss3.baidu.com/6LZ0ej3k1Qd3ote6lo7D0j9wehsv/tieba-smallvideo-transcode-cae/7582624_bd76685e95e44141dc814fb8e96c4366_0_cae.mp4");
+    private static String source = "https://gss3.baidu.com/6LZ0ej3k1Qd3ote6lo7D0j9wehsv/tieba-smallvideo-transcode-cae/7582624_bd76685e95e44141dc814fb8e96c4366_0_cae.mp4";
+    private static Media media = new Media(source);
     private static MediaPlayer mplayer = new MediaPlayer(media);
-
     private static MediaView mView;
     private static Button btnPlay;
     private static Slider slTime, slVolume;
@@ -46,11 +57,6 @@ public class MyMediaPlayer {
         BorderPane pane = new BorderPane();
         pane.setPrefWidth(600);
         pane.setPrefHeight(600);
-        mView.fitWidthProperty().bind(pane.widthProperty());
-        mView.fitHeightProperty().bind(pane.heightProperty().subtract(30));
-
-        //mView.fitWidthProperty().bind(Bindings.selectDouble(mView.sceneProperty(), "width"));;
-        //mView.fitHeightProperty().bind(Bindings.selectDouble(mView.sceneProperty(), "height"));;
 
         /* Button */
         btnPlay = new Button("播放");
@@ -121,7 +127,7 @@ public class MyMediaPlayer {
 
         HBox paneCtl = new HBox(15);
 //		paneCtl.setPadding(new Insets(30));
-        paneCtl.setMaxSize(600, 600);
+        paneCtl.setMaxSize(600, 300);
         paneCtl.setAlignment(Pos.CENTER);
         paneCtl.getChildren().addAll(/*btnOpen,*/ lbCurrentTime, slTime, btnReplay, btnPlay, new Label("音量"), slVolume);
         pane.setCenter(mView);
@@ -132,7 +138,7 @@ public class MyMediaPlayer {
         return pane;
     }
 
-    private static String Seconds2Str(Double seconds) {
+    private static String SecondsStr(Double seconds) {
         Integer count = seconds.intValue();
         Integer Hours = count / 3600;
         count = count % 3600;
@@ -153,6 +159,13 @@ public class MyMediaPlayer {
             MyAlertBox.display("播放组件提示", "播放文件不存在!");
             return;
         }
+
+        //计算播放画面大小
+        BorderPane pane = calculationRatio(file);
+        mView.fitWidthProperty().bind(pane.widthProperty());
+        mView.fitHeightProperty().bind(pane.heightProperty());
+        LOG.info("mVie width: {}, height: {}", mView.getFitWidth(), mView.getFitHeight());
+
         mplayer.stop();
         btnPlay.setText("播放");
         try {
@@ -174,7 +187,7 @@ public class MyMediaPlayer {
         });
         mplayer.currentTimeProperty().addListener(ov -> {
             currentTime = mplayer.getCurrentTime().toSeconds();
-            lbCurrentTime.setText(Seconds2Str(currentTime) + "/" + Seconds2Str(endTime));
+            lbCurrentTime.setText(SecondsStr(currentTime) + "/" + SecondsStr(endTime));
             slTime.setValue(currentTime / endTime * 100);
         });
         slTime.valueProperty().addListener(ov -> {
@@ -184,6 +197,31 @@ public class MyMediaPlayer {
         });
         mplayer.volumeProperty().bind(slVolume.valueProperty().divide(100)); // 音量调节
         mplayer.play();
+        LOG.info("mVie width: {}, height: {}", mView.getFitWidth(), mView.getFitHeight());
+    }
+
+
+    /**
+     * 传入视频文件获取宽高，计算播放画面尺寸
+     * @param file
+     * @return
+     */
+    public static BorderPane calculationRatio(File file) {
+        //获取视频信息计算播放画面大小
+        MultimediaInfo videoInfo = videoExecutor.getVideoInfo(file.getAbsolutePath());
+        double width = videoInfo.getVideo().getSize().getWidth();
+        double height = videoInfo.getVideo().getSize().getHeight();
+        if(width > 1000) {
+            width = width * 0.5;
+            height = height * 0.5;
+        } else if(width > 800) {
+            width = width * 0.75;
+            height = height * 0.75;
+        }
+        BorderPane pane = new BorderPane();
+        pane.setPrefSize(width, height);
+        pane.setMaxSize(width, height);
+        return pane;
     }
 
 }

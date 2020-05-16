@@ -67,4 +67,7 @@ ffmpeg 常用命令
         	
         	镜像
         	ffmpeg -i input.flv -vf crop=iw/2:ih:0:0,split[left][tmp];[tmp]hflip[right];[left]pad=iw*2[a];[a][right]overlay=w output.flv
-        
+     
+技术链接
+--------
+        Java Fx: http://www.javafxchina.net/main/   

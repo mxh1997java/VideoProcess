@@ -8,7 +8,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,8 +41,7 @@ public class MyMenuBar {
                 MyAlertBox.display("菜单栏提示: ", "未在" + path + "文件夹下读取到视频文件，请重新选择!");
                 return;
             }
-            VBox videoList = MyVideoList.getVideoList(fileList);
-            MyHome.setVideoList(videoList);
+            MyHome.setLeft(fileList, null);
         });
         menuFile.getItems().addAll(selectFolder);
 
@@ -57,8 +55,7 @@ public class MyMenuBar {
                     pathList.add(file.getAbsolutePath());
                 });
             }
-            VBox videoList = MyVideoList.getVideoList(pathList);
-            MyHome.setVideoList(videoList);
+            MyHome.setLeft(pathList, null);
         });
         menuFile.getItems().addAll(selectMultipleFile);
 
@@ -69,8 +66,7 @@ public class MyMenuBar {
                 LOG.info("选择单个文件: " + file.getAbsolutePath());
                 List<String> fileList = new ArrayList<>();
                 fileList.add(file.getAbsoluteFile().toString());
-                VBox videoList = MyVideoList.getVideoList(fileList);
-                MyHome.setVideoList(videoList);
+                MyHome.setLeft(fileList, null);
             }
         });
         menuFile.getItems().addAll(selectFile);
@@ -79,6 +75,7 @@ public class MyMenuBar {
         Menu menuEdit = new Menu("编辑");
         MenuItem none = new MenuItem("敬请期待");
         none.setOnAction((ActionEvent t) -> {
+            MyProgress.display();
         });
         menuEdit.getItems().addAll(none);
 

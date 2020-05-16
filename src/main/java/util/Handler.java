@@ -1,6 +1,7 @@
 package util;
 
 import components.MyAlertBox;
+import components.MyListView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.File;
@@ -30,6 +31,10 @@ public class Handler {
 
     private static Set<String> fileTypeSet = new HashSet<>();
 
+    private static Map<String, List<String>> dataListMap = new HashMap<>();
+
+    private static Map<String, MyListView> listViewMap = new HashMap<>();
+
     static {
         fileTypeSet.add("mp4");
         fileTypeSet.add("flv");
@@ -37,6 +42,44 @@ public class Handler {
         fileTypeSet.add("rm");
         fileTypeSet.add("rmvb");
         fileTypeSet.add("wmv");
+    }
+
+
+    /**
+     * 根据key存放集合
+     * @param key
+     * @param dataList
+     */
+    public static void put(String key, List<String> dataList) {
+        dataListMap.put(key, dataList);
+    }
+
+    /**
+     * 根据key获取集合
+     * @param key
+     * @return
+     */
+    public static List<String> getList(String key) {
+        return dataListMap.get(key);
+    }
+
+    /**
+     * 根据key获取ListView
+     * @param key
+     * @return
+     */
+    public static MyListView getListView(String key) {
+        LOG.info("根据key获取ListView: {} => {}", key, listViewMap.get(key));
+        return listViewMap.get(key);
+    }
+
+    /**
+     * 根据key存放ListView
+     * @param key
+     * @param listView
+     */
+    public static void put(String key, MyListView listView) {
+        listViewMap.put(key, listView);
     }
 
 
