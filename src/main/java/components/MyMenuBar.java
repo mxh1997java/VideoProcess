@@ -72,12 +72,23 @@ public class MyMenuBar {
         menuFile.getItems().addAll(selectFile);
 
         // --- Menu Edit
-        Menu menuEdit = new Menu("编辑");
-        MenuItem none = new MenuItem("敬请期待");
-        none.setOnAction((ActionEvent t) -> {
-            MyProgress.display();
+        Menu menuEdit = new Menu("列表");
+        MenuItem clearUnPrecessed = new MenuItem("清空视频列表");
+        clearUnPrecessed.setOnAction((ActionEvent t) -> {
+            Handler.put("unProcessed", new ArrayList<String>());
+            MyHome.setLeft(null, null);
         });
-        menuEdit.getItems().addAll(none);
+        MenuItem clearPrecessed = new MenuItem("清空已处理视频列表");
+        clearPrecessed.setOnAction((ActionEvent t) -> {
+            Handler.put("processed", new ArrayList<String>());
+            MyHome.setLeft(null, null);
+        });
+        MenuItem clearAll = new MenuItem("清空所有视频列表");
+        clearAll.setOnAction((ActionEvent t) -> {
+            Handler.put("processed", new ArrayList<String>());
+            MyHome.setLeft(null, null);
+        });
+        menuEdit.getItems().addAll(clearUnPrecessed, clearPrecessed, clearAll);
 
         // --- Menu View
         Menu menuView = new Menu("视图");

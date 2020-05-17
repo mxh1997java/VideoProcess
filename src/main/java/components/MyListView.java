@@ -84,7 +84,7 @@ public class MyListView {
         label.setMaxWidth(200);
         label.setWrapText(true);
         label.setFont(Font.font("Verdana", 12));
-        listView.setPrefWidth(120);
+        listView.setPrefWidth(200);
         listView.setMaxWidth(200);
         listView.setPrefHeight(280);
         ObservableList<String> data = FXCollections.observableArrayList(simplePathList);

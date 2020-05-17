@@ -97,6 +97,12 @@ public class VideoExecutor {
      * @desc ffmpeg -i input.mp4 -vcodec copy -acodec copy -ss 00:00:10 -to 00:00:40 output.mp4 -y
      */
     public void cutVideoByTime(String videoFile, String outputFile, String startTime, String endTime) {
+        if(startTime.indexOf("-") > -1) {
+            new RuntimeException("startTime " + startTime + " 错误!");
+        }
+        if(endTime.indexOf("-") > -1) {
+            new RuntimeException("endTime " + endTime + " 错误!");
+        }
         FFMPEGExecutor ffmpeg = this.locator.createExecutor();
         ffmpeg.addArgument("-i");
         ffmpeg.addArgument(videoFile);
@@ -680,7 +686,7 @@ public class VideoExecutor {
      * @param sourcePath :  来源路径
      * @param targetPath :  生成路径
      * @param framerate :   帧率
-     * @description ffmpeg -i 0.mp4 -vf setpts=PTS/2 -af atempo=2 00.mp4
+     * @description ffmpeg -i input.mp4 -vf "setpts=0.5*PTS" output.mp4
      * @return void
      */
     public void addFramerate(String sourcePath, String targetPath, String framerate) {
@@ -689,8 +695,7 @@ public class VideoExecutor {
         ffmpeg.addArgument(sourcePath);
         ffmpeg.addArgument("-vf");
         ffmpeg.addArgument("setpts=PTS/" + framerate);
-        ffmpeg.addArgument("-af");
-        ffmpeg.addArgument("atempo=" + targetPath);
+        ffmpeg.addArgument(targetPath);
         try {
             ffmpeg.execute();
             LOG.info("加速视频播放速度 执行完毕: " + targetPath);
@@ -768,7 +773,7 @@ public class VideoExecutor {
      * @param sourcePath :  来源路径
      * @param targetPath :  生成路径
      * @param framerate :   帧率
-     * @description ffmpeg -i 0.mp4 -vf setpts=PTS/2 -af atempo=2 00.mp4
+     * @description ffmpeg -i input.mp4 -vf "setpts=2.0*PTS" output.mp4
      * @return void
      */
     public void reduceFramerate(String sourcePath, String targetPath, String framerate) {
@@ -777,8 +782,7 @@ public class VideoExecutor {
         ffmpeg.addArgument(sourcePath);
         ffmpeg.addArgument("-vf");
         ffmpeg.addArgument("setpts=PTS*" + framerate);
-        ffmpeg.addArgument("-af");
-        ffmpeg.addArgument("atempo=" + targetPath);
+        ffmpeg.addArgument(targetPath);
         try {
             ffmpeg.execute();
             LOG.info("降低视频播放速度执行完毕: " + targetPath);
@@ -961,6 +965,10 @@ public class VideoExecutor {
      * @return void
      */
     public void blurBackground(String sourcePath, String targetPath) {
+        File file = new File(sourcePath);
+        while (!file.exists()) {
+            LOG.info("{}文件不存在，等待...", sourcePath);
+        }
         FFMPEGExecutor ffmpeg = this.locator.createExecutor();
         ffmpeg.addArgument("-i");
         ffmpeg.addArgument(sourcePath);

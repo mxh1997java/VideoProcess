@@ -6,7 +6,7 @@ import java.util.concurrent.Callable;
 /**
  * 消除水印异步任务
  */
-public class MyTask implements Callable<Integer> {
+public class RemoveWatermarkTask implements Callable<Integer> {
 
     private VideoExecutor videoExecutor;
     private String sourcePath;
@@ -22,7 +22,7 @@ public class MyTask implements Callable<Integer> {
         return 1;
     }
 
-    public MyTask(VideoExecutor videoExecutor, String sourcePath, String x, String y, String width, String height, String targetPath) {
+    public RemoveWatermarkTask(VideoExecutor videoExecutor, String sourcePath, String x, String y, String width, String height, String targetPath) {
         this.videoExecutor = videoExecutor;
         this.sourcePath = sourcePath;
         this.x = x;

@@ -5,6 +5,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.concurrent.ExecutorService;
+
 import executor.VideoExecutor;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -16,6 +18,8 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import task.BlurBackgroundTask;
+import task.MyExecutorService;
 import util.Handler;
 import view.MyHome;
 import ws.schild.jave.MultimediaInfo;
@@ -368,7 +372,7 @@ public class MyFunction {
                 }
                 if (selected.equals("锐化")) {
                     targetPath = Handler.getNewFilePath(currentVideo);
-                    System.out.printf("操作步骤:设置锐化效果 操作对象: " + targetPath);
+                    System.out.println("操作步骤:设置锐化效果 操作对象: " + targetPath);
                     videoExecutor.sharpen(currentVideo, targetPath);
                     //删除上一步产生的视频
                     Handler.deleteFile(currentVideo);
@@ -376,7 +380,7 @@ public class MyFunction {
                 }
                 if (selected.equals("黑白")) {
                     targetPath = Handler.getNewFilePath(currentVideo);
-                    System.out.printf("操作步骤:设置黑白效果 操作对象: " + targetPath);
+                    System.out.println("操作步骤:设置黑白效果 操作对象: " + targetPath);
                     videoExecutor.blackWhite(currentVideo, targetPath);
                     //删除上一步产生的视频
                     Handler.deleteFile(currentVideo);
@@ -384,7 +388,7 @@ public class MyFunction {
                 }
                 if (selected.equals("浮雕效果")) {
                     targetPath = Handler.getNewFilePath(currentVideo);
-                    System.out.printf("操作步骤:设置浮雕效果 操作对象: " + targetPath);
+                    System.out.println("操作步骤:设置浮雕效果 操作对象: " + targetPath);
                     videoExecutor.reliefEffect(currentVideo, targetPath);
                     //删除上一步产生的视频
                     Handler.deleteFile(currentVideo);
@@ -392,7 +396,7 @@ public class MyFunction {
                 }
                 if (selected.equals("模糊处理")) {
                     targetPath = Handler.getNewFilePath(currentVideo);
-                    System.out.printf("操作步骤:设置模糊处理 操作对象: " + targetPath);
+                    System.out.println("操作步骤:设置模糊处理 操作对象: " + targetPath);
                     videoExecutor.blur(currentVideo, targetPath);
                     //删除上一步产生的视频
                     Handler.deleteFile(currentVideo);
@@ -400,7 +404,7 @@ public class MyFunction {
                 }
                 if (selected.equals("色彩变幻")) {
                     targetPath = Handler.getNewFilePath(currentVideo);
-                    System.out.printf("操作步骤:设置色彩变幻 操作对象: " + targetPath);
+                    System.out.println("操作步骤:设置色彩变幻 操作对象: " + targetPath);
                     videoExecutor.colorChange(currentVideo, targetPath);
                     //删除上一步产生的视频
                     Handler.deleteFile(currentVideo);
@@ -504,8 +508,6 @@ public class MyFunction {
                     String target = Handler.getNewFilePath(path);
                     LOG.info("操作步骤:消除水印 操作对象: " + path);
                     videoExecutor.removeWatermark(path, x, y, width, height, target);
-                    //删除上一步产生的视频
-                    Handler.deleteFile(path);
                     iterator.set(target);
                 }
             }
@@ -513,24 +515,23 @@ public class MyFunction {
                 ListIterator<String> iterator = filePathList.listIterator();
                 String start = startTime.getText();
                 String end = endTime.getText();
+                String startPoint = null;
+                String endPoint = null;
                 while (iterator.hasNext()) {
                     String path = iterator.next();
                     MultimediaInfo videoInfo = videoExecutor.getVideoInfo(path);
                     long duration = videoInfo.getDuration(); //获取视频长度
                     BigDecimal durationValue = new BigDecimal(String.valueOf(duration));
+                    LOG.info("结束时间: {}", end);
+                    LOG.info("处理的文件: {}", path);
                     BigDecimal endValue = new BigDecimal(end + "000");
-                    start = Handler.formatTime(Long.valueOf(start));
+                    startPoint = Handler.formatTime(Long.valueOf(start));
                     BigDecimal standardValue= new BigDecimal("1000");
                     //视频总长度减去要删除的秒数再除以1000在向上取整得到的就是结束秒数
-                    end = Handler.formatTime(durationValue.subtract(endValue).divide(standardValue).setScale(0, BigDecimal.ROUND_UP).longValue());
-                    LOG.info("开始时间: " + start);
-                    LOG.info("结束时间: " + end);
-
+                    endPoint = Handler.formatTime(durationValue.subtract(endValue).divide(standardValue).setScale(0, BigDecimal.ROUND_UP).longValue());
                     String target = Handler.getNewFilePath(path);
                     LOG.info("操作步骤:剪切视频 操作对象: " + path);
-                    videoExecutor.cutVideoByTime(path, target, start, end);
-                    //删除上一步产生的视频
-                    Handler.deleteFile(path);
+                    videoExecutor.cutVideoByTime(path, target, startPoint, endPoint);
                     iterator.set(target);
                 }
             }
@@ -545,8 +546,6 @@ public class MyFunction {
                     String target = Handler.getNewFilePath(path);
                     LOG.info("操作步骤:设置封面 操作对象: " + path);
                     videoExecutor.setCover(path, imgPath, target);
-                    //删除上一步产生的视频
-                    Handler.deleteFile(path);
                     iterator.set(target);
                 }
             }
@@ -557,10 +556,8 @@ public class MyFunction {
                     while (iterator.hasNext()) {
                         String path = iterator.next();
                         String target = Handler.getNewFilePath(path);
-                        System.out.printf("操作步骤:设置镜像效果 操作对象: " + path);
+                        System.out.println("操作步骤:设置镜像效果 操作对象: " + path);
                         videoExecutor.mirror(path, target);
-                        //删除上一步产生的视频
-                        Handler.deleteFile(path);
                         iterator.set(target);
                     }
                 }
@@ -568,10 +565,8 @@ public class MyFunction {
                     while (iterator.hasNext()) {
                         String path = iterator.next();
                         String target = Handler.getNewFilePath(path);
-                        System.out.printf("操作步骤:设置复古风效果 操作对象: " + path);
+                        System.out.println("操作步骤:设置复古风效果 操作对象: " + path);
                         videoExecutor.ancientStyleFilter(path, target);
-                        //删除上一步产生的视频
-                        Handler.deleteFile(path);
                         iterator.set(target);
                     }
                 }
@@ -579,10 +574,8 @@ public class MyFunction {
                     while (iterator.hasNext()) {
                         String path = iterator.next();
                         String target = Handler.getNewFilePath(path);
-                        System.out.printf("操作步骤:设置复古风效果 操作对象: " + path);
+                        System.out.println("操作步骤:设置复古风效果 操作对象: " + path);
                         videoExecutor.spliceVideo(path, path, path, path, target);
-                        //删除上一步产生的视频
-                        Handler.deleteFile(path);
                         iterator.set(target);
                     }
                 }
@@ -590,10 +583,8 @@ public class MyFunction {
                     while (iterator.hasNext()) {
                         String path = iterator.next();
                         String target = Handler.getNewFilePath(path);
-                        System.out.printf("操作步骤:设置复古风效果 操作对象: " + path);
+                        System.out.println("操作步骤:设置复古风效果 操作对象: " + path);
                         videoExecutor.revisionCurveByPs(path, acvPath.getText(), target);
-                        //删除上一步产生的视频
-                        Handler.deleteFile(path);
                         iterator.set(target);
                     }
                 }
@@ -601,10 +592,8 @@ public class MyFunction {
                     while (iterator.hasNext()) {
                         String path = iterator.next();
                         String target = Handler.getNewFilePath(path);
-                        System.out.printf("操作步骤:设置锐化效果 操作对象: " + path);
+                        System.out.println("操作步骤:设置锐化效果 操作对象: " + path);
                         videoExecutor.sharpen(path, target);
-                        //删除上一步产生的视频
-                        Handler.deleteFile(path);
                         iterator.set(target);
                     }
                 }
@@ -612,10 +601,8 @@ public class MyFunction {
                     while (iterator.hasNext()) {
                         String path = iterator.next();
                         String target = Handler.getNewFilePath(path);
-                        System.out.printf("操作步骤:设置锐化效果 操作对象: " + path);
+                        System.out.println("操作步骤:设置锐化效果 操作对象: " + path);
                         videoExecutor.revisionCurveByPs(path, acvPath.getText(), target);
-                        //删除上一步产生的视频
-                        Handler.deleteFile(path);
                         iterator.set(target);
                     }
                 }
@@ -623,10 +610,8 @@ public class MyFunction {
                     while (iterator.hasNext()) {
                         String path = iterator.next();
                         String target = Handler.getNewFilePath(path);
-                        System.out.printf("操作步骤:设置浮雕效果 操作对象: " + path);
+                        System.out.println("操作步骤:设置浮雕效果 操作对象: " + path);
                         videoExecutor.reliefEffect(path, target);
-                        //删除上一步产生的视频
-                        Handler.deleteFile(path);
                         iterator.set(target);
                     }
                 }
@@ -634,10 +619,8 @@ public class MyFunction {
                     while (iterator.hasNext()) {
                         String path = iterator.next();
                         String target = Handler.getNewFilePath(path);
-                        System.out.printf("操作步骤:设置模糊处理 操作对象: " + path);
+                        System.out.println("操作步骤:设置模糊处理 操作对象: " + path);
                         videoExecutor.blur(path, target);
-                        //删除上一步产生的视频
-                        Handler.deleteFile(path);
                         iterator.set(target);
                     }
                 }
@@ -645,10 +628,8 @@ public class MyFunction {
                     while (iterator.hasNext()) {
                         String path = iterator.next();
                         String target = Handler.getNewFilePath(path);
-                        System.out.printf("操作步骤:设置色彩变幻 操作对象: " + path);
+                        System.out.println("操作步骤:设置色彩变幻 操作对象: " + path);
                         videoExecutor.colorChange(path, target);
-                        //删除上一步产生的视频
-                        Handler.deleteFile(path);
                         iterator.set(target);
                     }
                 }
@@ -656,15 +637,14 @@ public class MyFunction {
 
             //增加视频帧率
             if (addFramerateSelected) {
+                LOG.info("增加视频速率");
                 String frameRate = addFramerateTextField.getText();
                 ListIterator<String> iterator = filePathList.listIterator();
                 while (iterator.hasNext()) {
                     String path = iterator.next();
                     String target = Handler.getNewFilePath(path);
-                    System.out.printf("操作步骤:设置镜像效果 操作对象: " + path);
+                    System.out.println("操作步骤:设置镜像效果 操作对象: " + path);
                     videoExecutor.addFramerate(path, target, frameRate);
-                    //删除上一步产生的视频
-                    Handler.deleteFile(path);
                     iterator.set(target);
                 }
             }
@@ -676,10 +656,8 @@ public class MyFunction {
                 while (iterator.hasNext()) {
                     String path = iterator.next();
                     String target = Handler.getNewFilePath(path);
-                    System.out.printf("操作步骤:设置镜像效果 操作对象: " + path);
+                    System.out.println("操作步骤:设置镜像效果 操作对象: " + path);
                     videoExecutor.reduceFramerate(path, target, frameRate);
-                    //删除上一步产生的视频
-                    Handler.deleteFile(path);
                     iterator.set(target);
                 }
             }
@@ -690,25 +668,32 @@ public class MyFunction {
                 while (iterator.hasNext()) {
                     String path = iterator.next();
                     String target = Handler.getNewFilePath(path);
-                    System.out.printf("操作步骤:设置镜像效果 操作对象: " + path);
+                    System.out.println("操作步骤:设置镜像效果 操作对象: " + path);
                     videoExecutor.mergeVideo(path, target);
-                    //删除上一步产生的视频
-                    Handler.deleteFile(path);
                     iterator.set(target);
                 }
             }
 
             //模糊视频背景
             if (blurBackgroundSelected) {
+                ExecutorService myExecutorService = MyExecutorService.getMyExecutorService();
                 ListIterator<String> iterator = filePathList.listIterator();
-                while (iterator.hasNext()) {
-                    String path = iterator.next();
-                    String target = Handler.getNewFilePath(path);
-                    System.out.printf("操作步骤:设置镜像效果 操作对象: " + path);
-                    videoExecutor.blurBackground(path, target);
-                    //删除上一步产生的视频
-                    Handler.deleteFile(path);
-                    iterator.set(target);
+                LOG.info("filePathList: {}", filePathList);
+                try {
+                    while (iterator.hasNext()) {
+                        String path = iterator.next();
+                        LOG.info("背景虚化: {}", path);
+                        String target = Handler.getNewFilePath(path);
+                        System.out.println("操作步骤:设置镜像效果 操作对象: " + path);
+                        //videoExecutor.blurBackground(path, target);
+                        BlurBackgroundTask task = new BlurBackgroundTask(videoExecutor, path, target);
+                        myExecutorService.submit(task);
+                        if(task.call() == 1) {
+                            iterator.set(target);
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
             MyHome.setLeft(null, filePathList);
