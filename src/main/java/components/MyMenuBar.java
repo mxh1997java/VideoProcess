@@ -104,13 +104,6 @@ public class MyMenuBar {
         });
         menuView.getItems().addAll(home, config);
 
-        // --- Menu View
-        Menu menuMore = new Menu("更多");
-        MenuItem none2 = new MenuItem("敬请期待");
-        none2.setOnAction((ActionEvent even) -> {
-        });
-        menuMore.getItems().addAll(none2);
-
         // --- Menu Config
         Menu menuConfig = new Menu("配置");
         MenuItem configPage = new MenuItem("配置页面");
@@ -120,7 +113,14 @@ public class MyMenuBar {
         });
         menuConfig.getItems().addAll(configPage);
 
-        menuBar.getMenus().addAll(menuFile, menuEdit, menuView, menuMore, menuConfig);
+        // --- Menu View
+        Menu menuMore = new Menu("更多");
+        MenuItem none2 = new MenuItem("敬请期待");
+        none2.setOnAction((ActionEvent even) -> {
+        });
+        menuMore.getItems().addAll(none2);
+
+        menuBar.getMenus().addAll(menuFile, menuEdit, menuView, menuConfig, menuMore);
         return menuBar;
     }
 
