@@ -75,7 +75,7 @@ public class VideoExecutor {
             String line;
             while ((line = reader.readLine()) != null) {
                 lineNR++;
-                LOG.debug("Input Line ({}): {}", lineNR, line);
+                LOG.info("ffmpeg执行信息: " + line);
                 // TODO: Implement additional input stream parsing
             }
         } catch (IOException e) {
@@ -123,7 +123,7 @@ public class VideoExecutor {
             String line;
             while ((line = reader.readLine()) != null) {
                 lineNR++;
-                LOG.debug("Input Line ({}): {}", lineNR, line);
+                LOG.info("ffmpeg执行信息: " + line);
                 // TODO: Implement additional input stream parsing
             }
         } catch (IOException e) {
@@ -184,8 +184,7 @@ public class VideoExecutor {
             String line;
             while ((line = reader.readLine()) != null) {
                 lineNR++;
-                LOG.info("报错信息: " + line);
-                LOG.debug("Input Line ({}): {}", lineNR, line);
+                LOG.info("ffmpeg执行信息: " + line);
                 // TODO: Implement additional input stream parsing
             }
         } catch (IOException e) {
@@ -232,7 +231,7 @@ public class VideoExecutor {
             String line;
             while ((line = reader.readLine()) != null) {
                 lineNR++;
-                LOG.debug("Input Line ({}): {}", lineNR, line);
+                LOG.info("ffmpeg执行信息: " + line);
                 // TODO: Implement additional input stream parsing
             }
         } catch (IOException e) {
@@ -302,7 +301,7 @@ public class VideoExecutor {
             String line;
             while ((line = reader.readLine()) != null) {
                 lineNR++;
-                LOG.debug("Input Line ({}): {}", lineNR, line);
+                LOG.info("ffmpeg执行信息: " + line);
                 // TODO: Implement additional input stream parsing
             }
         } catch (IOException e) {
@@ -347,7 +346,7 @@ public class VideoExecutor {
             String line;
             while ((line = reader.readLine()) != null) {
                 lineNR++;
-                LOG.debug("Input Line ({}): {}", lineNR, line);
+                LOG.info("ffmpeg执行信息: " + line);
                 // TODO: Implement additional input stream parsing
             }
         } catch (IOException e) {
@@ -399,7 +398,7 @@ public class VideoExecutor {
             String line;
             while ((line = reader.readLine()) != null) {
                 lineNR++;
-                LOG.debug("Input Line ({}): {}", lineNR, line);
+                LOG.info("ffmpeg执行信息: " + line);
                 // TODO: Implement additional input stream parsing
             }
         } catch (IOException e) {
@@ -440,7 +439,7 @@ public class VideoExecutor {
             String line;
             while ((line = reader.readLine()) != null) {
                 lineNR++;
-                LOG.debug("Input Line ({}): {}", lineNR, line);
+                LOG.info("ffmpeg执行信息: " + line);
                 // TODO: Implement additional input stream parsing
             }
         } catch (IOException e) {
@@ -481,7 +480,7 @@ public class VideoExecutor {
             String line;
             while ((line = reader.readLine()) != null) {
                 lineNR++;
-                LOG.debug("Input Line ({}): {}", lineNR, line);
+                LOG.info("ffmpeg执行信息: " + line);
                 // TODO: Implement additional input stream parsing
             }
         } catch (IOException e) {
@@ -537,7 +536,7 @@ public class VideoExecutor {
             String line;
             while ((line = reader.readLine()) != null) {
                 lineNR++;
-                LOG.debug("Input Line ({}): {}", lineNR, line);
+                LOG.info("ffmpeg执行信息: " + line);
                 // TODO: Implement additional input stream parsing
             }
         } catch (IOException e) {
@@ -584,7 +583,7 @@ public class VideoExecutor {
             String line;
             while ((line = reader.readLine()) != null) {
                 lineNR++;
-                LOG.debug("Input Line ({}): {}", lineNR, line);
+                LOG.info("ffmpeg执行信息: " + line);
                 // TODO: Implement additional input stream parsing
             }
         } catch (IOException e) {
@@ -663,7 +662,7 @@ public class VideoExecutor {
             String line;
             while ((line = reader.readLine()) != null) {
                 lineNR++;
-                LOG.debug("Input Line ({}): {}", lineNR, line);
+                LOG.info("ffmpeg执行信息: " + line);
                 // TODO: Implement additional input stream parsing
             }
         } catch (IOException e) {
@@ -706,7 +705,7 @@ public class VideoExecutor {
             String line;
             while ((line = reader.readLine()) != null) {
                 lineNR++;
-                LOG.debug("Input Line ({}): {}", lineNR, line);
+                LOG.info("ffmpeg执行信息: " + line);
                 // TODO: Implement additional input stream parsing
             }
         } catch (IOException e) {
@@ -751,7 +750,7 @@ public class VideoExecutor {
             String line;
             while ((line = reader.readLine()) != null) {
                 lineNR++;
-                LOG.debug("Input Line ({}): {}", lineNR, line);
+                LOG.info("ffmpeg执行信息: " + line);
                 // TODO: Implement additional input stream parsing
             }
         } catch (IOException e) {
@@ -794,7 +793,7 @@ public class VideoExecutor {
             String line;
             while ((line = reader.readLine()) != null) {
                 lineNR++;
-                LOG.debug("Input Line ({}): {}", lineNR, line);
+                LOG.info("ffmpeg执行信息: " + line);
                 // TODO: Implement additional input stream parsing
             }
         } catch (IOException e) {
@@ -837,7 +836,7 @@ public class VideoExecutor {
             String line;
             while ((line = reader.readLine()) != null) {
                 lineNR++;
-                LOG.debug("Input Line ({}): {}", lineNR, line);
+                LOG.info("ffmpeg执行信息: " + line);
                 // TODO: Implement additional input stream parsing
             }
         } catch (IOException e) {
@@ -894,7 +893,7 @@ public class VideoExecutor {
             String line;
             while ((line = reader.readLine()) != null) {
                 lineNR++;
-                LOG.debug("Input Line ({}): {}", lineNR, line);
+                LOG.info("ffmpeg执行信息: " + line);
                 // TODO: Implement additional input stream parsing
             }
         } catch (IOException e) {
@@ -940,7 +939,7 @@ public class VideoExecutor {
             String line;
             while ((line = reader.readLine()) != null) {
                 lineNR++;
-                LOG.debug("Input Line ({}): {}", lineNR, line);
+                LOG.info("ffmpeg执行信息: " + line);
                 // TODO: Implement additional input stream parsing
             }
         } catch (IOException e) {
@@ -993,7 +992,7 @@ public class VideoExecutor {
             String line;
             while ((line = reader.readLine()) != null) {
                 lineNR++;
-                LOG.debug("Input Line ({}): {}", lineNR, line);
+                LOG.info("ffmpeg执行信息: " + line);
                 // TODO: Implement additional input stream parsing
             }
         } catch (IOException e) {
@@ -1031,7 +1030,7 @@ public class VideoExecutor {
             String line;
             while ((line = reader.readLine()) != null) {
                 lineNR++;
-                LOG.debug("Input Line ({}): {}", lineNR, line);
+                LOG.info("ffmpeg执行信息: " + line);
                 // TODO: Implement additional input stream parsing
             }
         } catch (IOException e) {
@@ -1107,7 +1106,7 @@ public class VideoExecutor {
             String line;
             while ((line = reader.readLine()) != null) {
                 lineNR++;
-                LOG.debug("Input Line ({}): {}", lineNR, line);
+                LOG.info("ffmpeg执行信息: " + line);
                 // TODO: Implement additional input stream parsing
             }
         } catch (IOException e) {
@@ -1144,7 +1143,7 @@ public class VideoExecutor {
             String line;
             while ((line = reader.readLine()) != null) {
                 lineNR++;
-                LOG.debug("Input Line ({}): {}", lineNR, line);
+                LOG.info("ffmpeg执行信息: " + line);
                 // TODO: Implement additional input stream parsing
             }
         } catch (IOException e) {

@@ -4,10 +4,9 @@ import components.MyAlertBox;
 import components.MyListView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+
+import java.io.*;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.time.LocalDateTime;
@@ -30,13 +29,35 @@ public class Handler {
 
     private static final Logger LOG = LoggerFactory.getLogger(Handler.class);
 
+    /**
+     * 程序可处理视频类型
+     */
     private static Set<String> fileTypeSet = new HashSet<>();
 
+    /**
+     * 存储页面数据
+     */
     private static Map<String, List<String>> dataListMap = new HashMap<>();
 
+    /**
+     * 存储MyListView对象
+     */
     private static Map<String, MyListView> listViewMap = new HashMap<>();
 
+    /**
+     * 存储视频播放画面比例
+     */
     private static BigDecimal scale = null;
+
+    /**
+     * 配置属性文件路径
+     */
+    private static String path = "C:\\VideoProcess\\config\\config.properties";
+
+    /**
+     * 配置文件对象
+     */
+    private static Properties prop = new Properties();
 
     static {
         fileTypeSet.add("mp4");
@@ -127,6 +148,12 @@ public class Handler {
         return fileList;
     }
 
+
+    /**
+     * 读取目录
+     * @param file
+     * @param fileList
+     */
     private static void readDic(File file, List<String> fileList) {
         File[] fs = file.listFiles();
         for (File f : fs) {
@@ -156,10 +183,6 @@ public class Handler {
         return fileTypeSet.contains(fileType);
     }
 
-    //属性文件路径
-    private static String path = getResourcePath("config.properties");
-    private static Properties prop = new Properties();
-
     /**
      * 保存配置文件
      *
@@ -168,28 +191,29 @@ public class Handler {
      * @param targetPath
      */
     public static void saveProp(String ffmpegPath, String sourcePath, String targetPath) {
-        InputStream is = Handler.class.getClassLoader().getResourceAsStream("config.properties");
-        FileOutputStream oFile = null;
-        LOG.info("获取属性文件对象: {}", is);
+        InputStream input = null;
+        FileOutputStream output = null;
         try {
-            prop.load(is);
+            input = new FileInputStream(path);
+            prop.load(input);
             delProp("ffmpegPath");
             delProp("sourcePath");
             delProp("targetPath");
             ///保存属性到b.properties文件
             LOG.info("属性文件路径: {}", path);
-            oFile = new FileOutputStream(path, true);//true表示追加打开
+            output = new FileOutputStream(path, true);//true表示追加打开
             prop.setProperty("ffmpegPath", ffmpegPath);
             prop.setProperty("sourcePath", sourcePath);
             prop.setProperty("targetPath", targetPath);
-            prop.store(oFile, "");
+            prop.store(output, "");
         } catch (IOException e) {
             LOG.error("保存配置失败: {}", e.getMessage());
             MyAlertBox.display("保存配置提示", "保存配置信息失败!");
             return;
         } finally {
             try {
-                oFile.close();
+                output.close();
+                input.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -203,15 +227,15 @@ public class Handler {
     public static void delProp(String key) {
         LOG.info("删除属性: {}", key);
         prop.remove(key);
-        FileOutputStream oFile = null;
+        FileOutputStream output = null;
         try {
-            oFile = new FileOutputStream(path);
-            prop.store(oFile, "");
+            output = new FileOutputStream(path);
+            prop.store(output, "");
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
             try {
-                oFile.close();
+                output.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -226,7 +250,7 @@ public class Handler {
         Map<String, String> config = new HashMap<>();
         InputStream in;
         try {
-            in = Handler.class.getClassLoader().getResourceAsStream("config.properties");
+            in = new FileInputStream(path);
             prop.load(in);    ///加载属性列表
             Enumeration enum1 = prop.propertyNames();//得到配置文件的名字
             while (enum1.hasMoreElements()) {
@@ -322,9 +346,8 @@ public class Handler {
 
     /**
      * 获取简洁路径
-     *
-     * @param path
-     * @return
+     * @param path 文件路径
+     * @return 简洁路径
      */
     public static String getSimplePath(String path) {
         int firstIndex = path.indexOf("\\");
@@ -338,8 +361,8 @@ public class Handler {
     /**
      * 获取简洁路径集合
      *
-     * @param pathList
-     * @return
+     * @param pathList 文件路径集合
+     * @return 简洁路径集合
      */
     public static List<String> getSimplePathList(List<String> pathList) {
         List<String> simplePathList = new ArrayList<>(pathList.size());
@@ -351,6 +374,12 @@ public class Handler {
         return simplePathList;
     }
 
+
+    /**
+     * 将秒数转化为00:00:01格式的字符串
+     * @param second 秒数
+     * @return
+     */
     public static String formatTime(long second) {
         long hours = second / 3600;//转换小时数
         second = second % 3600;//剩余秒数
@@ -375,6 +404,48 @@ public class Handler {
             buffer.append(second);
         }
         return buffer.toString();
+    }
+
+
+    /**
+     * 创建多重文件夹及文件
+     * @param folderPath  文件夹路径
+     * @param filePath  文件名称及后缀
+     */
+    public static void createFile(String folderPath, String filePath) {
+        File folder = new File(folderPath);
+        File file = new File(folderPath + File.separator + filePath);
+        if(!folder.isFile() && !folder.exists()) {
+            folder.mkdirs();
+        }
+        if(!file.exists()) {
+            try {
+                boolean result = file.createNewFile();
+                if(!result){
+                    LOG.info("创建文件失败! {}", folderPath + File.separator + filePath);
+                } else {
+                    LOG.info("创建文件成功! {}", folderPath + File.separator + filePath);
+                }
+            } catch (IOException e) {
+                LOG.error("创建文件错误: {}", e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * 删除文件
+     * @param filePath 文件路径
+     * @return 删除结果
+     */
+    public static boolean deleteFile(String filePath) {
+        boolean result = false;
+        File file = new File(filePath);
+        if(file.exists()) {
+            file.delete();
+            result = true;
+        }
+        return result;
     }
 
 }

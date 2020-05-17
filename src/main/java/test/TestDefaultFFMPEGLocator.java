@@ -3,6 +3,7 @@ package test;
 import processor.DefaultFFMPEGLocator;
 import executor.VideoExecutor;
 import org.junit.Test;
+import sun.nio.cs.HistoricallyNamedCharset;
 import util.Handler;
 //import util.Handler;
 //import ws.schild.jave.EncoderException;
@@ -58,7 +59,9 @@ public class TestDefaultFFMPEGLocator {
 //            e.printStackTrace();
 //        }
 
-        Handler.saveProp("2018", "2020", "2022");
+        //Handler.saveProp("2018", "2020", "2022");
+
+        Handler.createFile("D:\\MaXinHai\\file", "config.properties");
 
     }
 

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import executor.VideoExecutor;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
@@ -240,6 +241,10 @@ public class MyFunction {
         dealWithSingle.setOnAction(even -> {
             LOG.info("处理单个");
 
+            Platform.runLater(() -> {
+                MyProgress.display();
+            });
+
             //当前播放器播放的视频地址
             String currentVideo = Handler.getListView("unProcessed").getCurrentVideoPath();
             String targetPath = "";
@@ -291,6 +296,8 @@ public class MyFunction {
                 LOG.info("操作步骤:消除水印 操作对象: " + currentVideo);
                 targetPath = Handler.getNewFilePath(currentVideo);
                 videoExecutor.removeWatermark(currentVideo, x, y, width, height, targetPath);
+                //删除上一步产生的视频
+                Handler.deleteFile(currentVideo);
                 currentVideo = targetPath;
             }
 
@@ -311,6 +318,8 @@ public class MyFunction {
                 LOG.info("操作步骤:剪切视频 操作对象: " + currentVideo);
                 targetPath = Handler.getNewFilePath(currentVideo);
                 videoExecutor.cutVideoByTime(currentVideo, targetPath, start, end);
+                //删除上一步产生的视频
+                Handler.deleteFile(currentVideo);
                 currentVideo = targetPath;
             }
             if (setCoverSelected) {
@@ -321,6 +330,8 @@ public class MyFunction {
                 LOG.info("操作步骤:设置封面 操作对象: " + currentVideo);
                 targetPath = Handler.getNewFilePath(currentVideo);
                 videoExecutor.setCover(currentVideo, imgPath, targetPath);
+                //删除上一步产生的视频
+                Handler.deleteFile(currentVideo);
                 currentVideo = targetPath;
             }
 
@@ -330,51 +341,69 @@ public class MyFunction {
                 if (selected.equals("复古风")) {
                     targetPath = Handler.getNewFilePath(currentVideo);
                     videoExecutor.ancientStyleFilter(currentVideo, targetPath);
+                    //删除上一步产生的视频
+                    Handler.deleteFile(currentVideo);
                     currentVideo = targetPath;
                 }
                 if (selected.equals("镜像")) {
                     targetPath = Handler.getNewFilePath(currentVideo);
                     videoExecutor.mirror(currentVideo, targetPath);
+                    //删除上一步产生的视频
+                    Handler.deleteFile(currentVideo);
                     currentVideo = targetPath;
                 }
                 if (selected.equals("多路拼接")) {
                     targetPath = Handler.getNewFilePath(currentVideo);
                     videoExecutor.spliceVideo(currentVideo, currentVideo, currentVideo, currentVideo, targetPath);
+                    //删除上一步产生的视频
+                    Handler.deleteFile(currentVideo);
                     currentVideo = targetPath;
                 }
                 if (selected.equals("Ps滤镜")) {
                     targetPath = Handler.getNewFilePath(currentVideo);
                     videoExecutor.revisionCurveByPs(currentVideo, acvPath.getText(), targetPath);
+                    //删除上一步产生的视频
+                    Handler.deleteFile(currentVideo);
                     currentVideo = targetPath;
                 }
                 if (selected.equals("锐化")) {
                     targetPath = Handler.getNewFilePath(currentVideo);
                     System.out.printf("操作步骤:设置锐化效果 操作对象: " + targetPath);
                     videoExecutor.sharpen(currentVideo, targetPath);
+                    //删除上一步产生的视频
+                    Handler.deleteFile(currentVideo);
                     currentVideo = targetPath;
                 }
                 if (selected.equals("黑白")) {
                     targetPath = Handler.getNewFilePath(currentVideo);
                     System.out.printf("操作步骤:设置黑白效果 操作对象: " + targetPath);
                     videoExecutor.blackWhite(currentVideo, targetPath);
+                    //删除上一步产生的视频
+                    Handler.deleteFile(currentVideo);
                     currentVideo = targetPath;
                 }
                 if (selected.equals("浮雕效果")) {
                     targetPath = Handler.getNewFilePath(currentVideo);
                     System.out.printf("操作步骤:设置浮雕效果 操作对象: " + targetPath);
                     videoExecutor.reliefEffect(currentVideo, targetPath);
+                    //删除上一步产生的视频
+                    Handler.deleteFile(currentVideo);
                     currentVideo = targetPath;
                 }
                 if (selected.equals("模糊处理")) {
                     targetPath = Handler.getNewFilePath(currentVideo);
                     System.out.printf("操作步骤:设置模糊处理 操作对象: " + targetPath);
                     videoExecutor.blur(currentVideo, targetPath);
+                    //删除上一步产生的视频
+                    Handler.deleteFile(currentVideo);
                     currentVideo = targetPath;
                 }
                 if (selected.equals("色彩变幻")) {
                     targetPath = Handler.getNewFilePath(currentVideo);
                     System.out.printf("操作步骤:设置色彩变幻 操作对象: " + targetPath);
                     videoExecutor.colorChange(currentVideo, targetPath);
+                    //删除上一步产生的视频
+                    Handler.deleteFile(currentVideo);
                     currentVideo = targetPath;
                 }
             }
@@ -384,38 +413,42 @@ public class MyFunction {
                 String videoFrameRate = addFramerateTextField.getText();
                 String audioFrameRate = addFramerateTextField.getText();
                 videoExecutor.addVideoAudioFramerate(currentVideo, targetPath, videoFrameRate, audioFrameRate);
+                //删除上一步产生的视频
+                Handler.deleteFile(currentVideo);
                 currentVideo = targetPath;
             }
             //降低视频播放速度
             if (reduceFramerateSelected) {
                 String videoFrameRate = reduceFramerateTextField.getText();
                 videoExecutor.reduceFramerate(currentVideo, targetPath, videoFrameRate);
+                //删除上一步产生的视频
+                Handler.deleteFile(currentVideo);
                 currentVideo = targetPath;
             }
             //合并多个视频
             if (mergeVideoSelected) {
                 targetPath = Handler.getNewFilePath(currentVideo);
                 videoExecutor.mergeVideo(folder.getText(), targetPath);
+                //删除上一步产生的视频
+                Handler.deleteFile(currentVideo);
                 currentVideo = targetPath;
             }
             //背景虚化
             if (blurBackgroundSelected) {
                 targetPath = Handler.getNewFilePath(currentVideo);
                 videoExecutor.blurBackground(currentVideo, targetPath);
+                //删除上一步产生的视频
+                Handler.deleteFile(currentVideo);
                 currentVideo = targetPath;
             }
 
             //刷新左侧视频列表
             processedList.add(currentVideo);
-
-            //进度弹窗
-            MyProgress.display();
-
             MyHome.setLeft(null, processedList);
-
             //修改进度组件进度
-            MyProgress.setProgress(100);
-
+            Platform.runLater(() -> {
+                MyProgress.close();
+            });
             //选择视频地址并让播放组件播放视频
             //MyMediaPlayer.chooseFile(new File(targetPath));
         });
@@ -471,6 +504,8 @@ public class MyFunction {
                     String target = Handler.getNewFilePath(path);
                     LOG.info("操作步骤:消除水印 操作对象: " + path);
                     videoExecutor.removeWatermark(path, x, y, width, height, target);
+                    //删除上一步产生的视频
+                    Handler.deleteFile(path);
                     iterator.set(target);
                 }
             }
@@ -494,6 +529,8 @@ public class MyFunction {
                     String target = Handler.getNewFilePath(path);
                     LOG.info("操作步骤:剪切视频 操作对象: " + path);
                     videoExecutor.cutVideoByTime(path, target, start, end);
+                    //删除上一步产生的视频
+                    Handler.deleteFile(path);
                     iterator.set(target);
                 }
             }
@@ -508,6 +545,8 @@ public class MyFunction {
                     String target = Handler.getNewFilePath(path);
                     LOG.info("操作步骤:设置封面 操作对象: " + path);
                     videoExecutor.setCover(path, imgPath, target);
+                    //删除上一步产生的视频
+                    Handler.deleteFile(path);
                     iterator.set(target);
                 }
             }
@@ -520,6 +559,8 @@ public class MyFunction {
                         String target = Handler.getNewFilePath(path);
                         System.out.printf("操作步骤:设置镜像效果 操作对象: " + path);
                         videoExecutor.mirror(path, target);
+                        //删除上一步产生的视频
+                        Handler.deleteFile(path);
                         iterator.set(target);
                     }
                 }
@@ -529,6 +570,8 @@ public class MyFunction {
                         String target = Handler.getNewFilePath(path);
                         System.out.printf("操作步骤:设置复古风效果 操作对象: " + path);
                         videoExecutor.ancientStyleFilter(path, target);
+                        //删除上一步产生的视频
+                        Handler.deleteFile(path);
                         iterator.set(target);
                     }
                 }
@@ -538,6 +581,8 @@ public class MyFunction {
                         String target = Handler.getNewFilePath(path);
                         System.out.printf("操作步骤:设置复古风效果 操作对象: " + path);
                         videoExecutor.spliceVideo(path, path, path, path, target);
+                        //删除上一步产生的视频
+                        Handler.deleteFile(path);
                         iterator.set(target);
                     }
                 }
@@ -547,6 +592,8 @@ public class MyFunction {
                         String target = Handler.getNewFilePath(path);
                         System.out.printf("操作步骤:设置复古风效果 操作对象: " + path);
                         videoExecutor.revisionCurveByPs(path, acvPath.getText(), target);
+                        //删除上一步产生的视频
+                        Handler.deleteFile(path);
                         iterator.set(target);
                     }
                 }
@@ -556,6 +603,8 @@ public class MyFunction {
                         String target = Handler.getNewFilePath(path);
                         System.out.printf("操作步骤:设置锐化效果 操作对象: " + path);
                         videoExecutor.sharpen(path, target);
+                        //删除上一步产生的视频
+                        Handler.deleteFile(path);
                         iterator.set(target);
                     }
                 }
@@ -565,6 +614,8 @@ public class MyFunction {
                         String target = Handler.getNewFilePath(path);
                         System.out.printf("操作步骤:设置锐化效果 操作对象: " + path);
                         videoExecutor.revisionCurveByPs(path, acvPath.getText(), target);
+                        //删除上一步产生的视频
+                        Handler.deleteFile(path);
                         iterator.set(target);
                     }
                 }
@@ -574,6 +625,8 @@ public class MyFunction {
                         String target = Handler.getNewFilePath(path);
                         System.out.printf("操作步骤:设置浮雕效果 操作对象: " + path);
                         videoExecutor.reliefEffect(path, target);
+                        //删除上一步产生的视频
+                        Handler.deleteFile(path);
                         iterator.set(target);
                     }
                 }
@@ -583,6 +636,8 @@ public class MyFunction {
                         String target = Handler.getNewFilePath(path);
                         System.out.printf("操作步骤:设置模糊处理 操作对象: " + path);
                         videoExecutor.blur(path, target);
+                        //删除上一步产生的视频
+                        Handler.deleteFile(path);
                         iterator.set(target);
                     }
                 }
@@ -592,6 +647,8 @@ public class MyFunction {
                         String target = Handler.getNewFilePath(path);
                         System.out.printf("操作步骤:设置色彩变幻 操作对象: " + path);
                         videoExecutor.colorChange(path, target);
+                        //删除上一步产生的视频
+                        Handler.deleteFile(path);
                         iterator.set(target);
                     }
                 }
@@ -606,6 +663,8 @@ public class MyFunction {
                     String target = Handler.getNewFilePath(path);
                     System.out.printf("操作步骤:设置镜像效果 操作对象: " + path);
                     videoExecutor.addFramerate(path, target, frameRate);
+                    //删除上一步产生的视频
+                    Handler.deleteFile(path);
                     iterator.set(target);
                 }
             }
@@ -619,6 +678,8 @@ public class MyFunction {
                     String target = Handler.getNewFilePath(path);
                     System.out.printf("操作步骤:设置镜像效果 操作对象: " + path);
                     videoExecutor.reduceFramerate(path, target, frameRate);
+                    //删除上一步产生的视频
+                    Handler.deleteFile(path);
                     iterator.set(target);
                 }
             }
@@ -631,6 +692,8 @@ public class MyFunction {
                     String target = Handler.getNewFilePath(path);
                     System.out.printf("操作步骤:设置镜像效果 操作对象: " + path);
                     videoExecutor.mergeVideo(path, target);
+                    //删除上一步产生的视频
+                    Handler.deleteFile(path);
                     iterator.set(target);
                 }
             }
@@ -643,6 +706,8 @@ public class MyFunction {
                     String target = Handler.getNewFilePath(path);
                     System.out.printf("操作步骤:设置镜像效果 操作对象: " + path);
                     videoExecutor.blurBackground(path, target);
+                    //删除上一步产生的视频
+                    Handler.deleteFile(path);
                     iterator.set(target);
                 }
             }

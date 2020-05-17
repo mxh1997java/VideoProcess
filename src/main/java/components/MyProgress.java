@@ -17,6 +17,8 @@ public class MyProgress {
 
     private static VBox vBox = null;
 
+    private static Stage window = new Stage();
+
     public static VBox getMyProgress() {
         //初始化
         pin = new ProgressIndicator(0);
@@ -39,7 +41,6 @@ public class MyProgress {
 
 
     public static void display() {
-        Stage window = new Stage();
         window.setTitle("任务进度显示");
         window.initModality(Modality.APPLICATION_MODAL);
         window.setMinWidth(300);
@@ -50,6 +51,15 @@ public class MyProgress {
         Scene scene = new Scene(getMyProgress());
         window.setScene(scene);
         window.showAndWait();
+    }
+
+
+    /**
+     * 关闭进度条弹窗
+     */
+    public static void close() {
+        setProgress(100);
+        window.close();
     }
 
 
