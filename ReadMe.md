@@ -7,7 +7,7 @@
         1. 参考Jave2框架，获取里面的DefaultFFMPEGLocator，实现封装ffmpeg并执行ffmpeg命令执行的功能。
         2. Jave框架只是封装了ffmpeg，并实现了视频转码、添加水印功能。
         3. 这个项目在此基础上封装了如下功能：
-            视频加速、println
+            视频加速、视频减速
             添加、去除水印
             剪切视频
             多种滤镜效果

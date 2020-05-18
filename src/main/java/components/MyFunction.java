@@ -276,11 +276,8 @@ public class MyFunction {
                 String text = addWatermarkOfContent.getText();
                 LOG.info("操作步骤:加水印 操作对象: " + currentVideo);
                 targetPath = Handler.getNewFilePath(currentVideo);
-                videoExecutor.addWatermarkByFont(currentVideo, x, y, null, null, null, text, null, targetPath);
-                File targetFile = new File(targetPath);
-                while (!targetFile.exists()) {
-                    LOG.info(targetPath + "文件不存在!");
-                }
+                videoExecutor.addWatermarkByFont(text, 30, "微软雅黑", x, y, currentVideo, targetPath);
+                //File targetFile = new File(targetPath);
                 currentVideo = targetPath;
             }
             //消除水印
@@ -494,7 +491,8 @@ public class MyFunction {
                     String path = iterator.next();
                     String target = Handler.getNewFilePath(path);
                     LOG.info("操作步骤:加水印 操作对象: {}", path);
-                    videoExecutor.addWatermarkByFont(path, x, y, null, null, null, text, null, target);
+                    videoExecutor.addWatermarkByFont(text, 30, "微软雅黑", x, y, path, target);
+                    //videoExecutor.addWatermarkByFont(path, x, y, null, null, null, text, null, target);
                     iterator.set(target);
                 }
             }

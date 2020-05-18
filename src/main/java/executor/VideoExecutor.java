@@ -12,6 +12,8 @@ import util.Handler;
 import ws.schild.jave.EncoderException;
 import ws.schild.jave.MultimediaInfo;
 import ws.schild.jave.MultimediaObject;
+
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -203,7 +205,7 @@ public class VideoExecutor {
         ffmpeg.addArgument("-i");
         ffmpeg.addArgument(imgPath);
         ffmpeg.addArgument("-filter_complex");
-        ffmpeg.addArgument("'overlay=0:0'");
+        ffmpeg.addArgument("overlay=" + x + ":" + y);
         ffmpeg.addArgument(targetPath);
         ffmpeg.addArgument("-y");
         try {
@@ -1500,6 +1502,24 @@ public class VideoExecutor {
             e.printStackTrace();
         }
         return result;
+    }
+
+
+    /**
+     * ffmpeg添加文字不生效，自己实现的添加文字水印
+     * @param drawStr
+     * @param fontSize
+     * @param fontName
+     * @param sourcePath
+     * @param targetPath
+     */
+    public void addWatermarkByFont(String drawStr, int fontSize, String fontName, String x, String y, String sourcePath, String targetPath) {
+        //生成图片路径
+        String imagePath = Handler.getNewFilePath("D:\\MaXinHai\\file\\1.png");
+        //生成图片
+        ImageExecutor.createImage(drawStr, new Font(fontName, Font.PLAIN, fontSize), new File(imagePath));
+        //添加图片到视频
+        addWatermarkByImage(sourcePath, imagePath, x, y, targetPath);
     }
 
     /**
