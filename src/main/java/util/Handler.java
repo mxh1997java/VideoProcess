@@ -111,6 +111,7 @@ public class Handler {
      * @param value
      */
     public static void setScale(BigDecimal value){
+        LOG.info("比例: {}", value.doubleValue());
         scale = value;
     }
 
@@ -302,7 +303,12 @@ public class Handler {
      */
     public static String getNewFilePath(String currentVideo) {
         Map<String, String> config = Handler.readProp();
-        String targetPath = config.get("targetPath") + "\\" + Handler.getTimeStr() + Handler.getVideoSuffix(currentVideo);
+        String targetPath = null;
+        if(null == currentVideo) {
+            targetPath = config.get("targetPath") + "\\" + Handler.getTimeStr() + ".mp4";
+        } else {
+            targetPath = config.get("targetPath") + "\\" + Handler.getTimeStr() + Handler.getVideoSuffix(currentVideo);
+        }
         return targetPath;
     }
 

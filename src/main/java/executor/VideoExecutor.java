@@ -154,28 +154,11 @@ public class VideoExecutor {
      */
     public void removeWatermark(String sourcePath, String x, String y, String width, String height, String targetPath) {
         FFMPEGExecutor ffmpeg = this.locator.createExecutor();
-        //发现一个神奇的现象自己视频截图计算出来的像素点比画面长宽要大，大概是1.6倍
-        BigDecimal xValue = new BigDecimal(x);
-        BigDecimal yValue = new BigDecimal(y);
-        BigDecimal widthValue = new BigDecimal(width);
-        BigDecimal heightValue = new BigDecimal(height);
-        BigDecimal standardValue = new BigDecimal("1.6");
-        x = xValue.divide(standardValue).toString();
-        y = yValue.divide(standardValue).toString();
-        width = widthValue.divide(standardValue).toString();
-        height = heightValue.divide(standardValue).toString();
-
         ffmpeg.addArgument("-i");
         ffmpeg.addArgument(sourcePath);
-        ffmpeg.addArgument("-filter_complex");
-        ffmpeg.addArgument("\"delogo=");
-        ffmpeg.addArgument("x=" + x);
-        ffmpeg.addArgument(":y=" + y);
-        ffmpeg.addArgument(":w=" + width);
-        ffmpeg.addArgument(":h=" + height);
-        ffmpeg.addArgument(":show=0\"");
+        ffmpeg.addArgument("-vf");
+        ffmpeg.addArgument("\"delogo=x=" + x + ":y=" + y + ":w=" + width + ":h=" + height + ":show=0\"");
         ffmpeg.addArgument(targetPath);
-        ffmpeg.addArgument("-y");
         try {
             ffmpeg.execute();
             LOG.info("消除水印完毕! " + targetPath);
@@ -965,10 +948,6 @@ public class VideoExecutor {
      * @return void
      */
     public void blurBackground(String sourcePath, String targetPath) {
-        File file = new File(sourcePath);
-        while (!file.exists()) {
-            LOG.info("{}文件不存在，等待...", sourcePath);
-        }
         FFMPEGExecutor ffmpeg = this.locator.createExecutor();
         ffmpeg.addArgument("-i");
         ffmpeg.addArgument(sourcePath);

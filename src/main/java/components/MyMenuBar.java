@@ -85,6 +85,7 @@ public class MyMenuBar {
         });
         MenuItem clearAll = new MenuItem("清空所有视频列表");
         clearAll.setOnAction((ActionEvent t) -> {
+            Handler.put("unProcessed", new ArrayList<String>());
             Handler.put("processed", new ArrayList<String>());
             MyHome.setLeft(null, null);
         });

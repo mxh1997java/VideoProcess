@@ -294,12 +294,13 @@ public class MyFunction {
                 BigDecimal yValue = new BigDecimal(y);
                 BigDecimal widthValue = new BigDecimal(width);
                 BigDecimal heightValue = new BigDecimal(height);
-                x = xValue.divide(Handler.getScale()).toString();
-                y = yValue.divide(Handler.getScale()).toString();
-                width = widthValue.divide(Handler.getScale()).toString();
-                height = heightValue.divide(Handler.getScale()).toString();
-
+                //四舍五入不保留小数
+                x = xValue.divide(Handler.getScale(), 0, BigDecimal.ROUND_HALF_UP).toString();
+                y = yValue.divide(Handler.getScale(), 0, BigDecimal.ROUND_HALF_UP).toString();
+                width = widthValue.divide(Handler.getScale(), 0, BigDecimal.ROUND_HALF_UP).toString();
+                height = heightValue.divide(Handler.getScale(), 0, BigDecimal.ROUND_HALF_UP).toString();
                 LOG.info("操作步骤:消除水印 操作对象: " + currentVideo);
+                LOG.info("消除水印 水印坐标: x {}, y {}, height {}, width: {}", x, y, height, width);
                 targetPath = Handler.getNewFilePath(currentVideo);
                 videoExecutor.removeWatermark(currentVideo, x, y, width, height, targetPath);
                 //删除上一步产生的视频
@@ -481,7 +482,7 @@ public class MyFunction {
             boolean addFilterSelected = addFilter.isSelected();
             boolean addFramerateSelected = addFramerate.isSelected();
             boolean reduceFramerateSelected = reduceFramerate.isSelected();
-            boolean mergeVideoSelected = mergeVideo.isSelected();
+            //boolean mergeVideoSelected = mergeVideo.isSelected();
             boolean blurBackgroundSelected = blurBackground.isSelected();
 
             if (addWatermarkSelected) {
@@ -507,12 +508,16 @@ public class MyFunction {
                 BigDecimal yValue = new BigDecimal(y);
                 BigDecimal widthValue = new BigDecimal(width);
                 BigDecimal heightValue = new BigDecimal(height);
-                x = xValue.divide(Handler.getScale()).toString();
-                y = yValue.divide(Handler.getScale()).toString();
-                width = widthValue.divide(Handler.getScale()).toString();
-                height = heightValue.divide(Handler.getScale()).toString();
                 while (iterator.hasNext()) {
                     String path = iterator.next();
+
+                    //先计算比例，才能去拿值
+                    MyMediaPlayer.calculationRatio(new File(path));
+                    x = xValue.divide(Handler.getScale(), 0, BigDecimal.ROUND_HALF_UP).toString();
+                    y = yValue.divide(Handler.getScale(), 0, BigDecimal.ROUND_HALF_UP).toString();
+                    width = widthValue.divide(Handler.getScale(), 0, BigDecimal.ROUND_HALF_UP).toString();
+                    height = heightValue.divide(Handler.getScale(), 0, BigDecimal.ROUND_HALF_UP).toString();
+
                     String target = Handler.getNewFilePath(path);
                     LOG.info("操作步骤:消除水印 操作对象: {}", path);
                     videoExecutor.removeWatermark(path, x, y, width, height, target);
@@ -669,16 +674,16 @@ public class MyFunction {
             }
 
             //TODO 多个视频需要处理 path是文件夹路径
-            if (mergeVideoSelected) {
-                ListIterator<String> iterator = filePathList.listIterator();
-                while (iterator.hasNext()) {
-                    String path = iterator.next();
-                    String target = Handler.getNewFilePath(path);
-                    LOG.info("操作步骤:设置镜像效果 操作对象: {}", path);
-                    videoExecutor.mergeVideo(path, target);
-                    iterator.set(target);
-                }
-            }
+//            if (mergeVideoSelected) {
+//                ListIterator<String> iterator = filePathList.listIterator();
+//                while (iterator.hasNext()) {
+//                    String path = iterator.next();
+//                    String target = Handler.getNewFilePath(path);
+//                    LOG.info("操作步骤:合并多个视频 操作对象: {}", path);
+//                    videoExecutor.mergeVideo(folder.getText(), target);
+//                    filePathList.add(target);
+//                }
+//            }
 
             //模糊视频背景
             if (blurBackgroundSelected) {
@@ -703,7 +708,7 @@ public class MyFunction {
             }
 
             //更新进度
-            MyProgressBar.setProgress(100);
+            //MyProgressBar.setProgress(100);
             //关掉进度显示
             //progressBarBox.setVisible(false);
             MyHome.setLeft(null, filePathList);
