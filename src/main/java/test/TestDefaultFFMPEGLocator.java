@@ -63,8 +63,8 @@ public class TestDefaultFFMPEGLocator {
 
         //Handler.createFile("D:\\MaXinHai\\file", "config.properties");
 
-        videoExecutor.addWatermarkByFont("百度贴吧", 18, "微软雅黑",
-                "D:\\Users\\15735400536\\Videos\\台湾综艺\\12.mp4", "D:\\2.mp4");
+//        videoExecutor.addWatermarkByFont("百度贴吧", 18, "微软雅黑",
+//                "D:\\Users\\15735400536\\Videos\\台湾综艺\\12.mp4", "D:\\2.mp4");
 
     }
 

@@ -35,7 +35,9 @@ public class MyHome {
         List<String> unProcessedList = Handler.getList("unProcessed");
         List<String> processedList = Handler.getList("processed");
         MyListView videoView = new MyListView(unProcessedList);
+        videoView.setViewName("未处理视频");
         MyListView processedVideoView = new MyListView(processedList);
+        processedVideoView.setViewName("已处理视频");
         VBox vBox = new VBox();
         vBox.getChildren().addAll(videoView.getListView(), processedVideoView.getListView());
         pane.setLeft(vBox);
@@ -71,6 +73,7 @@ public class MyHome {
             unProcessedView = new MyListView(unProcessed);
             Handler.put("unProcessed", unProcessed);
         }
+        unProcessedView.setViewName("未处理视频");
         VBox unProcessedViewListView = unProcessedView.getListView();
         Handler.put("unProcessed", unProcessedView);
         vBox.getChildren().addAll(unProcessedViewListView);
@@ -91,6 +94,7 @@ public class MyHome {
             processedView = new MyListView(processed);
             Handler.put("processed", processed);
         }
+        processedView.setViewName("已处理视频");
         VBox processedlistView = processedView.getListView();
         Handler.put("processed", processedView);
         vBox.getChildren().addAll(processedlistView);

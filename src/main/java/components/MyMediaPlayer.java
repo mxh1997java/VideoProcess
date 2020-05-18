@@ -217,9 +217,15 @@ public class MyMediaPlayer {
      * @return
      */
     public static BorderPane calculationRatio(File file) {
+        if(null == file || !file.exists()) {
+            new RuntimeException("文件不存在!");
+        }
         LOG.info("文件路径: {}", file.getAbsolutePath());
         //获取视频信息计算播放画面大小
         MultimediaInfo videoInfo = videoExecutor.getVideoInfo(file.getAbsolutePath());
+        if(null == videoInfo) {
+            new RuntimeException(file.getAbsolutePath() + "获取文件信息出错!");
+        }
         double width = videoInfo.getVideo().getSize().getWidth();
         double height = videoInfo.getVideo().getSize().getHeight();
         BigDecimal standardValue = new BigDecimal("0.5");

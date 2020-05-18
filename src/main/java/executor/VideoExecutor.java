@@ -12,12 +12,12 @@ import util.Handler;
 import ws.schild.jave.EncoderException;
 import ws.schild.jave.MultimediaInfo;
 import ws.schild.jave.MultimediaObject;
-
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -30,6 +30,11 @@ public class VideoExecutor {
     private static final Logger LOG = LoggerFactory.getLogger(VideoExecutor.class);
 
     private static FFMPEGLocator locator;
+
+    /**
+     * 修改视频封面命令
+     */
+    //private static final String COMMAND = "-i %s -i %s -map 1 -map 0 -c copy -disposition:0 attached_pic -y %s";
 
     /**
      * 可以处理的视频格式
@@ -47,22 +52,24 @@ public class VideoExecutor {
      * @param sourcePath :   截取视频路径
      * @param targetPath :   生成图像路径
      * @param time :         帧数  0.003
-     * @param imageSize :    图像大小  800x600
-     * @description ffmpeg -i test.asf -y -f image2 -t 0.001 -s 352x240 a.jpg
+     * @description ffmpeg -i test.asf -y -f image2 -t 0.001 -s 352x240 a.jpg(不管用)
+     *               ffmpeg -y -i input.mp4 -ss 00:00:04 -vframes 1 -f image2 -vcodec png output.png
      * @return void
      */
-    public void cutVideoImage(String sourcePath, String targetPath, String time, String imageSize) {
+    public void cutVideoImage(String sourcePath, String targetPath, String time) {
         FFMPEGExecutor ffmpeg = this.locator.createExecutor();
         ffmpeg.addArgument("-i");
         ffmpeg.addArgument(sourcePath);
-        ffmpeg.addArgument("-y");
+        ffmpeg.addArgument("-ss");
+        ffmpeg.addArgument(time);
+        ffmpeg.addArgument("-vframes");
+        ffmpeg.addArgument("1");
         ffmpeg.addArgument("-f");
         ffmpeg.addArgument("image2");
-        ffmpeg.addArgument("-t");
-        ffmpeg.addArgument(time);
-        ffmpeg.addArgument("-s");
-        ffmpeg.addArgument(imageSize);
+        ffmpeg.addArgument("-vcodec");
+        ffmpeg.addArgument("png");
         ffmpeg.addArgument(targetPath);
+        ffmpeg.addArgument("-y");
         try {
             ffmpeg.execute();
             LOG.info("截取视频" + time + "画面 执行完毕: " + targetPath);
@@ -88,7 +95,7 @@ public class VideoExecutor {
     }
 
     /**
-     * 功能描述 根据startTime和timeLength剪切出新视频
+     * 功能描述 根据startTime和timeLength剪切出新视频(弃用：截出来的都是第一帧)
      * @author xinhai.ma
      * @date 2020/4/29 17:58
      * @param videoFile :
@@ -117,6 +124,48 @@ public class VideoExecutor {
         ffmpeg.addArgument("-to");
         ffmpeg.addArgument(endTime);
         ffmpeg.addArgument(outputFile);
+        ffmpeg.addArgument("-y");
+        try {
+            ffmpeg.execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            RBufferedReader reader = new RBufferedReader(
+                    new InputStreamReader(ffmpeg.getErrorStream()));
+            int step = 0;
+            int lineNR = 0;
+            String line;
+            while ((line = reader.readLine()) != null) {
+                lineNR++;
+                LOG.info("ffmpeg执行信息: " + line);
+                // TODO: Implement additional input stream parsing
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            ffmpeg.destroy();
+        }
+    }
+
+
+    /**
+     *
+     * @param sourcePath
+     * @param targetPath
+     * @param startTime
+     * @param endTime
+     * @desc ffmpeg -ss 00:10 -t 30 -i 0.mp4 -c copy 2.mp4
+     */
+    public void cutVideo(String sourcePath, String targetPath, String startTime, String endTime) {
+        FFMPEGExecutor ffmpeg = this.locator.createExecutor();
+        ffmpeg.addArgument("-ss");
+        ffmpeg.addArgument(startTime);
+        ffmpeg.addArgument("-t");
+        ffmpeg.addArgument(endTime);
+        ffmpeg.addArgument("-i");
+        ffmpeg.addArgument(sourcePath);
+        ffmpeg.addArgument(targetPath);
         ffmpeg.addArgument("-y");
         try {
             ffmpeg.execute();
@@ -538,11 +587,6 @@ public class VideoExecutor {
     }
 
     /**
-     * 修改视频封面命令
-     */
-    private static final String COMMAND = "-i %s -i %s -map 1 -map 0 -c copy -disposition:0 attached_pic -y %s";
-
-    /**
      * 功能描述 给视频设置封面(设置视频封面)
      * @author xinhai.ma
      * @date 2020/4/29 15:34
@@ -557,9 +601,21 @@ public class VideoExecutor {
         while (!file.exists()) {
             LOG.info("封面不存在 等待...");
         }
-        String cmd = String.format(COMMAND, sourcePath, imgPath, targetPath);
         FFMPEGExecutor ffmpeg = this.locator.createExecutor();
-        ffmpeg.addArgument(cmd);
+        ffmpeg.addArgument("-i");
+        ffmpeg.addArgument(sourcePath);
+        ffmpeg.addArgument("-i");
+        ffmpeg.addArgument(imgPath);
+        ffmpeg.addArgument("-map");
+        ffmpeg.addArgument("1");
+        ffmpeg.addArgument("-map");
+        ffmpeg.addArgument("0");
+        ffmpeg.addArgument("-c");
+        ffmpeg.addArgument("copy");
+        ffmpeg.addArgument("-disposition:0");
+        ffmpeg.addArgument("attached_pic");
+        ffmpeg.addArgument(targetPath);
+        ffmpeg.addArgument("-y");
         try {
             ffmpeg.execute();
             LOG.info("给视频设置封面 执行完毕: " + targetPath);
@@ -898,21 +954,60 @@ public class VideoExecutor {
      * @date 2020/5/8 22:10
      * @param fileList :    视频地址集合
      * @param targetPath :  生成文件路径
-     * @description ffmpeg -i "concat:f00282urkwd.321002.1.ts|f00282urkwd.321002.2.ts|f00282urkwd.321002.3.ts|f00282urkwd.321002.4.ts|f00282urkwd.321002.5.ts|f00282urkwd.321002.6.ts|f00282urkwd.321002.7.ts|f00282urkwd.321002.8.ts|f00282urkwd.321002.9.ts|f00282urkwd.321002.10.ts|f00282urkwd.321002.11.ts|f00282urkwd.321002.12.ts|f00282urkwd.321002.13.ts|f00282urkwd.321002.14.ts|f00282urkwd.321002.15.ts|f00282urkwd.321002.16.ts|f00282urkwd.321002.17.ts|" -c copy output.mp4
+     * @description  ffmpeg -i input1.flv -c copy -bsf:v h264_mp4toannexb -f mpegts input1.ts
+     *                ffmpeg -i "concat:input1.mpg|input2.mpg|input3.mpg" -c copy output.mpg
      * @return void
      */
     public void mergeVideo(List<String> fileList, String targetPath) {
+        List<String> newFileList = new ArrayList<>();
+        fileList.forEach(path -> {
+            //先执行: ffmpeg -i input1.flv -c copy -bsf:v h264_mp4toannexb -f mpegts input1.ts
+            FFMPEGExecutor ffmpeg = this.locator.createExecutor();
+            ffmpeg.addArgument("-i");
+            ffmpeg.addArgument(path);
+            ffmpeg.addArgument("-c");
+            ffmpeg.addArgument("copy");
+            ffmpeg.addArgument("-bsf:v");
+            ffmpeg.addArgument("h264_mp4toannexb");
+            ffmpeg.addArgument("-f");
+            ffmpeg.addArgument("mpegts");
+            String target = Handler.getNewFilePath("D:\\MaXinHai\\file\\1.ts");
+            ffmpeg.addArgument(target);
+            try {
+                ffmpeg.execute();
+                Thread.sleep(1000);
+                LOG.info("{} 转化视频格式: {}", path, target);
+                newFileList.add(target);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }finally {
+                ffmpeg.destroy();
+            }
+        });
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         FFMPEGExecutor ffmpeg = this.locator.createExecutor();
         ffmpeg.addArgument("-i");
         StringBuffer buffer = new StringBuffer("\"concat:");
-        fileList.forEach(path -> {
-            buffer.append(path);
-            buffer.append("|");
-        });
+        for(int i=0; i<newFileList.size(); i++) {
+            buffer.append(newFileList.get(i));
+            if(i != newFileList.size()-1) {
+                buffer.append("|");
+            }
+        }
         buffer.append("\"");
         ffmpeg.addArgument(buffer.toString());
         ffmpeg.addArgument("-c");
         ffmpeg.addArgument("copy");
+        ffmpeg.addArgument("-bsf:a");
+        ffmpeg.addArgument("aac_adtstoasc");
+        ffmpeg.addArgument("-movflags");
+        ffmpeg.addArgument("+faststart");
         ffmpeg.addArgument(targetPath);
         try {
             ffmpeg.execute();
@@ -1507,17 +1602,21 @@ public class VideoExecutor {
 
     /**
      * ffmpeg添加文字不生效，自己实现的添加文字水印
-     * @param drawStr
-     * @param fontSize
-     * @param fontName
-     * @param sourcePath
-     * @param targetPath
+     * @param drawStr    文字
+     * @param fontSize   文字大小
+     * @param fontName   字体名称
+     * @param sourcePath 来源视频地址
+     * @param targetPath 生成视频地址
      */
     public void addWatermarkByFont(String drawStr, int fontSize, String fontName, String x, String y, String sourcePath, String targetPath) {
-        //生成图片路径
-        String imagePath = Handler.getNewFilePath("D:\\MaXinHai\\file\\1.png");
-        //生成图片
-        ImageExecutor.createImage(drawStr, new Font(fontName, Font.PLAIN, fontSize), new File(imagePath));
+        //减少生成不必要的图片
+        String imagePath = Handler.getPath(drawStr);
+        if(null == imagePath) {
+            //生成图片路径
+            imagePath = Handler.getNewFilePath("D:\\MaXinHai\\file\\1.png");
+            //生成图片
+            ImageExecutor.createImage(drawStr, new Font(fontName, Font.PLAIN, fontSize), new File(imagePath));
+        }
         //添加图片到视频
         addWatermarkByImage(sourcePath, imagePath, x, y, targetPath);
     }

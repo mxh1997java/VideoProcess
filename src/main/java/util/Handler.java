@@ -59,6 +59,11 @@ public class Handler {
      */
     private static Properties prop = new Properties();
 
+    /**
+     * 水印图片地址集合
+     */
+    private static Map<String, String> watermarkImagePathMap = new HashMap<>();
+
     static {
         fileTypeSet.add("mp4");
         fileTypeSet.add("flv");
@@ -68,6 +73,23 @@ public class Handler {
         fileTypeSet.add("wmv");
     }
 
+    /**
+     * 根据文本存放图片地址
+     * @param drawStr
+     * @param imagePath
+     */
+    public static void put(String drawStr, String imagePath) {
+        watermarkImagePathMap.put(drawStr, imagePath);
+    }
+
+    /**
+     * 根据文本获取图片地址
+     * @param drawStr
+     * @return
+     */
+    public static String getPath(String drawStr) {
+        return watermarkImagePathMap.get(drawStr);
+    }
 
     /**
      * 根据key存放集合

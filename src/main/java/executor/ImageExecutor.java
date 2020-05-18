@@ -2,6 +2,7 @@ package executor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.Handler;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -50,6 +51,7 @@ public class ImageExecutor {
         try {
             // 输出png图片
             ImageIO.write(image, "png", targetPath);
+            Handler.put(drawStr, targetPath.getAbsolutePath());
         } catch (IOException e) {
             LOG.info("生成图片出错: {}", e.getMessage());
             e.printStackTrace();

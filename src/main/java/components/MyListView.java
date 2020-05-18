@@ -7,6 +7,7 @@ import java.util.List;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.Priority;
@@ -26,6 +27,11 @@ public class MyListView {
     private static final Logger LOG = LoggerFactory.getLogger(MyListView.class);
 
     /**
+     * 视图名称
+     */
+    private String viewName;
+
+    /**
      * 列表视图
      */
     private ListView<String> listView = new ListView<>();
@@ -34,6 +40,11 @@ public class MyListView {
      * 显示选中项label
      */
     private final Label label = new Label();
+
+    /**
+     * 显示列表名称
+     */
+    private Label nameLabel = new Label();
 
     /**
      * 所有视频地址（不带省略号）
@@ -71,29 +82,39 @@ public class MyListView {
         listView.setPrefSize(width, height);
     }
 
+    /**
+     * 设置试图名称
+     * @param viewName
+     */
+    public void setViewName(String viewName) {
+        this.viewName = viewName;
+        nameLabel.setText(this.viewName);
+        nameLabel.setFont(new Font("仿宋",20));
+    }
 
     /**
      * 传入数据集合获得列表视图
      */
     public VBox getListView() {
         VBox box = new VBox();
-        box.getChildren().addAll(listView, label);
+        VBox.setMargin(box, new Insets(15,0,0,0));
+        box.getChildren().addAll(nameLabel, listView, label);
         VBox.setVgrow(listView, Priority.ALWAYS);
         label.setLayoutX(10);
         label.setLayoutY(115);
         label.setMaxWidth(200);
         label.setWrapText(true);
-        label.setFont(Font.font("Verdana", 12));
+        label.setFont(Font.font("Verdana", 10));
         listView.setPrefWidth(200);
         listView.setMaxWidth(200);
-        listView.setPrefHeight(280);
+        listView.setPrefHeight(300);
         ObservableList<String> data = FXCollections.observableArrayList(simplePathList);
         listView.setItems(data);
         listView.getSelectionModel().selectedItemProperty()
                 .addListener((ObservableValue<? extends String> ov, String old_val, String new_val) -> {
                     LOG.info("您点了第{}项，视频名称是{}", listView.getSelectionModel().getSelectedIndex(), listView.getSelectionModel().getSelectedItem());
                     currentVideoPath = filePathList.get(listView.getSelectionModel().getSelectedIndex());
-                    label.setText(new_val);
+                    label.setText(currentVideoPath);
 
                     //选择视频地址并让播放组件播放视频
                     LOG.info("播放: " + currentVideoPath);

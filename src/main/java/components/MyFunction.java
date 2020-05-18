@@ -1,6 +1,7 @@
 package components;
 
 import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -268,6 +269,7 @@ public class MyFunction {
             boolean reduceFramerateSelected = reduceFramerate.isSelected();
             boolean mergeVideoSelected = mergeVideo.isSelected();
             boolean blurBackgroundSelected = blurBackground.isSelected();
+            boolean getCoverSelected = getCover.isSelected();
 
             //加水印
             if (addWatermarkSelected) {
@@ -321,7 +323,7 @@ public class MyFunction {
                 LOG.info("结束时间: " + end);
                 LOG.info("操作步骤:剪切视频 操作对象: " + currentVideo);
                 targetPath = Handler.getNewFilePath(currentVideo);
-                videoExecutor.cutVideoByTime(currentVideo, targetPath, start, end);
+                videoExecutor.cutVideo(currentVideo, targetPath, start, end);
                 //删除上一步产生的视频
                 Handler.deleteFile(currentVideo);
                 currentVideo = targetPath;
@@ -331,12 +333,27 @@ public class MyFunction {
                 //TODO 宽和高暂时没有
                 //String height = coverHeight.getText();
                 //String width = coverWidth.getText();
-                LOG.info("操作步骤:设置封面 操作对象: " + currentVideo);
+                LOG.info("操作步骤:设置封面 操作对象: {}", currentVideo);
                 targetPath = Handler.getNewFilePath(currentVideo);
                 videoExecutor.setCover(currentVideo, imgPath, targetPath);
                 //删除上一步产生的视频
                 Handler.deleteFile(currentVideo);
                 currentVideo = targetPath;
+            }
+
+            //截取图片
+            if(getCoverSelected) {
+                String time = cutVideoTime.getText();
+                time = Handler.formatTime(Long.valueOf(time));
+                LOG.info("操作步骤: 截取图片 操作对象: {}", currentVideo);
+                targetPath = Handler.getNewFilePath("D:\\MaXinHai\\file\\1.png");
+                videoExecutor.cutVideoImage(currentVideo, targetPath, time);
+                try {
+                    //通过cmd命令打开图片
+                    Runtime.getRuntime().exec("cmd /c " + targetPath);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
 
             //添加滤镜效果
@@ -429,14 +446,19 @@ public class MyFunction {
                 Handler.deleteFile(currentVideo);
                 currentVideo = targetPath;
             }
-            //合并多个视频
-            if (mergeVideoSelected) {
-                targetPath = Handler.getNewFilePath(currentVideo);
-                videoExecutor.mergeVideo(folder.getText(), targetPath);
-                //删除上一步产生的视频
-                Handler.deleteFile(currentVideo);
-                currentVideo = targetPath;
-            }
+//            //合并多个视频
+//            if (mergeVideoSelected) {
+//                targetPath = Handler.getNewFilePath(currentVideo);
+//                List<String> filePathList = Handler.getListView("unProcessed").getFilePathList();
+//                if(null == filePathList || filePathList.size() == 0) {
+//                    MyAlertBox.display("合并视频提示", "请先导入要合并的视频!");
+//                    return;
+//                }
+//                videoExecutor.mergeVideo(filePathList, targetPath);
+//                //删除上一步产生的视频
+//                Handler.deleteFile(currentVideo);
+//                currentVideo = targetPath;
+//            }
             //背景虚化
             if (blurBackgroundSelected) {
                 targetPath = Handler.getNewFilePath(currentVideo);
@@ -479,7 +501,7 @@ public class MyFunction {
             boolean addFilterSelected = addFilter.isSelected();
             boolean addFramerateSelected = addFramerate.isSelected();
             boolean reduceFramerateSelected = reduceFramerate.isSelected();
-            //boolean mergeVideoSelected = mergeVideo.isSelected();
+            boolean mergeVideoSelected = mergeVideo.isSelected();
             boolean blurBackgroundSelected = blurBackground.isSelected();
 
             if (addWatermarkSelected) {
@@ -540,7 +562,7 @@ public class MyFunction {
                     endPoint = Handler.formatTime(durationValue.subtract(endValue).divide(standardValue).setScale(0, BigDecimal.ROUND_UP).longValue());
                     String target = Handler.getNewFilePath(path);
                     LOG.info("操作步骤:剪切视频 操作对象: {}", path);
-                    videoExecutor.cutVideoByTime(path, target, startPoint, endPoint);
+                    videoExecutor.cutVideo(path, target, startPoint, endPoint);
                     iterator.set(target);
                 }
             }
@@ -668,6 +690,21 @@ public class MyFunction {
                     LOG.info("操作步骤:设置镜像效果 操作对象: {}", path);
                     videoExecutor.reduceFramerate(path, target, frameRate);
                     iterator.set(target);
+                }
+            }
+
+            //合并多个视频
+            if (mergeVideoSelected) {
+                String targetPath = Handler.getNewFilePath("D:\\MaXinHai\\file\\1.mp4");
+                videoExecutor.mergeVideo(filePathList, targetPath);
+                try {
+                    File file = new File(targetPath);
+                    while (!file.exists()) {
+                        //System.out.println("文件未生成，等待...");
+                    }
+                    Runtime.getRuntime().exec("cmd /c " + targetPath);
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
 
