@@ -216,17 +216,17 @@ public class MyFunction {
         HBox mergeVideoBox = new HBox();
         mergeVideoBox.setPadding(new Insets(5));
         CheckBox mergeVideo = new CheckBox(" 视频合并 ");
-        TextField folder = new TextField();
-        folder.setPrefWidth(150);
-        Button folderChooserButton = new Button("请选择");
-        folderChooserButton.setOnAction(even -> {
-            File file = MyChooser.getDirectoryChooser().showDialog(primaryStage);
-            if (file != null) {
-                LOG.info("选择文件夹: " + file.getAbsolutePath());
-                folder.setText(file.getAbsolutePath());
-            }
-        });
-        mergeVideoBox.getChildren().addAll(mergeVideo, folder, folderChooserButton);
+//        TextField folder = new TextField();
+//        folder.setPrefWidth(150);
+//        Button folderChooserButton = new Button("请选择");
+//        folderChooserButton.setOnAction(even -> {
+//            File file = MyChooser.getDirectoryChooser().showDialog(primaryStage);
+//            if (file != null) {
+//                LOG.info("选择文件夹: " + file.getAbsolutePath());
+//                folder.setText(file.getAbsolutePath());
+//            }
+//        });
+        mergeVideoBox.getChildren().addAll(mergeVideo);
 
 
         //视频背景虚化
