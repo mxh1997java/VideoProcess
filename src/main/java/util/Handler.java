@@ -4,11 +4,15 @@ import components.MyAlertBox;
 import components.MyListView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import task.CopyFileTask;
+import task.MyExecutorService;
 
+import java.awt.*;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.nio.channels.FileChannel;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -19,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
 /**
  * @author xinhai.ma
@@ -75,6 +80,7 @@ public class Handler {
 
     /**
      * 根据文本存放图片地址
+     *
      * @param drawStr
      * @param imagePath
      */
@@ -84,6 +90,7 @@ public class Handler {
 
     /**
      * 根据文本获取图片地址
+     *
      * @param drawStr
      * @return
      */
@@ -93,6 +100,7 @@ public class Handler {
 
     /**
      * 根据key存放集合
+     *
      * @param key
      * @param dataList
      */
@@ -102,6 +110,7 @@ public class Handler {
 
     /**
      * 根据key获取集合
+     *
      * @param key
      * @return
      */
@@ -111,6 +120,7 @@ public class Handler {
 
     /**
      * 根据key获取ListView
+     *
      * @param key
      * @return
      */
@@ -121,6 +131,7 @@ public class Handler {
 
     /**
      * 根据key存放ListView
+     *
      * @param key
      * @param listView
      */
@@ -130,15 +141,17 @@ public class Handler {
 
     /**
      * 设置当前比例
+     *
      * @param value
      */
-    public static void setScale(BigDecimal value){
+    public static void setScale(BigDecimal value) {
         LOG.info("比例: {}", value.doubleValue());
         scale = value;
     }
 
     /**
      * 获取当前比例
+     *
      * @return
      */
     public static BigDecimal getScale() {
@@ -174,6 +187,7 @@ public class Handler {
 
     /**
      * 读取目录
+     *
      * @param file
      * @param fileList
      */
@@ -245,6 +259,7 @@ public class Handler {
 
     /**
      * 删除属性文件属性
+     *
      * @param key
      */
     public static void delProp(String key) {
@@ -326,7 +341,7 @@ public class Handler {
     public static String getNewFilePath(String currentVideo) {
         Map<String, String> config = Handler.readProp();
         String targetPath = null;
-        if(null == currentVideo) {
+        if (null == currentVideo) {
             targetPath = config.get("targetPath") + "\\" + Handler.getTimeStr() + ".mp4";
         } else {
             targetPath = config.get("targetPath") + "\\" + Handler.getTimeStr() + Handler.getVideoSuffix(currentVideo);
@@ -344,7 +359,7 @@ public class Handler {
      */
     public static String getResourcePath(String fileName) {
         URL url = Handler.class.getClassLoader().getResource(fileName);
-        if(url == null) {
+        if (url == null) {
             System.out.println(url);
         }
         File file = new File(url.getFile());
@@ -373,7 +388,19 @@ public class Handler {
 
 
     /**
+     * 根据文件路径获取文件名
+     * @param filePath
+     * @return
+     */
+    public static String getFileName(String filePath) {
+        int startIndex = filePath.lastIndexOf("\\");
+        //int lastIndex = filePath.lastIndexOf(".");
+        return filePath.substring(startIndex+1, filePath.length());
+    }
+
+    /**
      * 获取简洁路径
+     *
      * @param path 文件路径
      * @return 简洁路径
      */
@@ -405,6 +432,7 @@ public class Handler {
 
     /**
      * 将秒数转化为00:00:01格式的字符串
+     *
      * @param second 秒数
      * @return
      */
@@ -437,19 +465,20 @@ public class Handler {
 
     /**
      * 创建多重文件夹及文件
-     * @param folderPath  文件夹路径
-     * @param filePath  文件名称及后缀
+     *
+     * @param folderPath 文件夹路径
+     * @param filePath   文件名称及后缀
      */
     public static void createFile(String folderPath, String filePath) {
         File folder = new File(folderPath);
         File file = new File(folderPath + File.separator + filePath);
-        if(!folder.isFile() && !folder.exists()) {
+        if (!folder.isFile() && !folder.exists()) {
             folder.mkdirs();
         }
-        if(!file.exists()) {
+        if (!file.exists()) {
             try {
                 boolean result = file.createNewFile();
-                if(!result){
+                if (!result) {
                     LOG.info("创建文件失败! {}", folderPath + File.separator + filePath);
                 } else {
                     LOG.info("创建文件成功! {}", folderPath + File.separator + filePath);
@@ -463,17 +492,158 @@ public class Handler {
 
     /**
      * 删除文件
+     *
      * @param filePath 文件路径
      * @return 删除结果
      */
     public static boolean deleteFile(String filePath) {
         boolean result = false;
         File file = new File(filePath);
-        if(file.exists()) {
+        if (file.exists()) {
             file.delete();
             result = true;
         }
         return result;
+    }
+
+
+    /**
+     * 复制文件
+     *
+     * @param sourcePath 要复制的文件路径
+     * @param targetPath 复制到的路径
+     */
+    public static void copyFile(String sourcePath, String targetPath) {
+        FileInputStream fi = null;
+        FileOutputStream fo = null;
+        FileChannel in = null;
+        FileChannel out = null;
+        try {
+            fi = new FileInputStream(sourcePath);
+            fo = new FileOutputStream(targetPath);
+            in = fi.getChannel();//得到对应的文件通道
+            out = fo.getChannel();//得到对应的文件通道
+            in.transferTo(0, in.size(), out);//连接两个通道，并且从in通道读取，然后写入out通道
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                fi.close();
+                in.close();
+                fo.close();
+                out.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+    /**
+     * 异步复制文件
+     * @param sourceFolderPath 要复制的文件夹
+     * @param targetFolderPath 目标文件夹
+     */
+    public static void asynBatchCopyFile(String sourceFolderPath, String targetFolderPath) {
+        long startTime = System.currentTimeMillis();
+        long endTime = 0;
+        File sourceFolder = new File(sourceFolderPath);
+        File targetFolder = new File(targetFolderPath);
+        if (!sourceFolder.exists()) {
+            new RuntimeException(sourceFolderPath + "路径不存在!");
+        }
+        if (!targetFolder.exists()) {
+            new RuntimeException(targetFolderPath + "路径不存在!");
+        }
+        if (sourceFolder.isFile()) {
+            new RuntimeException(sourceFolderPath + "不是文件夹!");
+        }
+        if (targetFolder.isFile()) {
+            new RuntimeException(targetFolderPath + "不是文件夹!");
+        }
+
+        ExecutorService service = MyExecutorService.getMyExecutorService();
+        Integer flag = 0;
+        File[] files = sourceFolder.listFiles();
+        try {
+            for (int i = 0; i < files.length; i++) {
+                if (files[i].isFile()) {
+                    String source = files[i].getAbsolutePath();
+                    String target = targetFolderPath + File.separator + files[i].getName();
+                    CopyFileTask task = new CopyFileTask(source, target, flag);
+                    service.submit(task);
+                    if (task.call() == files.length) {
+                        service.shutdown();
+                        endTime = System.currentTimeMillis();
+                        LOG.info("耗时: {}", endTime-startTime);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            service.shutdown();
+            endTime = System.currentTimeMillis();
+            LOG.info("耗时1: {}", endTime-startTime);
+        }
+
+    }
+
+
+    /**
+     * 同步复制文件
+     * @param sourceFolderPath 要复制的文件夹
+     * @param targetFolderPath 目标文件夹
+     */
+    public static void batchCopyFile(String sourceFolderPath, String targetFolderPath) {
+        long startTime = System.currentTimeMillis();
+        File sourceFolder = new File(sourceFolderPath);
+        File targetFolder = new File(targetFolderPath);
+        if (!sourceFolder.exists()) {
+            new RuntimeException(sourceFolderPath + "路径不存在!");
+        }
+        if (!targetFolder.exists()) {
+            new RuntimeException(targetFolderPath + "路径不存在!");
+        }
+        if (sourceFolder.isFile()) {
+            new RuntimeException(sourceFolderPath + "不是文件夹!");
+        }
+        if (targetFolder.isFile()) {
+            new RuntimeException(targetFolderPath + "不是文件夹!");
+        }
+        File[] files = sourceFolder.listFiles();
+        for(int i=0; i<files.length; i++) {
+            String source = files[i].getAbsolutePath();
+            String target = targetFolderPath + File.separator + files[i].getName();
+            copyFile(source, target);
+        }
+        long endTime = System.currentTimeMillis();
+        LOG.info("耗时: {}", endTime-startTime);
+    }
+
+    /**
+     * 同步复制文件
+     * @param filePathList     文件地址集合
+     * @param targetFolderPath 目标文件夹
+     */
+    public static List<String> batchCopyFile(List<String> filePathList, String targetFolderPath) {
+        long startTime = System.currentTimeMillis();
+        List<String> targetPathList = new ArrayList<>(filePathList.size());
+        File targetFolder = new File(targetFolderPath);
+        if (!targetFolder.exists()) {
+            new RuntimeException(targetFolderPath + "路径不存在!");
+        }
+        if (targetFolder.isFile()) {
+            new RuntimeException(targetFolderPath + "不是文件夹!");
+        }
+        filePathList.forEach(path -> {
+            String target = targetFolderPath + File.separator + getFileName(path);
+            copyFile(path, target);
+            targetPathList.add(target);
+        });
+        long endTime = System.currentTimeMillis();
+        LOG.info("耗时: {}", endTime-startTime);
+        return targetPathList;
     }
 
 }

@@ -21,13 +21,13 @@ public class TestDefaultFFMPEGLocator {
 
     @Test
     public void test() {
-        DefaultFFMPEGLocator locator = new DefaultFFMPEGLocator();
-        System.out.println(locator);
+        //DefaultFFMPEGLocator locator = new DefaultFFMPEGLocator();
+        //System.out.println(locator);
 
-        VideoExecutor videoExecutor = new VideoExecutor();
+        //VideoExecutor videoExecutor = new VideoExecutor();
 
-        String sourcePath = "D:\\Users\\xinhai.ma\\Videos\\Captures\\3-7.mp4";
-        String targetPath = "D:\\Users\\xinhai.ma\\Videos\\Captures\\程序测试结果\\3-7-1.mp4";
+        //String sourcePath = "D:\\Users\\xinhai.ma\\Videos\\Captures\\3-7.mp4";
+        //String targetPath = "D:\\Users\\xinhai.ma\\Videos\\Captures\\程序测试结果\\3-7-1.mp4";
 
         //获取封面 测试通过
         //videoExecutor.cutVideoImage(null, null, null, null);
@@ -35,8 +35,8 @@ public class TestDefaultFFMPEGLocator {
         //videoExecutor.removeWatermark(sourcePath, "100", "740", "300", "200", targetPath);
 
         //添加图片水印
-        String imgPath = "D:\\Users\\xinhai.ma\\Pictures\\本人照片\\微信图片_20200420133157.jpg";
-        targetPath = "D:\\Users\\xinhai.ma\\Videos\\Captures\\程序测试结果\\3-7-3.mp4";
+        //String imgPath = "D:\\Users\\xinhai.ma\\Pictures\\本人照片\\微信图片_20200420133157.jpg";
+        //targetPath = "D:\\Users\\xinhai.ma\\Videos\\Captures\\程序测试结果\\3-7-3.mp4";
         //videoExecutor.addWatermarkByImage(sourcePath, imgPath, "0", "0", targetPath);
 
         //String newPath = Handler.getSimplePath(targetPath);
@@ -65,6 +65,14 @@ public class TestDefaultFFMPEGLocator {
 
 //        videoExecutor.addWatermarkByFont("百度贴吧", 18, "微软雅黑",
 //                "D:\\Users\\15735400536\\Videos\\台湾综艺\\12.mp4", "D:\\2.mp4");
+
+
+//        String sourcePath = "D:\\test1";
+//        String targetPath = "D:\\test";
+//        Handler.batchCopyFile(sourcePath, targetPath);
+
+        String fileName = Handler.getFileName("D:\\123.mp4");
+        System.out.println(fileName);
 
     }
 

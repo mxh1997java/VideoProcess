@@ -11,9 +11,9 @@ public class MyExecutorService {
     private MyExecutorService() {}
 
     //获得计算机CPU核心数
-    //private static final int cpuCoreNum = Runtime.getRuntime().availableProcessors();
+    private static final int cpuCoreNum = Runtime.getRuntime().availableProcessors();
 
-    private static final ExecutorService taskExecutor = Executors.newFixedThreadPool(10);
+    private static final ExecutorService taskExecutor = Executors.newFixedThreadPool(cpuCoreNum);
 
     public static ExecutorService getMyExecutorService() {
         return taskExecutor;
