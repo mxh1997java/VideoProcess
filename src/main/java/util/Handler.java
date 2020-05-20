@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import task.CopyFileTask;
 import task.MyExecutorService;
-
 import java.awt.*;
 import java.io.*;
 import java.lang.reflect.Field;
@@ -360,7 +359,7 @@ public class Handler {
     public static String getResourcePath(String fileName) {
         URL url = Handler.class.getClassLoader().getResource(fileName);
         if (url == null) {
-            System.out.println(url);
+            new RuntimeException(fileName + "文件不存在");
         }
         File file = new File(url.getFile());
         return file.getAbsolutePath();

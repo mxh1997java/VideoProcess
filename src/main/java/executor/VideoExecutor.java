@@ -1621,6 +1621,85 @@ public class VideoExecutor {
         addWatermarkByImage(sourcePath, imagePath, x, y, targetPath);
     }
 
+
+    /**
+     * 提取视频
+     * @param sourcePath
+     * @param targetPath
+     * @desc ffmpeg -i input_file -vcodec copy -an output_file_video
+     */
+    public void extractVideo(String sourcePath, String targetPath) {
+        FFMPEGExecutor ffmpeg = this.locator.createExecutor();
+        ffmpeg.addArgument("-i");
+        ffmpeg.addArgument(sourcePath);
+        ffmpeg.addArgument("-vcodec");
+        ffmpeg.addArgument("copy");
+        ffmpeg.addArgument("-an");
+        ffmpeg.addArgument(targetPath);
+        try {
+            ffmpeg.execute();
+            LOG.info("提取视频完毕: " + targetPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            RBufferedReader reader = new RBufferedReader(
+                    new InputStreamReader(ffmpeg.getErrorStream()));
+            int step = 0;
+            int lineNR = 0;
+            String line;
+            while ((line = reader.readLine()) != null) {
+                lineNR++;
+                LOG.debug("Input Line ({}): {}", lineNR, line);
+                // TODO: Implement additional input stream parsing
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            ffmpeg.destroy();
+        }
+    }
+
+
+    /**
+     * 提取音频
+     * @param sourcePath
+     * @param targetPath
+     * @desc ffmpeg -i input_file -acodec copy -vn output_file_audio
+     */
+    public void extractAudio(String sourcePath, String targetPath) {
+        FFMPEGExecutor ffmpeg = this.locator.createExecutor();
+        ffmpeg.addArgument("-i");
+        ffmpeg.addArgument(sourcePath);
+        ffmpeg.addArgument("-acodec");
+        ffmpeg.addArgument("copy");
+        ffmpeg.addArgument("-vn");
+        ffmpeg.addArgument(targetPath);
+        try {
+            ffmpeg.execute();
+            LOG.info("提取音频完毕: " + targetPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            RBufferedReader reader = new RBufferedReader(
+                    new InputStreamReader(ffmpeg.getErrorStream()));
+            int step = 0;
+            int lineNR = 0;
+            String line;
+            while ((line = reader.readLine()) != null) {
+                lineNR++;
+                LOG.debug("Input Line ({}): {}", lineNR, line);
+                // TODO: Implement additional input stream parsing
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            ffmpeg.destroy();
+        }
+    }
+
+
     /**
      * 获取指定文件的后缀名
      * @param file
