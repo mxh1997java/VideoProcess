@@ -4,6 +4,7 @@ import components.MyAlertBox;
 import components.MyListView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import processor.FFMPEGExecutor;
 import task.CopyFileTask;
 import task.MyExecutorService;
 import java.awt.*;
@@ -75,6 +76,37 @@ public class Handler {
         fileTypeSet.add("rm");
         fileTypeSet.add("rmvb");
         fileTypeSet.add("wmv");
+    }
+
+    /**
+     * 屏幕录制进程
+     */
+    private static FFMPEGExecutor ffmpeg = null;
+
+    private static Thread screenRecordthread = null;
+
+    public static Thread getScreenRecordthread() {
+        return screenRecordthread;
+    }
+
+    public static void setScreenRecordthread(Thread screenRecordthread) {
+        Handler.screenRecordthread = screenRecordthread;
+    }
+
+    /**
+     * 获取进程
+     * @return
+     */
+    public static FFMPEGExecutor getFfmpeg() {
+        return ffmpeg;
+    }
+
+    /**
+     * 设置进程
+     * @param ffmpeg
+     */
+    public static void setFfmpeg(FFMPEGExecutor ffmpeg) {
+        Handler.ffmpeg = ffmpeg;
     }
 
     /**

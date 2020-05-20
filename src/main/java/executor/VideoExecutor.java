@@ -1701,6 +1701,97 @@ public class VideoExecutor {
 
 
     /**
+     * 屏幕录制
+     * @param targetPath
+     * @desc ffmpeg -f gdigrab -i desktop -f mp4 output.mp4
+     */
+    public String screenRecord(String targetPath) {
+        FFMPEGExecutor ffmpeg = this.locator.createExecutor();
+        ffmpeg.addArgument("-f");
+        ffmpeg.addArgument("gdigrab");
+        ffmpeg.addArgument("-i");
+        ffmpeg.addArgument("desktop");
+        ffmpeg.addArgument("-f");
+        ffmpeg.addArgument("mp4");
+        ffmpeg.addArgument(targetPath);
+        try {
+            ffmpeg.execute();
+            LOG.info("提取音频完毕: " + targetPath);
+            Handler.setFfmpeg(ffmpeg);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            RBufferedReader reader = new RBufferedReader(
+                    new InputStreamReader(ffmpeg.getErrorStream()));
+            int step = 0;
+            int lineNR = 0;
+            String line;
+            while ((line = reader.readLine()) != null) {
+                lineNR++;
+                LOG.info("屏幕录制: {}", line);
+                // TODO: Implement additional input stream parsing
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return "true";
+    }
+
+    /**
+     * 关闭屏幕录制进程
+     */
+    public void closeScreenRecord() {
+        FFMPEGExecutor ffmpeg = Handler.getFfmpeg();
+        if(null == ffmpeg) {
+            new RuntimeException("没有发现屏幕录制进程!");
+        }
+        ffmpeg.destroy();
+    }
+
+
+    /**
+     * 打开摄像头拍摄视频
+     * @param targetPath
+     * @desc ffmpeg -t 20 -f vfwcap -i 0 -r 8 -f mp4 cap1111.mp4
+     */
+    public void takeVideo(String targetPath) {
+        FFMPEGExecutor ffmpeg = this.locator.createExecutor();
+        ffmpeg.addArgument("-t");
+        ffmpeg.addArgument("20");
+        ffmpeg.addArgument("-f");
+        ffmpeg.addArgument("vfwcap");
+        ffmpeg.addArgument("-i");
+        ffmpeg.addArgument("0");
+        ffmpeg.addArgument("-r");
+        ffmpeg.addArgument("8");
+        ffmpeg.addArgument("-f");
+        ffmpeg.addArgument("mp4");
+        ffmpeg.addArgument(targetPath);
+        try {
+            ffmpeg.execute();
+            LOG.info("打开摄像头拍摄视频: " + targetPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            RBufferedReader reader = new RBufferedReader(
+                    new InputStreamReader(ffmpeg.getErrorStream()));
+            int step = 0;
+            int lineNR = 0;
+            String line;
+            while ((line = reader.readLine()) != null) {
+                lineNR++;
+                LOG.info("打开摄像头拍摄视频: {}", line);
+                // TODO: Implement additional input stream parsing
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    /**
      * 获取指定文件的后缀名
      * @param file
      * @return

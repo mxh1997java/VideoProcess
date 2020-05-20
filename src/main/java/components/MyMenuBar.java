@@ -3,6 +3,9 @@ package components;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+
+import executor.VideoExecutor;
 import javafx.event.ActionEvent;
 import javafx.scene.Scene;
 import javafx.scene.control.Menu;
@@ -11,6 +14,7 @@ import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import task.MyExecutorService;
 import util.Handler;
 import view.ConfigPage;
 import view.MyHome;
@@ -116,10 +120,44 @@ public class MyMenuBar {
 
         // --- Menu View
         Menu menuMore = new Menu("更多");
-        MenuItem none2 = new MenuItem("敬请期待");
-        none2.setOnAction((ActionEvent even) -> {
+        Menu screenRecord = new Menu("屏幕录制");
+        screenRecord.setOnAction((ActionEvent even) -> {
         });
-        menuMore.getItems().addAll(none2);
+        MenuItem screenRecordStart = new MenuItem("开始");
+        screenRecordStart.setOnAction(event -> {
+            LOG.info("开始录制屏幕");
+            String filePath = Handler.getNewFilePath("D:\\file\\1.mp4");
+            VideoExecutor videoExecutor = new VideoExecutor();
+            ExecutorService myExecutorService = MyExecutorService.getMyExecutorService();
+            Thread thread = new Thread(() -> {
+                videoExecutor.screenRecord(filePath);
+            });
+            myExecutorService.submit(thread);
+        });
+        MenuItem screenRecordStop = new MenuItem("停止");
+        screenRecordStop.setOnAction(event -> {
+            LOG.info("关闭屏幕录制");
+            VideoExecutor videoExecutor = new VideoExecutor();
+            videoExecutor.closeScreenRecord();
+            MyExecutorService.getMyExecutorService().shutdownNow();
+        });
+        screenRecord.getItems().addAll(screenRecordStart, screenRecordStop);
+
+        Menu takeVideo = new Menu("拍摄视频");
+        takeVideo.setOnAction((ActionEvent even) -> {
+        });
+        MenuItem takeVideoStart = new MenuItem("开始拍摄");
+        takeVideoStart.setOnAction(event -> {
+            LOG.info("开始拍摄视频");
+            new Thread(()->{
+                String filePath = Handler.getNewFilePath("D:\\file\\1.mp4");
+                VideoExecutor videoExecutor = new VideoExecutor();
+                videoExecutor.takeVideo(filePath);
+            }).start();
+        });
+        MenuItem takeVideoEnd = new MenuItem("结束拍摄");
+        takeVideo.getItems().addAll(takeVideoStart, takeVideoEnd);
+        menuMore.getItems().addAll(screenRecord, takeVideo);
 
         menuBar.getMenus().addAll(menuFile, menuEdit, menuView, menuConfig, menuMore);
         return menuBar;
