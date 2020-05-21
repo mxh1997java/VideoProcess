@@ -24,7 +24,7 @@ public class TestDefaultFFMPEGLocator {
         //DefaultFFMPEGLocator locator = new DefaultFFMPEGLocator();
         //System.out.println(locator);
 
-        //VideoExecutor videoExecutor = new VideoExecutor();
+        VideoExecutor videoExecutor = new VideoExecutor();
 
         //String sourcePath = "D:\\Users\\xinhai.ma\\Videos\\Captures\\3-7.mp4";
         //String targetPath = "D:\\Users\\xinhai.ma\\Videos\\Captures\\程序测试结果\\3-7-1.mp4";
@@ -71,8 +71,19 @@ public class TestDefaultFFMPEGLocator {
 //        String targetPath = "D:\\test";
 //        Handler.batchCopyFile(sourcePath, targetPath);
 
-        String fileName = Handler.getFileName("D:\\123.mp4");
-        System.out.println(fileName);
+//        String fileName = Handler.getFileName("D:\\123.mp4");
+//        System.out.println(fileName);
+
+
+//        String startVideo = "D:\\Users\\15735400536\\Videos\\台湾综艺\\10.mp4";
+//        String video = "D:\\Users\\15735400536\\Videos\\台湾综艺\\12.mp4";
+//        String endVideo = "D:\\Users\\15735400536\\Videos\\台湾综艺\\11.mp4";
+//        String targetPath = Handler.getNewFilePath(null);
+//        videoExecutor.mergeVideo(startVideo, video, endVideo, targetPath);
+
+        String filePath = Handler.getNewFilePath(null);
+        String url = "https://gss3.baidu.com/6LZ0ej3k1Qd3ote6lo7D0j9wehsv/tieba-smallvideo-transcode-cae/7582624_bd76685e95e44141dc814fb8e96c4366_0_cae.mp4";
+        Handler.httpDownload(url, filePath);
 
     }
 

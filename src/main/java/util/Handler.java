@@ -11,7 +11,9 @@ import java.awt.*;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.channels.FileChannel;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -84,6 +86,31 @@ public class Handler {
     private static FFMPEGExecutor ffmpeg = null;
 
     private static Thread screenRecordthread = null;
+
+    private static List<String> coverPathList = new ArrayList<>();
+
+    public static List<String> getCoverPathList() {
+        return coverPathList;
+    }
+
+    public static void setCoverPathList(List<String> coverPathList) {
+        Handler.coverPathList = coverPathList;
+    }
+
+    /**
+     * 添加封面路径到缓存
+     * @param coverPath
+     */
+    public static void addCoverPath(String coverPath) {
+        coverPathList.add(coverPath);
+    }
+
+    /**
+     * 清空封面路径缓存
+     */
+    public static void clearCoverPathList() {
+        coverPathList.clear();
+    }
 
     public static Thread getScreenRecordthread() {
         return screenRecordthread;
@@ -676,5 +703,48 @@ public class Handler {
         LOG.info("耗时: {}", endTime-startTime);
         return targetPathList;
     }
+
+
+    /**
+     * 根据httpUrl下载网络文件
+     * @param httpUrl
+     * @param saveFile
+     * @return
+     */
+    public static boolean httpDownload(String httpUrl, String saveFile) {
+        // 1.下载网络文件
+        int byteRead;
+        URL url;
+        try {
+            url = new URL(httpUrl);
+        } catch (MalformedURLException e1) {
+            e1.printStackTrace();
+            return false;
+        }
+
+        try {
+            //2.获取链接
+            URLConnection conn = url.openConnection();
+            //3.输入流
+            InputStream inStream = conn.getInputStream();
+            //3.写入文件
+            FileOutputStream fs = new FileOutputStream(saveFile);
+
+            byte[] buffer = new byte[1024];
+            while ((byteRead = inStream.read(buffer)) != -1) {
+                fs.write(buffer, 0, byteRead);
+            }
+            inStream.close();
+            fs.close();
+            return true;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return false;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 
 }

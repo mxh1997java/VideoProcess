@@ -16,7 +16,6 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -1031,6 +1030,51 @@ public class VideoExecutor {
         } finally {
             ffmpeg.destroy();
         }
+    }
+
+
+    /**
+     * 转换视频为ts流
+     * @param sourcePath
+     * @return
+     */
+    public void videoConvertTs(String sourcePath, String targetPath) {
+        //先执行: ffmpeg -i input1.flv -c copy -bsf:v h264_mp4toannexb -f mpegts input1.ts
+        FFMPEGExecutor ffmpeg = this.locator.createExecutor();
+        ffmpeg.addArgument("-i");
+        ffmpeg.addArgument(sourcePath);
+        ffmpeg.addArgument("-c");
+        ffmpeg.addArgument("copy");
+        ffmpeg.addArgument("-bsf:v");
+        ffmpeg.addArgument("h264_mp4toannexb");
+        ffmpeg.addArgument("-f");
+        ffmpeg.addArgument("mpegts");
+        ffmpeg.addArgument(targetPath);
+        try {
+            ffmpeg.execute();
+            LOG.info("{} 转化视频格式: {}", sourcePath, targetPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            ffmpeg.destroy();
+        }
+    }
+
+
+    /**
+     * 给视频添加片头片尾
+     * @param startVideoPath   片头
+     * @param centerVideoPath  内容视频
+     * @param endVideoPath     片尾
+     * @param targetPath       生成地址
+     * @desc ffmpeg -i "concat:input1.mpg|input2.mpg|input3.mpg" -c copy output.mpg
+     */
+    public void mergeVideo(String startVideoPath, String centerVideoPath, String endVideoPath, String targetPath) {
+        List<String> filePathList = new ArrayList<>(3);
+        filePathList.add(startVideoPath);
+        filePathList.add(centerVideoPath);
+        filePathList.add(endVideoPath);
+        mergeVideo(filePathList, targetPath);
     }
 
 

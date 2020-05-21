@@ -42,7 +42,7 @@ public class MyFunction {
         VBox vbox = new VBox();
         // vbox.setStyle("-fx-background-color: red");
         vbox.setStyle("-fx-border-style: solid inside");
-        vbox.setMaxSize(400, 670);
+        vbox.setMaxSize(400, 700);
         vbox.setMinSize(300, 670);
 
         // 创建一个水平箱子
@@ -64,14 +64,14 @@ public class MyFunction {
         Label watermarkYAxisLabel = new Label(" 水印y轴: ");
         TextField addWatermarkOfY = new TextField();
         addWatermarkOfY.setPrefWidth(100);
-        HBox addWatermarkBox2 = new HBox();
-        addWatermarkBox2.setPadding(new Insets(5, 5, 5, 5));
-        Label watermarkWidthLabel = new Label(" 水印宽度: ");
-        TextField addWatermarkOfWidth = new TextField();
-        addWatermarkOfWidth.setPrefWidth(100);
-        Label watermarkHeightLabel = new Label(" 水印高度: ");
-        TextField addWatermarkOfHeight = new TextField();
-        addWatermarkOfHeight.setPrefWidth(100);
+//        HBox addWatermarkBox2 = new HBox();
+//        addWatermarkBox2.setPadding(new Insets(5, 5, 5, 5));
+//        Label watermarkWidthLabel = new Label(" 水印宽度: ");
+//        TextField addWatermarkOfWidth = new TextField();
+//        addWatermarkOfWidth.setPrefWidth(100);
+//        Label watermarkHeightLabel = new Label(" 水印高度: ");
+//        TextField addWatermarkOfHeight = new TextField();
+//        addWatermarkOfHeight.setPrefWidth(100);
         HBox addWatermarkBox3 = new HBox();
         addWatermarkBox3.setPadding(new Insets(5, 5, 5, 5));
         Label watermarkContentLabel = new Label(" 水印内容: ");
@@ -80,8 +80,8 @@ public class MyFunction {
         addWatermarkBox.getChildren().addAll(addWatermark);
         addWatermarkBox1.getChildren().addAll(watermarkXAxisLabel, addWatermarkOfX);
         addWatermarkBox1.getChildren().addAll(watermarkYAxisLabel, addWatermarkOfY);
-        addWatermarkBox2.getChildren().addAll(watermarkWidthLabel, addWatermarkOfWidth);
-        addWatermarkBox2.getChildren().addAll(watermarkHeightLabel, addWatermarkOfHeight);
+//        addWatermarkBox2.getChildren().addAll(watermarkWidthLabel, addWatermarkOfWidth);
+//        addWatermarkBox2.getChildren().addAll(watermarkHeightLabel, addWatermarkOfHeight);
         addWatermarkBox3.getChildren().addAll(watermarkContentLabel, addWatermarkOfContent);
 
         //删除水印
@@ -203,7 +203,7 @@ public class MyFunction {
 
         //视频减速
         HBox reduceFramerateBox = new HBox();
-        reduceFramerateBox.setPadding(new Insets(5));
+        reduceFramerateBox.setPadding(new Insets(5,5,5,5));
         CheckBox reduceFramerate = new CheckBox(" 视频减速 ");
         Label reduceFramerateLabel = new Label(" 减速倍数: ");
         TextField reduceFramerateTextField = new TextField();
@@ -211,9 +211,9 @@ public class MyFunction {
         reduceFramerateBox.getChildren().addAll(reduceFramerate, reduceFramerateLabel, reduceFramerateTextField);
 
         //合并视频
-        HBox mergeVideoBox = new HBox();
-        mergeVideoBox.setPadding(new Insets(5));
-        CheckBox mergeVideo = new CheckBox(" 视频合并 ");
+//        HBox mergeVideoBox = new HBox();
+//        mergeVideoBox.setPadding(new Insets(5,5,5,5));
+//        CheckBox mergeVideo = new CheckBox(" 视频合并 ");
 //        TextField folder = new TextField();
 //        folder.setPrefWidth(150);
 //        Button folderChooserButton = new Button("请选择");
@@ -224,14 +224,46 @@ public class MyFunction {
 //                folder.setText(file.getAbsolutePath());
 //            }
 //        });
-        mergeVideoBox.getChildren().addAll(mergeVideo);
+//        mergeVideoBox.getChildren().addAll(mergeVideo);
 
 
         //视频背景虚化
         HBox blurBackgroundBox = new HBox();
-        blurBackgroundBox.setPadding(new Insets(5));
+        blurBackgroundBox.setPadding(new Insets(5,5,5,5));
         CheckBox blurBackground = new CheckBox(" 背景虚化 ");
         blurBackgroundBox.getChildren().addAll(blurBackground);
+
+        //添加片头片尾
+        HBox addVideoBox = new HBox();
+        addVideoBox.setPadding(new Insets(5,5,5,5));
+        CheckBox addVideo = new CheckBox("添加片头片尾");
+        HBox addVideoBox1 = new HBox();
+        addVideoBox1.setPadding(new Insets(5));
+        Label startVideoLabel = new Label(" 片头: ");
+        TextField startVideoText = new TextField(); //"请选择片头"
+        Button startVideoButton = new Button("请选择");
+        startVideoButton.setOnAction(even -> {
+            File file = MyChooser.getFileChooser().showOpenDialog(primaryStage);
+            if (file != null) {
+                LOG.info("选择片头: " + file.getAbsolutePath());
+                startVideoText.setText(file.getAbsolutePath());
+            }
+        });
+        HBox addVideoBox2 = new HBox();
+        addVideoBox2.setPadding(new Insets(5,5,5,5));
+        Label endVideoLabel = new Label(" 片尾: ");
+        TextField endVideoText = new TextField(); //"请选择片尾"
+        Button endVideoButton = new Button("请选择");
+        endVideoButton.setOnAction(even -> {
+            File file = MyChooser.getFileChooser().showOpenDialog(primaryStage);
+            if (file != null) {
+                LOG.info("选择片尾: " + file.getAbsolutePath());
+                endVideoText.setText(file.getAbsolutePath());
+            }
+        });
+        addVideoBox.getChildren().addAll(addVideo);
+        addVideoBox1.getChildren().addAll(startVideoLabel, startVideoText, startVideoButton);
+        addVideoBox2.getChildren().addAll(endVideoLabel, endVideoText, endVideoButton);
 
         //处理视频按钮
         HBox dealWithBox = new HBox();
@@ -244,8 +276,6 @@ public class MyFunction {
         //单个处理
         dealWithSingle.setOnAction(even -> {
             LOG.info("处理单个");
-            //dealWithSingle.setDisable(true);
-            //progressBarBox.setVisible(true);
             if(null == Handler.getListView("unProcessed")) {
                 MyAlertBox.display("程序提示", "请导入视频!");
                 return;
@@ -258,6 +288,9 @@ public class MyFunction {
                 return;
             }
 
+            //清空封面路径缓存
+            Handler.clearCoverPathList();
+
             boolean addWatermarkSelected = addWatermark.isSelected();
             boolean delWatermarkSelected = delWatermark.isSelected();
             boolean cutVideoSelected = cutVideo.isSelected();
@@ -265,9 +298,25 @@ public class MyFunction {
             boolean addFilterSelected = addFilter.isSelected();
             boolean addFramerateSelected = addFramerate.isSelected();
             boolean reduceFramerateSelected = reduceFramerate.isSelected();
-            boolean mergeVideoSelected = mergeVideo.isSelected();
+            //boolean mergeVideoSelected = mergeVideo.isSelected();
             boolean blurBackgroundSelected = blurBackground.isSelected();
             boolean getCoverSelected = getCover.isSelected();
+            boolean addVideoSelected = addVideo.isSelected();
+
+            //添加片头片尾
+            if(addVideoSelected) {
+                String startVideoPath = startVideoText.getText();
+                String endVideoPath = endVideoText.getText();
+                targetPath = Handler.getNewFilePath(currentVideo);
+                videoExecutor.mergeVideo(startVideoPath, currentVideo, endVideoPath, targetPath);
+                Handler.deleteFile(currentVideo);
+                currentVideo = targetPath;
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
 
             //加水印
             if (addWatermarkSelected) {
@@ -338,18 +387,6 @@ public class MyFunction {
                     e.printStackTrace();
                 }
             }
-            if (setCoverSelected) {
-                String imgPath = coverPath.getText();
-                //TODO 宽和高暂时没有
-                //String height = coverHeight.getText();
-                //String width = coverWidth.getText();
-                LOG.info("操作步骤:设置封面 操作对象: {}", currentVideo);
-                targetPath = Handler.getNewFilePath(currentVideo);
-                videoExecutor.setCover(currentVideo, imgPath, targetPath);
-                //删除上一步产生的视频
-                Handler.deleteFile(currentVideo);
-                currentVideo = targetPath;
-            }
 
             //截取图片
             if(getCoverSelected) {
@@ -361,6 +398,8 @@ public class MyFunction {
                 try {
                     //通过cmd命令打开图片
                     Runtime.getRuntime().exec("cmd /c " + targetPath);
+                    //把封面路径写入缓存
+                    Handler.addCoverPath(targetPath);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -538,15 +577,38 @@ public class MyFunction {
                 }
             }
 
-            //更新进度
-            //MyProgressBar.setProgress(100);
-            //关掉进度显示
-            //progressBarBox.setVisible(false);
+            if (setCoverSelected) {
+                String imgPath = coverPath.getText();
+                //封面路径为空
+                if(null == imgPath || "".equals(imgPath)) {
+                    //是否勾选获取图片及获取封面功能
+                    if(getCoverSelected) {
+                        imgPath = Handler.getCoverPathList().get(0);
+                    } else {
+                        new RuntimeException("未勾选获取图片或未选择封面文件");
+                    }
+                }
+                //TODO 宽和高暂时没有
+                //String height = coverHeight.getText();
+                //String width = coverWidth.getText();
+                LOG.info("操作步骤:设置封面 操作对象: {}", currentVideo);
+                targetPath = Handler.getNewFilePath(currentVideo);
+                videoExecutor.setCover(currentVideo, imgPath, targetPath);
+                //删除上一步产生的视频
+                Handler.deleteFile(currentVideo);
+                currentVideo = targetPath;
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
             //刷新左侧视频列表
             processedList.add(currentVideo);
             MyHome.setLeft(null, processedList);
             //选择视频地址并让播放组件播放视频
-            //MyMediaPlayer.chooseFile(new File(targetPath));
+            MyMediaPlayer.chooseFile(new File(currentVideo));
         });
 
         //批量处理
@@ -562,15 +624,20 @@ public class MyFunction {
                 return;
             }
 
+            //清除封面路径缓存
+            Handler.clearCoverPathList();
+
             boolean addWatermarkSelected = addWatermark.isSelected();
             boolean delWatermarkSelected = delWatermark.isSelected();
             boolean cutVideoSelected = cutVideo.isSelected();
+            boolean getCoverSelected = getCover.isSelected();
             boolean setCoverSelected = setCover.isSelected();
             boolean addFilterSelected = addFilter.isSelected();
             boolean addFramerateSelected = addFramerate.isSelected();
             boolean reduceFramerateSelected = reduceFramerate.isSelected();
-            boolean mergeVideoSelected = mergeVideo.isSelected();
+           // boolean mergeVideoSelected = mergeVideo.isSelected();
             boolean blurBackgroundSelected = blurBackground.isSelected();
+            boolean addVideoSelected = addVideo.isSelected();
 
             Map<String, String> config = Handler.readProp();
             String targetPath = config.get("targetPath");
@@ -582,6 +649,47 @@ public class MyFunction {
             List<String> targetPathList = Handler.batchCopyFile(filePathList, targetPath);
             //要删除的多余文件
             Set<String> deletePathSet = new HashSet<>(targetPathList);
+
+            //添加片头片尾
+            if(addVideoSelected) {
+                String startVideoPath = startVideoText.getText();
+                String endVideoPath = endVideoText.getText();
+                ListIterator<String> iterator = targetPathList.listIterator();
+                try {
+                    while (iterator.hasNext()) {
+                        String path = iterator.next();
+                        String target = Handler.getNewFilePath(path);
+                        LOG.info("操作步骤:批量添加片头片尾 操作对象: {}", path);
+                        videoExecutor.mergeVideo(startVideoPath, path, endVideoPath, target);
+                        Thread.sleep(500);
+                        deletePathSet.add(path);
+                        iterator.set(target);
+                    }
+                } catch (InterruptedException e) {
+                    LOG.info("批量添加片头片尾出错! {}", e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+
+            //截取图片
+            if(getCoverSelected) {
+                String time = cutVideoTime.getText();
+                time = Handler.formatTime(Long.valueOf(time));
+                ListIterator<String> iterator = targetPathList.listIterator();
+                try {
+                    while (iterator.hasNext()) {
+                        String path = iterator.next();
+                        LOG.info("操作步骤: 批量截取图片 操作对象: {}", path);
+                        String target = Handler.getNewFilePath("D:\\MaXinHai\\file\\1.png");
+                        videoExecutor.cutVideoImage(path, target, time);
+                        Thread.sleep(500);
+                        Handler.addCoverPath(target);
+                        //iterator.set(target);
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
 
             if (addWatermarkSelected) {
                 ListIterator<String> iterator = targetPathList.listIterator();
@@ -664,20 +772,6 @@ public class MyFunction {
                 } catch (InterruptedException e) {
                     LOG.info("批量剪切视频出错! {}", e.getMessage());
                     e.printStackTrace();
-                }
-            }
-            if (setCoverSelected) {
-                ListIterator<String> iterator = targetPathList.listIterator();
-                String imgPath = coverPath.getText();
-                //TODO 宽和高暂时没有
-                //String height = coverHeight.getText();
-                //String width = coverWidth.getText();
-                while (iterator.hasNext()) {
-                    String path = iterator.next();
-                    String target = Handler.getNewFilePath(path);
-                    LOG.info("操作步骤:设置封面 操作对象: {}", path);
-                    videoExecutor.setCover(path, imgPath, target);
-                    iterator.set(target);
                 }
             }
             if (addFilterSelected) {
@@ -875,15 +969,15 @@ public class MyFunction {
             }
 
             //合并多个视频
-            if (mergeVideoSelected) {
-                String newTargetPath = Handler.getNewFilePath("D:\\MaXinHai\\file\\1.mp4");
-                videoExecutor.mergeVideo(filePathList, newTargetPath);
-                try {
-                    Runtime.getRuntime().exec("cmd /c " + newTargetPath);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+//            if (mergeVideoSelected) {
+//                String newTargetPath = Handler.getNewFilePath("D:\\MaXinHai\\file\\1.mp4");
+//                videoExecutor.mergeVideo(filePathList, newTargetPath);
+//                try {
+//                    Runtime.getRuntime().exec("cmd /c " + newTargetPath);
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
 
             //模糊视频背景
             if (blurBackgroundSelected) {
@@ -901,6 +995,36 @@ public class MyFunction {
                     }
                 } catch (Exception e) {
                     LOG.info("批量设置模糊视频背景出错! {}", e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+
+            //设置封面
+            if (setCoverSelected) {
+                ListIterator<String> iterator = targetPathList.listIterator();
+                String imgPath = coverPath.getText();
+                if(null == imgPath || "".equals(imgPath)) {
+                    if(getCoverSelected) {
+                        imgPath = Handler.getCoverPathList().get(0);
+                    } else {
+                        new RuntimeException("未勾选获取图片功能或未设置封面文件!");
+                    }
+                }
+                //TODO 宽和高暂时没有
+                //String height = coverHeight.getText();
+                //String width = coverWidth.getText();
+                try {
+                    while (iterator.hasNext()) {
+                        String path = iterator.next();
+                        String target = Handler.getNewFilePath(path);
+                        LOG.info("操作步骤:批量设置封面 操作对象: {}", path);
+                        videoExecutor.setCover(path, imgPath, target);
+                        Thread.sleep(500);
+                        deletePathSet.add(path);
+                        iterator.set(target);
+                    }
+                } catch (InterruptedException e) {
+                    LOG.info("批量设置封面出错! {}", e.getMessage());
                     e.printStackTrace();
                 }
             }
@@ -926,9 +1050,10 @@ public class MyFunction {
         vbox.getChildren().addAll(getCoverBox); //截图图片
         vbox.getChildren().addAll(addFilterBox); //添加滤镜效果
         vbox.getChildren().addAll(addFramerateBox, reduceFramerateBox); //视频加速 减速
-        vbox.getChildren().addAll(mergeVideoBox); //合并多个视频
+        //vbox.getChildren().addAll(mergeVideoBox); //合并多个视频
         vbox.getChildren().addAll(blurBackgroundBox); //视频背景虚化
-        vbox.getChildren().addAll(addWatermarkBox, addWatermarkBox1, addWatermarkBox2, addWatermarkBox3); //添加水印
+        vbox.getChildren().addAll(addWatermarkBox, addWatermarkBox1, /*addWatermarkBox2,*/ addWatermarkBox3); //添加水印
+        vbox.getChildren().addAll(addVideoBox, addVideoBox1, addVideoBox2); //添加片头片尾
         vbox.getChildren().addAll(dealWithBox); //处理按钮
         //vbox.getChildren().addAll(progressBarBox); //任务进度条
         return vbox;

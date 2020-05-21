@@ -3,6 +3,7 @@ package components;
 import java.io.File;
 import java.math.BigDecimal;
 import executor.VideoExecutor;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -33,38 +34,27 @@ public class MyMediaPlayer {
 
     private static final VideoExecutor videoExecutor = new VideoExecutor();
 
-    private static Double endTime = new Double(0);
+    private static Double endTime = new Double(36);
     private static Double currentTime = new Double(0);
-    private static String source = "https://gss3.baidu.com/6LZ0ej3k1Qd3ote6lo7D0j9wehsv/tieba-smallvideo-transcode-cae/7582624_bd76685e95e44141dc814fb8e96c4366_0_cae.mp4";
-    private static Media media = new Media(source);
-    private static MediaPlayer mplayer = new MediaPlayer(media);
+    private static String source = "C:\\VideoProcess\\show.mp4";
+    private static Media media = null;
+    private static MediaPlayer mplayer = null;
     private static MediaView mView;
     private static Button btnPlay;
     private static Slider slTime, slVolume;
-    private static Label lbCurrentTime;
+    private static Label lbCurrentTime = new Label();
 
     public static BorderPane getMediaPlayer() {
-        //mplayer = new MediaPlayer(media);
-        /* MediaView */ mView = new MediaView(mplayer);
-        /* Label */
-        lbCurrentTime = new Label();
-        /* Slider */
+        media = new Media(new File(source).toURI().toString());
+        mplayer = new MediaPlayer(media);
+        mView = new MediaView(mplayer);
         slTime = new Slider(); // 时间轴
         slTime.setPrefWidth(200);
         BorderPane pane = new BorderPane();
         pane.setPrefWidth(600);
-        pane.setPrefHeight(600);
-
-//        mView.fitWidthProperty().bind(pane.widthProperty());
-//        mView.fitHeightProperty().bind(pane.heightProperty());
+        pane.setPrefHeight(500);
         mView.setFitWidth(600);
-        mView.setFitHeight(400);
-
-        //计算播放画面大小
-//        BorderPane pane1 = pane1 = calculationRatio(new File(source));
-//        mView.fitWidthProperty().bind(pane1.widthProperty());
-//        mView.fitHeightProperty().bind(pane1.heightProperty());
-//        LOG.info("mVie width: {}, height: {}", mView.getFitWidth(), mView.getFitHeight());
+        mView.setFitHeight(360);
 
         /* Button */
         btnPlay = new Button("播放");
@@ -79,6 +69,7 @@ public class MyMediaPlayer {
         });
         mplayer.setOnEndOfMedia(() -> { // 为初始存在的奇葩
             mplayer.stop();
+            mplayer.seek(Duration.ZERO);
             btnPlay.setText("播放");
         });
         Button btnReplay = new Button("停止");
@@ -93,51 +84,27 @@ public class MyMediaPlayer {
         slVolume.setValue(50);
         slVolume.setShowTickLabels(true);
         slVolume.setShowTickMarks(true);
+        lbCurrentTime.setMinWidth(60);
+        lbCurrentTime.setText("0:0:0/0:0:36");
 
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open Media...");
-        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("MP4 Video", "*.mp4"),
-                new FileChooser.ExtensionFilter("MP3 Music", "*.mp3"),
-                new FileChooser.ExtensionFilter("All Files", "*.*"));
-
-//        Button btnOpen = new Button("打开"); // 实际初始化在这里完成
-//        btnOpen.setOnAction(e -> {
-//            file = fileChooser.showOpenDialog(new Stage()); // 在一个新Stage里放FileChooser
-//            if (file != null) {
-//                mplayer.stop();
-//                btnPlay.setText("暂停");
-//                media = new Media(file.toURI().toString());
-//                mplayer = new MediaPlayer(media);
-//                mView.setMediaPlayer(mplayer);
-//                mplayer.setOnReady(() -> {
-//                    endTime = mplayer.getStopTime().toSeconds();
-//                });
-//                // 媒体准备好时获得信息
-//                mplayer.setOnEndOfMedia(() -> {
-//                    mplayer.stop();
-//                    mplayer.seek(Duration.ZERO);
-//                    btnPlay.setText("播放");
-//                });
-//                mplayer.currentTimeProperty().addListener(ov -> {
-//                    currentTime = mplayer.getCurrentTime().toSeconds();
-//                    lbCurrentTime.setText(Seconds2Str(currentTime) + "/" + Seconds2Str(endTime));
-//                    slTime.setValue(currentTime / endTime * 100);
-//                });
-//                slTime.valueProperty().addListener(ov -> {
-//                    if (slTime.isValueChanging()) {
-//                        mplayer.seek(mplayer.getTotalDuration().multiply(slTime.getValue() / 100));
-//                    }
-//                });
-//                mplayer.volumeProperty().bind(slVolume.valueProperty().divide(100)); // 音量调节
-//                mplayer.play();
-//            }
-//        });
+        mplayer.currentTimeProperty().addListener(ov -> {
+            currentTime = mplayer.getCurrentTime().toSeconds();
+            lbCurrentTime.setText(SecondsStr(currentTime) + "/" + SecondsStr(endTime));
+            slTime.setValue(currentTime / endTime * 100);
+        });
+        slTime.valueProperty().addListener(ov -> {
+            if (slTime.isValueChanging()) {
+                mplayer.seek(mplayer.getTotalDuration().multiply(slTime.getValue() / 100));
+            }
+        });
+        mplayer.volumeProperty().bind(slVolume.valueProperty().divide(100)); // 音量调节
 
         HBox paneCtl = new HBox(15);
-//		paneCtl.setPadding(new Insets(30));
-        paneCtl.setMaxSize(600, 300);
+        //paneCtl.setStyle("-fx-background-color: gold");
+        paneCtl.setPadding(new Insets(0,0,0, 60));
+        paneCtl.setMaxSize(1000, 300);
         paneCtl.setAlignment(Pos.CENTER);
-        paneCtl.getChildren().addAll(/*btnOpen,*/ lbCurrentTime, slTime, btnReplay, btnPlay, new Label("音量"), slVolume);
+        paneCtl.getChildren().addAll(lbCurrentTime, slTime, btnReplay, btnPlay, new Label("音量"), slVolume);
         pane.setCenter(mView);
         pane.setBottom(paneCtl);
         Text title = new Text("预览区域");
@@ -167,11 +134,8 @@ public class MyMediaPlayer {
             MyAlertBox.display("播放组件提示", "播放文件不存在!");
             return;
         }
-
         //计算播放画面大小
         BorderPane pane = calculationRatio(file);
-//        mView.fitWidthProperty().bind(pane.widthProperty());
-//        mView.fitHeightProperty().bind(pane.heightProperty());
         mView.setFitWidth(pane.getPrefWidth());
         mView.setFitHeight(pane.getPrefHeight());
         LOG.info("mVie width: {}, height: {}", mView.getFitWidth(), mView.getFitHeight());
@@ -207,7 +171,6 @@ public class MyMediaPlayer {
         });
         mplayer.volumeProperty().bind(slVolume.valueProperty().divide(100)); // 音量调节
         mplayer.play();
-        LOG.info("mVie width: {}, height: {}", mView.getFitWidth(), mView.getFitHeight());
     }
 
 

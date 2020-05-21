@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 import util.Handler;
 import view.MyHome;
 
+import java.io.File;
+
 /**
  * @author xinhai.ma
  * @description
@@ -27,8 +29,17 @@ public class MyApplication extends Application {
     public static void main(String[] args) {
         LOG.info("视频处理程序启动...");
         Handler.createFile("C:\\VideoProcess\\config", "config.properties");
+        downloadVideo();
         launch(args);
         LOG.info("视频处理程序关闭...");
+    }
+
+    private static void downloadVideo() {
+        File file = new File("C:\\VideoProcess\\show.mp4");
+        if(!file.exists()){
+            String url = "https://gss3.baidu.com/6LZ0ej3k1Qd3ote6lo7D0j9wehsv/tieba-smallvideo-transcode-cae/7582624_bd76685e95e44141dc814fb8e96c4366_0_cae.mp4";
+            Handler.httpDownload(url, "C:\\VideoProcess\\show.mp4");
+        }
     }
 
 }
