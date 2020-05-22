@@ -26,11 +26,12 @@ public class MyChooser {
         FileChooser fileChooser = new FileChooser();
         //在文件选择器做了格式限制
         fileChooser.getExtensionFilters().addAll(
-                new ExtensionFilter("MP4", "*.mp4"),
-                new ExtensionFilter("AVI", "*.avi"),
-                new ExtensionFilter("RM", "*.rm"),
-                new ExtensionFilter("WMV", ".wmv"),
-                new ExtensionFilter("FLV", ".flv"));
+                new ExtensionFilter("MP4", "*.mp4"));
+                /*new ExtensionFilter("AVI", "*.avi"),*/
+                /*new ExtensionFilter("RM", "*.rm"),*/
+                /*new ExtensionFilter("WMV", ".wmv"),*/
+                /*new ExtensionFilter("FLV", ".flv"),*/
+                /*new ExtensionFilter("MPEG", ".mpeg")*/
         return fileChooser;
     }
 

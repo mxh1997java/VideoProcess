@@ -179,7 +179,7 @@ public class VideoExecutor {
             String line;
             while ((line = reader.readLine()) != null) {
                 lineNR++;
-                LOG.info("ffmpeg执行信息: " + line);
+                LOG.info("剪切视频: {}", line);
                 // TODO: Implement additional input stream parsing
             }
         } catch (IOException e) {
@@ -1827,6 +1827,43 @@ public class VideoExecutor {
             while ((line = reader.readLine()) != null) {
                 lineNR++;
                 LOG.info("打开摄像头拍摄视频: {}", line);
+                // TODO: Implement additional input stream parsing
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    /**
+     * 裁剪视频尺寸
+     * @param sourcePath
+     * @param targetPath
+     * @param size 1280x720
+     * @desc ffmpeg  -i  input_file  -s  wxh  output_file (wxh 指 1280x720)
+     */
+    public void cropVidoe(String sourcePath, String targetPath, String size) {
+        FFMPEGExecutor ffmpeg = this.locator.createExecutor();
+        ffmpeg.addArgument("-i");
+        ffmpeg.addArgument(sourcePath);
+        ffmpeg.addArgument("-s");
+        ffmpeg.addArgument(size);
+        ffmpeg.addArgument(targetPath);
+        try {
+            ffmpeg.execute();
+            LOG.info("裁剪视频尺寸: {}", targetPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            RBufferedReader reader = new RBufferedReader(
+                    new InputStreamReader(ffmpeg.getErrorStream()));
+            int step = 0;
+            int lineNR = 0;
+            String line;
+            while ((line = reader.readLine()) != null) {
+                lineNR++;
+                LOG.info("裁剪视频尺寸: {}", line);
                 // TODO: Implement additional input stream parsing
             }
         } catch (IOException e) {

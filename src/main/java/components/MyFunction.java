@@ -303,6 +303,23 @@ public class MyFunction {
             boolean getCoverSelected = getCover.isSelected();
             boolean addVideoSelected = addVideo.isSelected();
 
+            //截取图片
+            if(getCoverSelected) {
+                String time = cutVideoTime.getText();
+                time = Handler.formatTime(Long.valueOf(time));
+                LOG.info("操作步骤: 截取图片 操作对象: {}", currentVideo);
+                targetPath = Handler.getNewFilePath("D:\\MaXinHai\\file\\1.png");
+                videoExecutor.cutVideoImage(currentVideo, targetPath, time);
+                try {
+                    //通过cmd命令打开图片
+                    Runtime.getRuntime().exec("cmd /c " + targetPath);
+                    //把封面路径写入缓存
+                    Handler.addCoverPath(targetPath);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
             //添加片头片尾
             if(addVideoSelected) {
                 String startVideoPath = startVideoText.getText();
@@ -326,7 +343,6 @@ public class MyFunction {
                 LOG.info("操作步骤:加水印 操作对象: " + currentVideo);
                 targetPath = Handler.getNewFilePath(currentVideo);
                 videoExecutor.addWatermarkByFont(text, 30, "微软雅黑", x, y, currentVideo, targetPath);
-                //File targetFile = new File(targetPath);
                 currentVideo = targetPath;
                 try {
                     Thread.sleep(500);
@@ -384,23 +400,6 @@ public class MyFunction {
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            //截取图片
-            if(getCoverSelected) {
-                String time = cutVideoTime.getText();
-                time = Handler.formatTime(Long.valueOf(time));
-                LOG.info("操作步骤: 截取图片 操作对象: {}", currentVideo);
-                targetPath = Handler.getNewFilePath("D:\\MaXinHai\\file\\1.png");
-                videoExecutor.cutVideoImage(currentVideo, targetPath, time);
-                try {
-                    //通过cmd命令打开图片
-                    Runtime.getRuntime().exec("cmd /c " + targetPath);
-                    //把封面路径写入缓存
-                    Handler.addCoverPath(targetPath);
-                } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
@@ -650,6 +649,26 @@ public class MyFunction {
             //要删除的多余文件
             Set<String> deletePathSet = new HashSet<>(targetPathList);
 
+            //截取图片
+            if(getCoverSelected) {
+                String time = cutVideoTime.getText();
+                time = Handler.formatTime(Long.valueOf(time));
+                ListIterator<String> iterator = targetPathList.listIterator();
+                try {
+                    while (iterator.hasNext()) {
+                        String path = iterator.next();
+                        LOG.info("操作步骤: 批量截取图片 操作对象: {}", path);
+                        String target = Handler.getNewFilePath("D:\\MaXinHai\\file\\1.png");
+                        videoExecutor.cutVideoImage(path, target, time);
+                        Thread.sleep(500);
+                        Handler.addCoverPath(target);
+                        //iterator.set(target);
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
             //添加片头片尾
             if(addVideoSelected) {
                 String startVideoPath = startVideoText.getText();
@@ -667,26 +686,6 @@ public class MyFunction {
                     }
                 } catch (InterruptedException e) {
                     LOG.info("批量添加片头片尾出错! {}", e.getMessage());
-                    e.printStackTrace();
-                }
-            }
-
-            //截取图片
-            if(getCoverSelected) {
-                String time = cutVideoTime.getText();
-                time = Handler.formatTime(Long.valueOf(time));
-                ListIterator<String> iterator = targetPathList.listIterator();
-                try {
-                    while (iterator.hasNext()) {
-                        String path = iterator.next();
-                        LOG.info("操作步骤: 批量截取图片 操作对象: {}", path);
-                        String target = Handler.getNewFilePath("D:\\MaXinHai\\file\\1.png");
-                        videoExecutor.cutVideoImage(path, target, time);
-                        Thread.sleep(500);
-                        Handler.addCoverPath(target);
-                        //iterator.set(target);
-                    }
-                } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
@@ -981,7 +980,6 @@ public class MyFunction {
 
             //模糊视频背景
             if (blurBackgroundSelected) {
-                //ExecutorService myExecutorService = MyExecutorService.getMyExecutorService();
                 ListIterator<String> iterator = targetPathList.listIterator();
                 try {
                     while (iterator.hasNext()) {
@@ -1004,11 +1002,7 @@ public class MyFunction {
                 ListIterator<String> iterator = targetPathList.listIterator();
                 String imgPath = coverPath.getText();
                 if(null == imgPath || "".equals(imgPath)) {
-                    if(getCoverSelected) {
-                        imgPath = Handler.getCoverPathList().get(0);
-                    } else {
-                        new RuntimeException("未勾选获取图片功能或未设置封面文件!");
-                    }
+                    new RuntimeException("未设置封面文件!");
                 }
                 //TODO 宽和高暂时没有
                 //String height = coverHeight.getText();
@@ -1040,8 +1034,6 @@ public class MyFunction {
             LOG.info("删除多余文件完毕...");
         });
         dealWithBox.getChildren().addAll(dealWithSingle, dealWithBath);
-
-        //progressBarBox.setVisible(false);
 
         vbox.getChildren().addAll(titleBox);
         vbox.getChildren().addAll(delWatermarkBox, delWatermarkBox1, delWatermarkBox2); //删除水印

@@ -81,9 +81,14 @@ public class TestDefaultFFMPEGLocator {
 //        String targetPath = Handler.getNewFilePath(null);
 //        videoExecutor.mergeVideo(startVideo, video, endVideo, targetPath);
 
-        String filePath = Handler.getNewFilePath(null);
-        String url = "https://gss3.baidu.com/6LZ0ej3k1Qd3ote6lo7D0j9wehsv/tieba-smallvideo-transcode-cae/7582624_bd76685e95e44141dc814fb8e96c4366_0_cae.mp4";
-        Handler.httpDownload(url, filePath);
+//        String filePath = Handler.getNewFilePath(null);
+//        String url = "https://s184.convertio.me/p/ZuM4utNbttyfzOCg0BsLtA/0fcd2080dbbfff74459f449cd8112fc2/%E4%B8%80%E5%89%AA%E6%A2%85.avi";
+//        Handler.httpDownload(url, filePath);
+
+        String sourcePath = "D:\\Users\\15735400536\\Videos\\台湾综艺\\12.mp4";
+        String targetPath = "D:\\start.mp4";
+        String size = "1920x1080";
+        videoExecutor.cropVidoe(sourcePath, targetPath, size);
 
     }
 
