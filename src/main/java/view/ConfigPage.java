@@ -2,7 +2,6 @@ package view;
 
 import java.io.File;
 import java.util.Map;
-
 import components.MyChooser;
 import components.MyMenuBar;
 import javafx.event.ActionEvent;
@@ -58,7 +57,7 @@ public class ConfigPage {
         final TextField sourcePath = new TextField();
         sourcePath.setDisable(true);
         sourcePath.setPrefSize(350, 40);
-        sourcePath.setPromptText("请选择source路径");
+        sourcePath.setPromptText("请选择视频来源文件夹路径");
         if(null != config.get("sourcePath")) {
             sourcePath.setText(config.get("sourcePath"));
         }
@@ -69,7 +68,7 @@ public class ConfigPage {
         final TextField targetPath = new TextField();
         targetPath.setDisable(true);
         targetPath.setPrefSize(350, 40);
-        targetPath.setPromptText("请选择target路径");
+        targetPath.setPromptText("请选择生成视频文件夹路径");
         if(null != config.get("targetPath")) {
             targetPath.setText(config.get("targetPath"));
         }
@@ -104,14 +103,14 @@ public class ConfigPage {
         sourceButton.setOnAction((ActionEvent even) -> {
             File file = MyChooser.getDirectoryChooser().showDialog(primaryStage);
             String path = file.getPath();
-            LOG.info("选择视频来源文件夹: " + path);
+            LOG.info("选择source文件夹: " + path);
             sourcePath.setText(path);
         });
 
         targetButton.setOnAction((ActionEvent even) -> {
             File file = MyChooser.getDirectoryChooser().showDialog(primaryStage);
             String path = file.getPath();
-            LOG.info("选择生成视频文件夹: " + path);
+            LOG.info("选择target文件夹: " + path);
             targetPath.setText(path);
         });
 

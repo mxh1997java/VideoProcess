@@ -1,5 +1,7 @@
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.Mnemonic;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +36,9 @@ public class MyApplication extends Application {
         LOG.info("视频处理程序关闭...");
     }
 
+    /**
+     * 下载视频以便初始化视频播放器
+     */
     private static void downloadVideo() {
         File file = new File("C:\\VideoProcess\\show.mp4");
         if(!file.exists()){

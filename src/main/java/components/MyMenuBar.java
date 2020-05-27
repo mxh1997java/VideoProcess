@@ -120,6 +120,8 @@ public class MyMenuBar {
 
         // --- Menu View
         Menu menuMore = new Menu("更多");
+//        MenuItem menuItem = new MenuItem("敬请期待");
+//        menuMore.getItems().addAll(menuItem);
         Menu screenRecord = new Menu("屏幕录制");
         screenRecord.setOnAction((ActionEvent even) -> {
         });
@@ -137,9 +139,9 @@ public class MyMenuBar {
         MenuItem screenRecordStop = new MenuItem("停止");
         screenRecordStop.setOnAction(event -> {
             LOG.info("关闭屏幕录制");
+            MyExecutorService.getMyExecutorService().shutdown();
             VideoExecutor videoExecutor = new VideoExecutor();
             videoExecutor.closeScreenRecord();
-            MyExecutorService.getMyExecutorService().shutdownNow();
         });
         screenRecord.getItems().addAll(screenRecordStart, screenRecordStop);
 

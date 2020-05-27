@@ -1760,7 +1760,8 @@ public class VideoExecutor {
         ffmpeg.addArgument(targetPath);
         try {
             ffmpeg.execute();
-            LOG.info("提取音频完毕: " + targetPath);
+            //ffmpeg.getProcessExitCode();
+            LOG.info("屏幕录制完毕: " + targetPath);
             Handler.setFfmpeg(ffmpeg);
         } catch (IOException e) {
             e.printStackTrace();

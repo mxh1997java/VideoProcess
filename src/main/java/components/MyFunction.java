@@ -4,20 +4,21 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
+import java.util.List;
 import executor.VideoExecutor;
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.MediaView;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import task.BlurBackgroundTask;
-import task.MyExecutorService;
 import util.Handler;
 import view.MyHome;
 import ws.schild.jave.MultimediaInfo;
@@ -34,8 +35,6 @@ public class MyFunction {
     private static VideoExecutor videoExecutor = new VideoExecutor();
 
     private static List<String> processedList = new ArrayList<>();
-
-    //private static HBox progressBarBox = MyProgressBar.getProgressBar();
 
     public static VBox getFunction(Stage primaryStage) {
         // 创建一个垂直箱子
@@ -104,11 +103,34 @@ public class MyFunction {
         Label deleteWatermarkHeightLabel = new Label(" 水印高度: ");
         TextField delWatermarkOfHeight = new TextField();
         delWatermarkOfHeight.setPrefWidth(100);
+
+        //将删除水印文本框对象放入缓存
+        Handler.put("x", delWatermarkOfX);
+        Handler.put("y", delWatermarkOfY);
+        Handler.put("width", delWatermarkOfWidth);
+        Handler.put("height", delWatermarkOfHeight);
+
+        HBox delWatermarkBox3 = new HBox();
+        delWatermarkBox3.setPadding(new Insets(5, 5, 5, 5));
+        Button selectWatermarkLocation = new Button("选择水印位置");
+        selectWatermarkLocation.setOnAction(even -> {
+            MediaView mediaView = MyMediaPlayer.getmView();
+            int x = new Double(mediaView.getLayoutX()).intValue();
+            int y = new Double(mediaView.getLayoutY()).intValue();
+            int width = new Double(mediaView.getFitWidth()).intValue();
+            int height = new Double(mediaView.getFitHeight()).intValue();
+            x = x + 200;
+            y = y + 50;
+            LOG.info("x: {}, y: {}, 长: {}, 宽: {}", x, y, width, height);
+            CapterScreen capterScreen = new CapterScreen();
+            capterScreen.show(x, y, width, height);
+        });
         delWatermarkBox.getChildren().addAll(delWatermark);
         delWatermarkBox1.getChildren().addAll(deleteWatermarkXAxisLabel, delWatermarkOfX);
         delWatermarkBox1.getChildren().addAll(deleteWatermarkYAxisLabel, delWatermarkOfY);
         delWatermarkBox2.getChildren().addAll(deleteWatermarkWidthLabel, delWatermarkOfWidth);
         delWatermarkBox2.getChildren().addAll(deleteWatermarkHeightLabel, delWatermarkOfHeight);
+        delWatermarkBox3.getChildren().addAll(selectWatermarkLocation);
 
 
         //截取视频
@@ -1036,7 +1058,7 @@ public class MyFunction {
         dealWithBox.getChildren().addAll(dealWithSingle, dealWithBath);
 
         vbox.getChildren().addAll(titleBox);
-        vbox.getChildren().addAll(delWatermarkBox, delWatermarkBox1, delWatermarkBox2); //删除水印
+        vbox.getChildren().addAll(delWatermarkBox, delWatermarkBox1, delWatermarkBox2, delWatermarkBox3); //删除水印
         vbox.getChildren().addAll(cutVideoBox, cutVideoBox1); //剪切视频
         vbox.getChildren().addAll(setCoverBox, setCoverBox1); //设置视频封面
         vbox.getChildren().addAll(getCoverBox); //截图图片

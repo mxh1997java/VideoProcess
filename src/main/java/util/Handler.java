@@ -2,14 +2,13 @@ package util;
 
 import components.MyAlertBox;
 import components.MyListView;
+import javafx.scene.control.TextField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import processor.FFMPEGExecutor;
 import task.CopyFileTask;
 import task.MyExecutorService;
-import java.awt.*;
 import java.io.*;
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -17,14 +16,7 @@ import java.net.URLConnection;
 import java.nio.channels.FileChannel;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -88,6 +80,29 @@ public class Handler {
     private static Thread screenRecordthread = null;
 
     private static List<String> coverPathList = new ArrayList<>();
+
+    /**
+     * 消除水印x、y、width、height文本框对象集合
+     */
+    private static Map<String, TextField> textFieldMap = new HashMap<>(4);
+
+    /**
+     * 根据key获取TextField对象
+     * @param key
+     * @return
+     */
+    public static TextField getTextField(String key) {
+        return textFieldMap.get(key);
+    }
+
+    /**
+     * 根据key存放TextField对象
+     * @param key
+     * @param textField
+     */
+    public static void put(String key, TextField textField) {
+        textFieldMap.put(key, textField);
+    }
 
     public static List<String> getCoverPathList() {
         return coverPathList;
@@ -746,5 +761,45 @@ public class Handler {
         }
     }
 
+
+    /**
+     * 生成坐标图(未使用)
+     * @param x
+     * @param y
+     * @param width
+     * @param height
+     * @return
+     */
+    public static Map<String, Map<Integer, Integer>> GenerateCoordinateFig(int x, int y, int width, int height) {
+        Map<String, Map<Integer, Integer>> result = new LinkedHashMap<>(2);
+        Map<Integer, Integer> head = new LinkedHashMap<>(1);
+        Map<Integer, Integer> tail = new LinkedHashMap<>(1);
+        head.put(x, y);
+        tail.put(width, height);
+        result.put("head", head);
+        result.put("tail", tail);
+        return result;
+    }
+
+
+    /**
+     * 从坐标图中获取相对坐标(未使用)
+     * @param map
+     * @param x
+     * @param y
+     * @return
+     */
+    public static int[] getRelativeCoordinates(Map<String, Map<Integer, Integer>> map, int x, int y) {
+        Map<Integer, Integer> headMap = map.get("head");
+        Map<Integer, Integer> tailMap = map.get("tail");
+        Map.Entry<Integer, Integer> head = headMap.entrySet().iterator().next();
+        Map.Entry<Integer, Integer> tail = tailMap.entrySet().iterator().next();
+        int row = head.getKey() + tail.getKey(); //9
+        int column = head.getValue() + tail.getValue(); //10
+        int[] result = new int[2];
+        result[0] = row - x;
+        result[1] = column - y;
+        return result;
+    }
 
 }

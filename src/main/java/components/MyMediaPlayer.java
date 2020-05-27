@@ -51,6 +51,7 @@ public class MyMediaPlayer {
         slTime = new Slider(); // 时间轴
         slTime.setPrefWidth(200);
         BorderPane pane = new BorderPane();
+        //pane.setStyle("-fx-background-color: gold");
         pane.setPrefWidth(600);
         pane.setPrefHeight(500);
         mView.setFitWidth(600);
@@ -216,6 +217,13 @@ public class MyMediaPlayer {
         pane.setPrefSize(widthValue.doubleValue(), heightValue.doubleValue());
         pane.setMaxSize(widthValue.doubleValue(), heightValue.doubleValue());
         return pane;
+    }
+
+    public static MediaView getmView() {
+        if(mView == null) {
+            new RuntimeException("播放试图未初始化!");
+        }
+        return mView;
     }
 
 }
