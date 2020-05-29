@@ -1,8 +1,10 @@
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.Mnemonic;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.Handler;
@@ -25,6 +27,14 @@ public class MyApplication extends Application {
         // 设置stage的scene，然后显示我们的stage
         primaryStage.setScene(scene);
         primaryStage.setTitle("微智汇视频处理程序");
+        //软件关闭监听
+        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent event) {
+                System.out.print("监听到窗口关闭");
+                System.exit(0); //关闭java虚拟机
+            }
+        });
         primaryStage.show();
     }
 

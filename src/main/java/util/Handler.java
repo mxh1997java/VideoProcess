@@ -2,6 +2,7 @@ package util;
 
 import components.MyAlertBox;
 import components.MyListView;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +47,7 @@ public class Handler {
     /**
      * 存储视频播放画面比例
      */
-    private static BigDecimal scale = null;
+    private static volatile BigDecimal scale = null;
 
     /**
      * 配置属性文件路径
@@ -85,6 +86,35 @@ public class Handler {
      * 消除水印x、y、width、height文本框对象集合
      */
     private static Map<String, TextField> textFieldMap = new HashMap<>(4);
+
+    /**
+     * 功能区域复选框选择结果
+     */
+    private static List<Boolean> checkBoxList = new ArrayList<>();
+
+    /**
+     * 添加复选框选择结果
+     * @return
+     */
+    public static void removeSelect() {
+        checkBoxList.remove(0);
+    }
+
+    /**
+     * 添加复选框选择结果
+     * @return
+     */
+    public static void addSelect(boolean flag) {
+        checkBoxList.add(flag);
+    }
+
+    /**
+     * 获得复选框结果
+     * @return
+     */
+    public static List<Boolean> getCheckBoxList() {
+        return checkBoxList;
+    }
 
     /**
      * 根据key获取TextField对象

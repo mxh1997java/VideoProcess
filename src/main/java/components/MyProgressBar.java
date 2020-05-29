@@ -1,48 +1,126 @@
 package components;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
+import javafx.geometry.Insets;
 import javafx.scene.control.Label;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.layout.HBox;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * 进度条组件
  */
 public class MyProgressBar {
 
-    final Label status = new Label();
-    final Label folderCount = new Label();
-    final Label fileCount = new Label();
-    final Label mp3Count = new Label();
+    private static final Logger LOG = LoggerFactory.getLogger(MyProgressBar.class);
+
+    private HBox hBox;
+
+    /**
+     * 进度条标题
+     */
+    private Label title;
+
+    /**
+     * 进度条
+     */
+    private ProgressBar progressBar;
+
+    /**
+     * 进度条提示
+     */
+    private Label message;
+
+    /**
+     * 每个步骤所占的比例
+     */
+    private Double step;
+
+    /**
+     * 进度条总量
+     */
+    private Double total = 0.0;
+
+    /**
+     * 更新进度提示
+     * @param message
+     */
+    public void setLabel(String message) {
+        this.message.setText(message);
+    }
+
+    /**
+     * 更新进度条
+     * @param value
+     */
+    public void setValue(double value) {
+        progressBar.setProgress(value);
+    }
+
+    /**
+     * 控制进度条组件显示
+     * @param flag
+     */
+    public void setVisible(boolean flag) {
+        progressBar.setVisible(flag);
+        title.setVisible(flag);
+        message.setVisible(flag);
+        hBox.setDisable(!flag);
+    }
+
+    /**
+     * 获取进度条组件
+     * @return
+     */
+    public HBox getProgressBar() {
+        hBox = new HBox();
+        hBox.setPadding(new Insets(5));
+        progressBar = new ProgressBar();
+        message = new Label();
+        if(title != null) {
+            hBox.getChildren().addAll(title);
+        }
+        hBox.getChildren().addAll(progressBar, message);
+        //默认不显示
+        setVisible(false);
+        return hBox;
+    }
+
+    public MyProgressBar(String title) {
+        this.title = new Label(title);
+    }
+
+    public MyProgressBar() {}
+
+    /**
+     * 计算进度条步长
+     * @param checkBoxList
+     * @return
+     */
+    public void calculationStep(List<Boolean> checkBoxList) {
+        if(null == checkBoxList || checkBoxList.size() == 0) {
+            new RuntimeException("checkBoxList为空!无法计算进度条step!");
+        }
+        BigDecimal dividend = new BigDecimal("1");
+        BigDecimal divisor = new BigDecimal(checkBoxList.size());
+        LOG.info("进度组件: 计算进度条步长 除数: {}", divisor);
+        LOG.info("被除数: {}, 除数: {}, 结果: {}", dividend, divisor, dividend.divide(divisor, 2, BigDecimal.ROUND_UP).doubleValue());
+        step = dividend.divide(divisor, 2, BigDecimal.ROUND_UP).doubleValue();
+    }
 
 
-    public void start(Stage stage) {
-        final GridPane finderResults = new GridPane();
-        finderResults.setPrefWidth(400);
-        finderResults.setVgap(10);
-        finderResults.setHgap(10);
-        finderResults.addRow(0, new Label("Status: "), status);
-        finderResults.addRow(1, new Label("# Folders: "), folderCount);
-        finderResults.addRow(2, new Label("# Files: "), fileCount);
-        finderResults.addRow(3, new Label("# mp3s: "), mp3Count);
-
-        final Button finderStarter = new Button("Find mp3s");
-        finderStarter.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent t) {
-                //startMp3Finder(finderStarter);
-            }
-        });
-
-        VBox layout = new VBox(10);
-        layout.setStyle("-fx-background-color: cornsilk; -fx-padding: 10; -fx-font-size: 16;");
-        layout.getChildren().setAll(finderStarter, finderResults);
-        stage.setScene(new Scene(layout));
-        stage.show();
+    /**
+     * 自动累加
+     */
+    public void autoAdd() {
+        if(null == step) {
+            new RuntimeException("未计算进度条step!");
+        }
+        total += step;
+        setValue(total);
     }
 
 }

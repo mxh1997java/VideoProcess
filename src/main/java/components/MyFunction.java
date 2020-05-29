@@ -5,11 +5,10 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.ExecutorService;
-
 import executor.VideoExecutor;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
@@ -41,6 +40,18 @@ public class MyFunction {
 
     private static List<String> processedList = new ArrayList<>();
 
+    private static MyProgressBar myProgressBar = new MyProgressBar("单个视频进度: ");
+
+    /**
+     * 单个任务进度条
+     */
+    private static HBox singleSchedule = myProgressBar.getProgressBar();
+
+    /**
+     * 批量任务进度条
+     */
+    private static HBox batchSchedule = new MyProgressBar("批量视频进度: ").getProgressBar();
+
     public static VBox getFunction(Stage primaryStage) {
         // 创建一个垂直箱子
         VBox vbox = new VBox();
@@ -60,6 +71,7 @@ public class MyFunction {
         HBox addWatermarkBox = new HBox();
         addWatermarkBox.setPadding(new Insets(5, 5, 5, 5));
         CheckBox addWatermark = new CheckBox("添加水印");
+        addListener(addWatermark);
         HBox addWatermarkBox1 = new HBox();
         addWatermarkBox1.setPadding(new Insets(5, 5, 5, 5));
         Label watermarkXAxisLabel = new Label(" 水印x轴: ");
@@ -92,6 +104,7 @@ public class MyFunction {
         HBox delWatermarkBox = new HBox();
         delWatermarkBox.setPadding(new Insets(5, 5, 5, 5));
         CheckBox delWatermark = new CheckBox("删除水印");
+        addListener(delWatermark);
         HBox delWatermarkBox1 = new HBox();
         delWatermarkBox1.setPadding(new Insets(5, 5, 5, 5));
         Label deleteWatermarkXAxisLabel = new Label(" 水印x轴: ");
@@ -142,6 +155,7 @@ public class MyFunction {
         HBox cutVideoBox = new HBox();
         cutVideoBox.setPadding(new Insets(5, 5, 5, 5));
         CheckBox cutVideo = new CheckBox("去头去尾");
+        addListener(cutVideo);
         HBox cutVideoBox1 = new HBox();
         cutVideoBox1.setPadding(new Insets(5, 5, 5, 5));
         Label startTimeLabel = new Label(" 开头删除");
@@ -161,6 +175,7 @@ public class MyFunction {
         HBox setCoverBox = new HBox();
         setCoverBox.setPadding(new Insets(5, 5, 5, 5));
         CheckBox setCover = new CheckBox("设置封面");
+        addListener(setCover);
         HBox setCoverBox1 = new HBox();
         setCoverBox1.setPadding(new Insets(5, 5, 5, 5));
         Label coverPathLabel = new Label(" 封面路径: ");
@@ -190,6 +205,7 @@ public class MyFunction {
         HBox getCoverBox = new HBox();
         getCoverBox.setPadding(new Insets(5, 5, 5, 5));
         CheckBox getCover = new CheckBox("截取图片");
+        addListener(getCover);
         //HBox getCoverBox1 = new HBox();
         Label cutVideoTimeLabel = new Label(" 视频时间: ");
         TextField cutVideoTime = new TextField();
@@ -202,14 +218,15 @@ public class MyFunction {
         HBox addFilterBox = new HBox();
         addFilterBox.setPadding(new Insets(5, 5, 5, 5));
         CheckBox addFilter = new CheckBox(" 添加滤镜 ");
+        addListener(addFilter);
         List<String> itemList = Handler.getFilterList();
         TextField acvPath = new TextField();
         acvPath.setVisible(false);
         Button psChooserButton = new Button("请选择");
         psChooserButton.setOnAction(even -> {
-            File file = MyChooser.getImageChooser().showOpenDialog(primaryStage);
+            File file = MyChooser.getAllFileChooser().showOpenDialog(primaryStage);
             if (file != null) {
-                LOG.info("选择图片: " + file.getAbsolutePath());
+                LOG.info("选择PS预设文件: {}", file.getAbsolutePath());
                 acvPath.setText(file.getAbsolutePath());
             }
         });
@@ -222,6 +239,7 @@ public class MyFunction {
         HBox addFramerateBox = new HBox();
         addFramerateBox.setPadding(new Insets(5));
         CheckBox addFramerate = new CheckBox(" 视频加速 ");
+        addListener(addFramerate);
         Label addFramerateLabel = new Label("加速倍数: ");
         TextField addFramerateTextField = new TextField();
         addFramerateTextField.setPrefWidth(100);
@@ -232,6 +250,7 @@ public class MyFunction {
         HBox reduceFramerateBox = new HBox();
         reduceFramerateBox.setPadding(new Insets(5,5,5,5));
         CheckBox reduceFramerate = new CheckBox(" 视频减速 ");
+        addListener(reduceFramerate);
         Label reduceFramerateLabel = new Label(" 减速倍数: ");
         TextField reduceFramerateTextField = new TextField();
         reduceFramerateTextField.setPrefWidth(100);
@@ -258,12 +277,14 @@ public class MyFunction {
         HBox blurBackgroundBox = new HBox();
         blurBackgroundBox.setPadding(new Insets(5,5,5,5));
         CheckBox blurBackground = new CheckBox(" 背景虚化 ");
+        addListener(blurBackground);
         blurBackgroundBox.getChildren().addAll(blurBackground);
 
         //添加片头片尾
         HBox addVideoBox = new HBox();
         addVideoBox.setPadding(new Insets(5,5,5,5));
         CheckBox addVideo = new CheckBox("添加片头片尾");
+        addListener(addVideo);
         HBox addVideoBox1 = new HBox();
         addVideoBox1.setPadding(new Insets(5));
         Label startVideoLabel = new Label(" 片头: ");
@@ -313,6 +334,11 @@ public class MyFunction {
             //不可再点击
             dealWithSingle.setDisable(true);
 
+            //显示进度条并给初始值
+            myProgressBar.setVisible(true);
+            myProgressBar.setValue(0.0);
+            myProgressBar.setLabel("开始执行");
+
             new Thread(()->{
                 boolean addWatermarkSelected = addWatermark.isSelected();
                 boolean delWatermarkSelected = delWatermark.isSelected();
@@ -325,6 +351,9 @@ public class MyFunction {
                 boolean blurBackgroundSelected = blurBackground.isSelected();
                 boolean getCoverSelected = getCover.isSelected();
                 boolean addVideoSelected = addVideo.isSelected();
+
+                //功能区域每个复选框绑定了监听事件
+                myProgressBar.calculationStep(Handler.getCheckBoxList());
 
                 //当前播放器播放的视频地址
                 String currentVideo = Handler.getListView("unProcessed").getCurrentVideoPath();
@@ -344,6 +373,13 @@ public class MyFunction {
 
                 //截取图片
                 if(getCoverSelected) {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            myProgressBar.autoAdd();
+                            myProgressBar.setLabel("正在截取视频封面");
+                        }
+                    });
                     String time = cutVideoTime.getText();
                     time = Handler.formatTime(Long.valueOf(time));
                     LOG.info("操作步骤: 截取图片 操作对象: {}", currentVideo);
@@ -361,6 +397,13 @@ public class MyFunction {
 
                 //添加片头片尾
                 if(addVideoSelected) {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            myProgressBar.autoAdd();
+                            myProgressBar.setLabel("正在添加片头片尾");
+                        }
+                    });
                     String startVideoPath = startVideoText.getText();
                     String endVideoPath = endVideoText.getText();
                     String targetPath = Handler.getNewFilePath(currentVideo);
@@ -374,23 +417,15 @@ public class MyFunction {
                     }
                 }
 
-                //加水印
-                if (addWatermarkSelected) {
-                    String x = addWatermarkOfX.getText();
-                    String y = addWatermarkOfY.getText();
-                    String text = addWatermarkOfContent.getText();
-                    LOG.info("操作步骤:加水印 操作对象: " + currentVideo);
-                    String targetPath = Handler.getNewFilePath(currentVideo);
-                    videoExecutor.addWatermarkByFont(text, 30, "微软雅黑", x, y, currentVideo, targetPath);
-                    pathList.add(targetPath);
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
                 //消除水印
                 if (delWatermarkSelected) {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            myProgressBar.autoAdd();
+                            myProgressBar.setLabel("正在消除水印");
+                        }
+                    });
                     String x = delWatermarkOfX.getText();
                     String y = delWatermarkOfY.getText();
                     String width = delWatermarkOfWidth.getText();
@@ -414,6 +449,32 @@ public class MyFunction {
                     pathList.add(targetPath);
                     try {
                         Thread.sleep(500);
+                    } catch (Exception e) {
+                        MyAlertBox.display("消除水印提示", "消除水印失败");
+                        e.printStackTrace();
+                    } finally {
+                        dealWithSingle.setDisable(true);
+                    }
+                }
+
+                //加水印
+                if (addWatermarkSelected) {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            myProgressBar.autoAdd();
+                            myProgressBar.setLabel("正在添加水印");
+                        }
+                    });
+                    String x = addWatermarkOfX.getText();
+                    String y = addWatermarkOfY.getText();
+                    String text = addWatermarkOfContent.getText();
+                    LOG.info("操作步骤:加水印 操作对象: " + currentVideo);
+                    String targetPath = Handler.getNewFilePath(currentVideo);
+                    videoExecutor.addWatermarkByFont(text, 30, "微软雅黑", x, y, currentVideo, targetPath);
+                    pathList.add(targetPath);
+                    try {
+                        Thread.sleep(500);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -421,6 +482,13 @@ public class MyFunction {
 
                 //剪切视频
                 if (cutVideoSelected) {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            myProgressBar.autoAdd();
+                            myProgressBar.setLabel("正在剪切视频");
+                        }
+                    });
                     String start = startTime.getText();
                     String end = endTime.getText();
                     MultimediaInfo videoInfo = videoExecutor.getVideoInfo(currentVideo);
@@ -445,6 +513,13 @@ public class MyFunction {
 
                 //添加滤镜效果
                 if (addFilterSelected) {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            myProgressBar.autoAdd();
+                            myProgressBar.setLabel("正在添加滤镜");
+                        }
+                    });
                     String selected = MyChoiceBox.getSelected();
                     if (selected.equals("复古风")) {
                         String targetPath = Handler.getNewFilePath(currentVideo);
@@ -562,6 +637,13 @@ public class MyFunction {
                 }
                 //提升视频播放速度
                 if (addFramerateSelected) {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            myProgressBar.autoAdd();
+                            myProgressBar.setLabel("正在提升视频播放速度");
+                        }
+                    });
                     String targetPath = Handler.getNewFilePath(currentVideo);
                     String videoFrameRate = addFramerateTextField.getText();
                     String audioFrameRate = addFramerateTextField.getText();
@@ -577,6 +659,13 @@ public class MyFunction {
                 }
                 //降低视频播放速度
                 if (reduceFramerateSelected) {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            myProgressBar.autoAdd();
+                            myProgressBar.setLabel("正在降低视频播放速度");
+                        }
+                    });
                     String targetPath = Handler.getNewFilePath(currentVideo);
                     String videoFrameRate = reduceFramerateTextField.getText();
                     videoExecutor.reduceFramerate(currentVideo, targetPath, videoFrameRate);
@@ -591,6 +680,13 @@ public class MyFunction {
                 }
                 //背景虚化
                 if (blurBackgroundSelected) {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            myProgressBar.autoAdd();
+                            myProgressBar.setLabel("正在背景虚化");
+                        }
+                    });
                     String targetPath = Handler.getNewFilePath(currentVideo);
                     videoExecutor.blurBackground(currentVideo, targetPath);
                     //删除上一步产生的视频
@@ -604,6 +700,13 @@ public class MyFunction {
                 }
 
                 if (setCoverSelected) {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            myProgressBar.autoAdd();
+                            myProgressBar.setLabel("正在设置视频封面");
+                        }
+                    });
                     String imgPath = coverPath.getText();
                     //封面路径为空
                     if(null == imgPath || "".equals(imgPath)) {
@@ -634,13 +737,25 @@ public class MyFunction {
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {
-                        String videoPath = pathList.get(pathList.size() - 1);
-                        //刷新左侧视频列表
-                        processedList.add(videoPath);
-                        MyHome.setLeft(null, processedList);
-                        //选择视频地址并让播放组件播放视频
-                        MyMediaPlayer.chooseFile(new File(videoPath));
+                        //不是视频截图 就刷新已处理视频栏
+                        if(pathList.size() == 1 && pathList.get(0).indexOf(".png") == -1) {
+                            String videoPath = pathList.get(pathList.size() - 1);
+                            //刷新左侧视频列表
+                            processedList.add(videoPath);
+                            MyHome.setLeft(null, processedList);
+                            //选择视频地址并让播放组件播放视频
+                            MyMediaPlayer.chooseFile(new File(videoPath));
+                        }
                         dealWithSingle.setDisable(false);
+                        myProgressBar.setVisible(true);
+                        myProgressBar.setValue(1.0);
+                        myProgressBar.setLabel("处理完毕");
+//                        try {
+//                            Thread.sleep(5000);
+//                        } catch (InterruptedException e) {
+//                            e.printStackTrace();
+//                        }
+//                        myProgressBar.setVisible(false);
                     }
                 });
             }).start();
@@ -1818,8 +1933,27 @@ public class MyFunction {
         vbox.getChildren().addAll(addWatermarkBox, addWatermarkBox1, /*addWatermarkBox2,*/ addWatermarkBox3); //添加水印
         vbox.getChildren().addAll(addVideoBox, addVideoBox1, addVideoBox2); //添加片头片尾
         vbox.getChildren().addAll(dealWithBox); //处理按钮
-        //vbox.getChildren().addAll(progressBarBox); //任务进度条
+        vbox.getChildren().addAll(singleSchedule, batchSchedule); //任务进度条
         return vbox;
+    }
+
+
+    /**
+     * 给复选框添加监听事件
+     * @param checkBox
+     */
+    private static void addListener(CheckBox checkBox) {
+        checkBox.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if(newValue) {
+                    Handler.addSelect(newValue);
+                } else {
+                    Handler.removeSelect();
+                }
+                LOG.info("当前选择结果: {}, 复选框选择结果: {}", newValue, Handler.getCheckBoxList().size());
+            }
+        });
     }
 
 }

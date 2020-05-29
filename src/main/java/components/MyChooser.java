@@ -66,4 +66,19 @@ public class MyChooser {
         return fileChooser;
     }
 
+
+    /**
+     * 功能描述 返回所有文件选择器
+     * @author xinhai.ma
+     * @date 2020/5/9 22:27
+     * @return javafx.stage.FileChooser
+     */
+    public static FileChooser getAllFileChooser() {
+        FileChooser fileChooser = new FileChooser();
+        //在文件选择器做了格式限制
+        fileChooser.getExtensionFilters().addAll(
+                new ExtensionFilter("All File", "."));
+        return fileChooser;
+    }
+
 }

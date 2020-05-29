@@ -205,6 +205,8 @@ public class MyMediaPlayer {
             widthValue = widthValue.multiply(standardValue1);
             heightValue = heightValue.multiply(standardValue1);
             Handler.setScale(standardValue1);
+        } else if(width > 600){
+            Handler.setScale(standardValue2);
         } else if(height > 600) {
             //针对手机做出的优化
             heightValue = heightValue.multiply(standardValue);

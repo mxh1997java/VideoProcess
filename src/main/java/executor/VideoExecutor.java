@@ -294,7 +294,7 @@ public class VideoExecutor {
      * @param text :
      * @param shadowy :
      * @param targetPath :
-     * @description ffmpeg -i input.mp4 -vf "drawtext=fontfile=D:\Users\15735400536\Videos\simsun.ttc:text='xinhai.ma':x=w-100:y=100:fontsize=24:fontcolor=yellow@0.5:shadowy=2" output.mp4
+     * @description ffmpeg -i input.mp4 -vf "drawtext=fontfile=simsun.ttc:text='xinhai.ma':x=w-100:y=100:fontsize=24:fontcolor=yellow@0.5:shadowy=2" output.mp4
      * @return void
      */
     public void addWatermarkByFont(String sourcePath, String x, String y, String fontFilePath, String fontSize, String fontColor, String text, String shadowy, String targetPath) {
