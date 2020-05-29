@@ -2,6 +2,7 @@ package util;
 
 import components.MyAlertBox;
 import components.MyListView;
+import executor.VideoExecutor;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 import org.slf4j.Logger;
@@ -9,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import processor.FFMPEGExecutor;
 import task.CopyFileTask;
 import task.MyExecutorService;
+import ws.schild.jave.MultimediaInfo;
+
 import java.io.*;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
@@ -830,6 +833,52 @@ public class Handler {
         result[0] = row - x;
         result[1] = column - y;
         return result;
+    }
+
+
+    /**
+     * 判断String是否为数字
+     * @param str
+     * @return
+     */
+    public static boolean isNumber(String str) {
+        for (int i = 0; i < str.length(); i++) {
+            if (!Character.isDigit(str.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+    /**
+     * 校验剪切视频参数是否小于视频长度
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     * @param filePath  视频地址
+     * @throws RuntimeException
+     */
+    public static boolean checkCutTime(String startTime, String endTime, String filePath) throws RuntimeException {
+        VideoExecutor videoExecutor = new VideoExecutor();
+        MultimediaInfo videoInfo = videoExecutor.getVideoInfo(filePath);
+        long videoTime = videoInfo.getDuration();
+        LOG.info("视频: {}, 视频时间长度: {}", filePath, videoTime);
+        Long startValue = Long.valueOf(startTime) * 1000;
+        if(startValue > videoTime) {
+            MyAlertBox.display("提示", "开始时间超过视频长度!");
+            return true;
+        }
+        Long endValue = Long.valueOf(endTime) * 1000;
+        if(endValue > videoTime) {
+            MyAlertBox.display("提示", "结束时间超过视频长度!");
+            return true;
+        }
+        LOG.info("开始时间: {}, 结束时间: {}, 结果: {}", startValue, endValue, (startValue + endValue) > videoTime);
+        if((startValue + endValue) >= videoTime) {
+            MyAlertBox.display("提示", "开始时间和结束时间大于视频长度!");
+            return true;
+        }
+        return false;
     }
 
 }

@@ -40,17 +40,19 @@ public class MyFunction {
 
     private static List<String> processedList = new ArrayList<>();
 
-    private static MyProgressBar myProgressBar = new MyProgressBar("单个视频进度: ");
+    private static MyProgressBar singleProgressBar = new MyProgressBar("单个视频进度: ");
 
     /**
      * 单个任务进度条
      */
-    private static HBox singleSchedule = myProgressBar.getProgressBar();
+    private static HBox singleSchedule = singleProgressBar.getProgressBar();
+
+    private static MyProgressBar batchProgressBar = new MyProgressBar("批量视频进度: ");
 
     /**
      * 批量任务进度条
      */
-    private static HBox batchSchedule = new MyProgressBar("批量视频进度: ").getProgressBar();
+    private static HBox batchSchedule = batchProgressBar.getProgressBar();
 
     public static VBox getFunction(Stage primaryStage) {
         // 创建一个垂直箱子
@@ -161,9 +163,11 @@ public class MyFunction {
         Label startTimeLabel = new Label(" 开头删除");
         TextField startTime = new TextField();
         startTime.setPrefWidth(50);
+        addListener(startTime);
         Label startTimeLabel1 = new Label("秒");
         Label endTimeLabel = new Label("  结尾删除");
         TextField endTime = new TextField();
+        addListener(endTime);
         endTime.setPrefWidth(50);
         Label endTimeLabel1 = new Label("秒");
         cutVideoBox.getChildren().addAll(cutVideo);
@@ -329,15 +333,32 @@ public class MyFunction {
                 return;
             }
 
+            //校验用户是否配置targetPath
+            Map<String, String> config = Handler.readProp();
+            String configPath = config.get("targetPath");
+            if(null == configPath || "".equals(configPath)) {
+                MyAlertBox.display("程序提示", "请设置生成文件路径!");
+                return;
+            }
+
+            if(cutVideo.isSelected()) {
+                //校验剪切视频参数是否合法
+                boolean flag = Handler.checkCutTime(startTime.getText(), endTime.getText(), Handler.getListView("unProcessed").getCurrentVideoPath());
+                if(flag) {
+                    return;
+                }
+            }
+
             //清空封面路径缓存
             Handler.clearCoverPathList();
+
             //不可再点击
             dealWithSingle.setDisable(true);
 
             //显示进度条并给初始值
-            myProgressBar.setVisible(true);
-            myProgressBar.setValue(0.0);
-            myProgressBar.setLabel("开始执行");
+            singleProgressBar.setVisible(true);
+            singleProgressBar.setValue(0.0);
+            singleProgressBar.setLabel("开始执行");
 
             new Thread(()->{
                 boolean addWatermarkSelected = addWatermark.isSelected();
@@ -353,7 +374,7 @@ public class MyFunction {
                 boolean addVideoSelected = addVideo.isSelected();
 
                 //功能区域每个复选框绑定了监听事件
-                myProgressBar.calculationStep(Handler.getCheckBoxList());
+                singleProgressBar.calculationStep(Handler.getCheckBoxList());
 
                 //当前播放器播放的视频地址
                 String currentVideo = Handler.getListView("unProcessed").getCurrentVideoPath();
@@ -376,8 +397,8 @@ public class MyFunction {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-                            myProgressBar.autoAdd();
-                            myProgressBar.setLabel("正在截取视频封面");
+                            singleProgressBar.autoAdd();
+                            singleProgressBar.setLabel("正在截取视频封面");
                         }
                     });
                     String time = cutVideoTime.getText();
@@ -400,8 +421,8 @@ public class MyFunction {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-                            myProgressBar.autoAdd();
-                            myProgressBar.setLabel("正在添加片头片尾");
+                            singleProgressBar.autoAdd();
+                            singleProgressBar.setLabel("正在添加片头片尾");
                         }
                     });
                     String startVideoPath = startVideoText.getText();
@@ -422,8 +443,8 @@ public class MyFunction {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-                            myProgressBar.autoAdd();
-                            myProgressBar.setLabel("正在消除水印");
+                            singleProgressBar.autoAdd();
+                            singleProgressBar.setLabel("正在消除水印");
                         }
                     });
                     String x = delWatermarkOfX.getText();
@@ -462,8 +483,8 @@ public class MyFunction {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-                            myProgressBar.autoAdd();
-                            myProgressBar.setLabel("正在添加水印");
+                            singleProgressBar.autoAdd();
+                            singleProgressBar.setLabel("正在添加水印");
                         }
                     });
                     String x = addWatermarkOfX.getText();
@@ -485,8 +506,8 @@ public class MyFunction {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-                            myProgressBar.autoAdd();
-                            myProgressBar.setLabel("正在剪切视频");
+                            singleProgressBar.autoAdd();
+                            singleProgressBar.setLabel("正在剪切视频");
                         }
                     });
                     String start = startTime.getText();
@@ -516,8 +537,8 @@ public class MyFunction {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-                            myProgressBar.autoAdd();
-                            myProgressBar.setLabel("正在添加滤镜");
+                            singleProgressBar.autoAdd();
+                            singleProgressBar.setLabel("正在添加滤镜");
                         }
                     });
                     String selected = MyChoiceBox.getSelected();
@@ -640,8 +661,8 @@ public class MyFunction {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-                            myProgressBar.autoAdd();
-                            myProgressBar.setLabel("正在提升视频播放速度");
+                            singleProgressBar.autoAdd();
+                            singleProgressBar.setLabel("正在提升视频播放速度");
                         }
                     });
                     String targetPath = Handler.getNewFilePath(currentVideo);
@@ -662,8 +683,8 @@ public class MyFunction {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-                            myProgressBar.autoAdd();
-                            myProgressBar.setLabel("正在降低视频播放速度");
+                            singleProgressBar.autoAdd();
+                            singleProgressBar.setLabel("正在降低视频播放速度");
                         }
                     });
                     String targetPath = Handler.getNewFilePath(currentVideo);
@@ -683,8 +704,8 @@ public class MyFunction {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-                            myProgressBar.autoAdd();
-                            myProgressBar.setLabel("正在背景虚化");
+                            singleProgressBar.autoAdd();
+                            singleProgressBar.setLabel("正在背景虚化");
                         }
                     });
                     String targetPath = Handler.getNewFilePath(currentVideo);
@@ -703,8 +724,8 @@ public class MyFunction {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-                            myProgressBar.autoAdd();
-                            myProgressBar.setLabel("正在设置视频封面");
+                            singleProgressBar.autoAdd();
+                            singleProgressBar.setLabel("正在设置视频封面");
                         }
                     });
                     String imgPath = coverPath.getText();
@@ -747,9 +768,9 @@ public class MyFunction {
                             MyMediaPlayer.chooseFile(new File(videoPath));
                         }
                         dealWithSingle.setDisable(false);
-                        myProgressBar.setVisible(true);
-                        myProgressBar.setValue(1.0);
-                        myProgressBar.setLabel("处理完毕");
+                        singleProgressBar.setVisible(true);
+                        singleProgressBar.setValue(1.0);
+                        singleProgressBar.setLabel("处理完毕");
 //                        try {
 //                            Thread.sleep(5000);
 //                        } catch (InterruptedException e) {
@@ -1520,10 +1541,19 @@ public class MyFunction {
                 return;
             }
             dealWithBath.setDisable(true);
+
             //copy文件到生成文件夹下
             List<String> targetPathList = Handler.batchCopyFile(filePathList, targetPath);
             //要删除的多余文件
             Set<String> deletePathSet = new HashSet<>(targetPathList);
+
+            //计算进度条step
+            batchProgressBar.calculationStep(Handler.getCheckBoxList());
+
+            //显示进度条并给初始值
+            batchProgressBar.setVisible(true);
+            batchProgressBar.setValue(0.0);
+            batchProgressBar.setLabel("开始执行");
 
             new Thread(()->{
                 //截取图片
@@ -1534,12 +1564,18 @@ public class MyFunction {
                     try {
                         while (iterator.hasNext()) {
                             String path = iterator.next();
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    batchProgressBar.autoAdd();
+                                    batchProgressBar.setLabel("正在批量截取视频图片 " + Handler.getFileName(path));
+                                }
+                            });
                             LOG.info("操作步骤: 批量截取图片 操作对象: {}", path);
                             String target = Handler.getNewFilePath("D:\\MaXinHai\\file\\1.png");
                             videoExecutor.cutVideoImage(path, target, time);
                             Thread.sleep(500);
                             Handler.addCoverPath(target);
-                            //iterator.set(target);
                         }
                     } catch (InterruptedException e) {
                         e.printStackTrace();
@@ -1554,6 +1590,13 @@ public class MyFunction {
                     try {
                         while (iterator.hasNext()) {
                             String path = iterator.next();
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    batchProgressBar.autoAdd();
+                                    batchProgressBar.setLabel("正在批量添加片头片尾 " + Handler.getFileName(path));
+                                }
+                            });
                             String target = Handler.getNewFilePath(path);
                             LOG.info("操作步骤:批量添加片头片尾 操作对象: {}", path);
                             videoExecutor.mergeVideo(startVideoPath, path, endVideoPath, target);
@@ -1567,6 +1610,7 @@ public class MyFunction {
                     }
                 }
 
+                //添加水印
                 if (addWatermarkSelected) {
                     ListIterator<String> iterator = targetPathList.listIterator();
                     String x = addWatermarkOfX.getText();
@@ -1575,6 +1619,13 @@ public class MyFunction {
                     try {
                         while (iterator.hasNext()) {
                             String path = iterator.next();
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    batchProgressBar.autoAdd();
+                                    batchProgressBar.setLabel("正在批量添加水印 " + Handler.getFileName(path));
+                                }
+                            });
                             String target = Handler.getNewFilePath(path);
                             LOG.info("操作步骤:加水印 操作对象: {}", path);
                             videoExecutor.addWatermarkByFont(text, 30, "微软雅黑", x, y, path, target);
@@ -1601,6 +1652,13 @@ public class MyFunction {
                     try {
                         while (iterator.hasNext()) {
                             String path = iterator.next();
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    batchProgressBar.autoAdd();
+                                    batchProgressBar.setLabel("正在批量消除水印 " + Handler.getFileName(path));
+                                }
+                            });
 
                             //先计算比例，才能去拿值
                             MyMediaPlayer.calculationRatio(new File(path));
@@ -1630,6 +1688,13 @@ public class MyFunction {
                     try {
                         while (iterator.hasNext()) {
                             String path = iterator.next();
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    batchProgressBar.autoAdd();
+                                    batchProgressBar.setLabel("正在批量剪切视频 " + Handler.getFileName(path));
+                                }
+                            });
                             MultimediaInfo videoInfo = videoExecutor.getVideoInfo(path);
                             long duration = videoInfo.getDuration(); //获取视频长度
                             BigDecimal durationValue = new BigDecimal(String.valueOf(duration));
@@ -1653,6 +1718,13 @@ public class MyFunction {
                 if (addFilterSelected) {
                     ListIterator<String> iterator = targetPathList.listIterator();
                     String selected = MyChoiceBox.getSelected();
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            batchProgressBar.autoAdd();
+                            batchProgressBar.setLabel("正在批量添加滤镜,滤镜效果:" + selected);
+                        }
+                    });
                     if (selected.equals("镜像")) {
                         try {
                             while (iterator.hasNext()) {
@@ -1809,6 +1881,13 @@ public class MyFunction {
                     try {
                         while (iterator.hasNext()) {
                             String path = iterator.next();
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    batchProgressBar.autoAdd();
+                                    batchProgressBar.setLabel("正在批量增加视频速率 " + Handler.getFileName(path));
+                                }
+                            });
                             String target = Handler.getNewFilePath(path);
                             LOG.info("操作步骤:增加视频速率 操作对象: {}", path);
                             videoExecutor.addFramerate(path, target, frameRate);
@@ -1830,6 +1909,13 @@ public class MyFunction {
                     try {
                         while (iterator.hasNext()) {
                             String path = iterator.next();
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    batchProgressBar.autoAdd();
+                                    batchProgressBar.setLabel("正在批量降低视频帧率 " + Handler.getFileName(path));
+                                }
+                            });
                             String target = Handler.getNewFilePath(path);
                             LOG.info("操作步骤:降低视频帧率 操作对象: {}", path);
                             videoExecutor.reduceFramerate(path, target, frameRate);
@@ -1861,6 +1947,13 @@ public class MyFunction {
                     try {
                         while (iterator.hasNext()) {
                             String path = iterator.next();
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    batchProgressBar.autoAdd();
+                                    batchProgressBar.setLabel("正在批量模糊视频背景 " + Handler.getFileName(path));
+                                }
+                            });
                             String target = Handler.getNewFilePath(path);
                             LOG.info("操作步骤:设置模糊视频背景 操作对象: {}", path);
                             videoExecutor.blurBackground(path, target);
@@ -1887,6 +1980,13 @@ public class MyFunction {
                     try {
                         while (iterator.hasNext()) {
                             String path = iterator.next();
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    batchProgressBar.autoAdd();
+                                    batchProgressBar.setLabel("正在批量设置视频封面 " + Handler.getFileName(path));
+                                }
+                            });
                             String target = Handler.getNewFilePath(path);
                             LOG.info("操作步骤:批量设置封面 操作对象: {}", path);
                             videoExecutor.setCover(path, imgPath, target);
@@ -1914,6 +2014,9 @@ public class MyFunction {
                         //播放第一个视频并让播放组件播放视频
                         MyMediaPlayer.chooseFile(videoFile);
                         dealWithBath.setDisable(false);
+
+                        batchProgressBar.setValue(1);
+                        batchProgressBar.setLabel("执行完毕!");
                     }
                 });
 
@@ -1954,6 +2057,40 @@ public class MyFunction {
                 LOG.info("当前选择结果: {}, 复选框选择结果: {}", newValue, Handler.getCheckBoxList().size());
             }
         });
+    }
+
+
+    /**
+     * 给文本框添加监听事件
+     * @param textField
+     */
+    private static void addListener(TextField textField) {
+        textField.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                if(null != newValue && !"".equals(newValue)) {
+                    boolean isNumber = Handler.isNumber(newValue);
+                    if(!isNumber) {
+                        MyAlertBox.display("文本框提示", "输入内容不是整数！");
+                    }
+
+                }
+            }
+        });
+    }
+
+
+    /**
+     * 是否配置targetPath路径
+     * @throws RuntimeException
+     */
+    private static void isTargetPath() throws RuntimeException{
+        Map<String, String> config = Handler.readProp();
+        String targetPath = config.get("targetPath");
+        if(null == targetPath || "".equals(targetPath)) {
+            MyAlertBox.display("程序提示", "请设置生成文件路径!");
+            new RuntimeException("未设置生成文件路径!");
+        }
     }
 
 }
