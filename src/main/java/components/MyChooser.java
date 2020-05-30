@@ -75,9 +75,6 @@ public class MyChooser {
      */
     public static FileChooser getAllFileChooser() {
         FileChooser fileChooser = new FileChooser();
-        //在文件选择器做了格式限制
-        fileChooser.getExtensionFilters().addAll(
-                new ExtensionFilter("All File", "."));
         return fileChooser;
     }
 

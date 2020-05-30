@@ -134,7 +134,7 @@ public class MyMenuBar {
             LOG.info("开始录制屏幕");
             String filePath = Handler.getNewFilePath("D:\\file\\1.mp4");
             VideoExecutor videoExecutor = new VideoExecutor();
-            ExecutorService myExecutorService = MyExecutorService.getMyExecutorService();
+            ExecutorService myExecutorService = MyExecutorService.getTaskExecutor();
             Thread thread = new Thread(() -> {
                 videoExecutor.screenRecord(filePath);
             });
@@ -143,7 +143,7 @@ public class MyMenuBar {
         MenuItem screenRecordStop = new MenuItem("停止");
         screenRecordStop.setOnAction(event -> {
             LOG.info("关闭屏幕录制");
-            MyExecutorService.getMyExecutorService().shutdown();
+            MyExecutorService.getTaskExecutor().shutdown();
             VideoExecutor videoExecutor = new VideoExecutor();
             videoExecutor.closeScreenRecord();
         });

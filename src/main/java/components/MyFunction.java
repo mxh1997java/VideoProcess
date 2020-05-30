@@ -5,6 +5,10 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+
 import executor.VideoExecutor;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -44,18 +48,16 @@ public class MyFunction {
      */
     private static List<String> processedList = new ArrayList<>();
 
-    private static MyProgressBar singleProgressBar = new MyProgressBar("单个视频进度: ");
-
     /**
      * 单个任务进度条
      */
+    private static MyProgressBar singleProgressBar = new MyProgressBar("单个视频进度: ");
     private static HBox singleSchedule = singleProgressBar.getProgressBar();
-
-    private static MyProgressBar batchProgressBar = new MyProgressBar("批量视频进度: ");
 
     /**
      * 批量任务进度条
      */
+    private static MyProgressBar batchProgressBar = new MyProgressBar("批量视频进度: ");
     private static HBox batchSchedule = batchProgressBar.getProgressBar();
 
 
@@ -87,10 +89,10 @@ public class MyFunction {
     private static ChoiceBox<String> choiceBox = MyChoiceBox.getChoiceBox(Handler.getFilterList(), psChooserButton);
 
     private static CheckBox addFramerate = new CheckBox(" 视频加速 ");
-    private static TextField addFramerateTextField = new TextField();
+    private static TextField addFrameRateTextField = new TextField();
 
     private static CheckBox reduceFramerate = new CheckBox(" 视频减速 ");
-    private static TextField reduceFramerateTextField = new TextField();
+    private static TextField reduceFrameRateTextField = new TextField();
 
     private static CheckBox blurBackground = new CheckBox(" 背景虚化 ");
 
@@ -102,7 +104,6 @@ public class MyFunction {
     public static VBox getFunction(Stage primaryStage) {
         // 创建一个垂直箱子
         VBox vbox = new VBox();
-        // vbox.setStyle("-fx-background-color: red");
         vbox.setStyle("-fx-border-style: solid inside");
         vbox.setMaxSize(400, 700);
         vbox.setMinSize(300, 670);
@@ -252,19 +253,19 @@ public class MyFunction {
 
 
         //视频加速
-        HBox addFramerateBox = new HBox();
-        addFramerateBox.setPadding(new Insets(5));
-        Label addFramerateLabel = new Label("加速倍数: ");
-        addFramerateTextField.setPrefWidth(100);
-        addFramerateBox.getChildren().addAll(addFramerate, addFramerateLabel, addFramerateTextField);
+        HBox addFrameRateBox = new HBox();
+        addFrameRateBox.setPadding(new Insets(5));
+        Label addFrameRateLabel = new Label("加速倍数: ");
+        addFrameRateTextField.setPrefWidth(100);
+        addFrameRateBox.getChildren().addAll(addFramerate, addFrameRateLabel, addFrameRateTextField);
 
 
         //视频减速
-        HBox reduceFramerateBox = new HBox();
-        reduceFramerateBox.setPadding(new Insets(5,5,5,5));
-        Label reduceFramerateLabel = new Label(" 减速倍数: ");
-        reduceFramerateTextField.setPrefWidth(100);
-        reduceFramerateBox.getChildren().addAll(reduceFramerate, reduceFramerateLabel, reduceFramerateTextField);
+        HBox reduceFrameRateBox = new HBox();
+        reduceFrameRateBox.setPadding(new Insets(5,5,5,5));
+        Label reduceFrameRateLabel = new Label(" 减速倍数: ");
+        reduceFrameRateTextField.setPrefWidth(100);
+        reduceFrameRateBox.getChildren().addAll(reduceFramerate, reduceFrameRateLabel, reduceFrameRateTextField);
 
         //合并视频
 //        HBox mergeVideoBox = new HBox();
@@ -554,8 +555,8 @@ public class MyFunction {
                         }
                     });
                     String targetPath = Handler.getNewFilePath(currentVideo);
-                    String videoFrameRate = addFramerateTextField.getText();
-                    String audioFrameRate = addFramerateTextField.getText();
+                    String videoFrameRate = addFrameRateTextField.getText();
+                    String audioFrameRate = addFrameRateTextField.getText();
                     videoExecutor.addVideoAudioFramerate(currentVideo, targetPath, videoFrameRate, audioFrameRate);
                     //删除上一步产生的视频
                     Handler.deleteFile(currentVideo);
@@ -576,7 +577,7 @@ public class MyFunction {
                         }
                     });
                     String targetPath = Handler.getNewFilePath(currentVideo);
-                    String videoFrameRate = reduceFramerateTextField.getText();
+                    String videoFrameRate = reduceFrameRateTextField.getText();
                     videoExecutor.reduceFramerate(currentVideo, targetPath, videoFrameRate);
                     //删除上一步产生的视频
                     Handler.deleteFile(currentVideo);
@@ -647,7 +648,7 @@ public class MyFunction {
                     @Override
                     public void run() {
                         //不是视频截图 就刷新已处理视频栏
-                        if(pathList.size() == 1 && pathList.get(0).indexOf(".png") == -1) {
+                        if(pathList.size() > 0) {
                             String videoPath = pathList.get(pathList.size() - 1);
                             //刷新左侧视频列表
                             processedList.add(videoPath);
@@ -670,737 +671,14 @@ public class MyFunction {
             }).start();
         });
 
-        //单个处理
-//        dealWithSingle.setOnAction(even -> {
-//            LOG.info("处理单个");
-//            if(null == Handler.getListView("unProcessed")) {
-//                MyAlertBox.display("程序提示", "请导入视频!");
-//                return;
-//            }
-//            //当前播放器播放的视频地址
-//            String currentVideo = Handler.getListView("unProcessed").getCurrentVideoPath();
-//            String targetPath = "";
-//            if (null == currentVideo || "".equals(currentVideo) || "暂无数据".equals(currentVideo)) {
-//                MyAlertBox.display("程序提示", "未选择视频!");
-//                return;
-//            }
-//
-//            //清空封面路径缓存
-//            Handler.clearCoverPathList();
-//
-//            boolean addWatermarkSelected = addWatermark.isSelected();
-//            boolean delWatermarkSelected = delWatermark.isSelected();
-//            boolean cutVideoSelected = cutVideo.isSelected();
-//            boolean setCoverSelected = setCover.isSelected();
-//            boolean addFilterSelected = addFilter.isSelected();
-//            boolean addFramerateSelected = addFramerate.isSelected();
-//            boolean reduceFramerateSelected = reduceFramerate.isSelected();
-//            //boolean mergeVideoSelected = mergeVideo.isSelected();
-//            boolean blurBackgroundSelected = blurBackground.isSelected();
-//            boolean getCoverSelected = getCover.isSelected();
-//            boolean addVideoSelected = addVideo.isSelected();
-//
-//            //截取图片
-//            if(getCoverSelected) {
-//                String time = cutVideoTime.getText();
-//                time = Handler.formatTime(Long.valueOf(time));
-//                LOG.info("操作步骤: 截取图片 操作对象: {}", currentVideo);
-//                targetPath = Handler.getNewFilePath("D:\\MaXinHai\\file\\1.png");
-//                videoExecutor.cutVideoImage(currentVideo, targetPath, time);
-//                try {
-//                    //通过cmd命令打开图片
-//                    Runtime.getRuntime().exec("cmd /c " + targetPath);
-//                    //把封面路径写入缓存
-//                    Handler.addCoverPath(targetPath);
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//
-//            //添加片头片尾
-//            if(addVideoSelected) {
-//                String startVideoPath = startVideoText.getText();
-//                String endVideoPath = endVideoText.getText();
-//                targetPath = Handler.getNewFilePath(currentVideo);
-//                videoExecutor.mergeVideo(startVideoPath, currentVideo, endVideoPath, targetPath);
-//                Handler.deleteFile(currentVideo);
-//                currentVideo = targetPath;
-//                try {
-//                    Thread.sleep(500);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//
-//            //加水印
-//            if (addWatermarkSelected) {
-//                String x = addWatermarkOfX.getText();
-//                String y = addWatermarkOfY.getText();
-//                String text = addWatermarkOfContent.getText();
-//                LOG.info("操作步骤:加水印 操作对象: " + currentVideo);
-//                targetPath = Handler.getNewFilePath(currentVideo);
-//                videoExecutor.addWatermarkByFont(text, 30, "微软雅黑", x, y, currentVideo, targetPath);
-//                currentVideo = targetPath;
-//                try {
-//                    Thread.sleep(500);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//            //消除水印
-//            if (delWatermarkSelected) {
-//                String x = delWatermarkOfX.getText();
-//                String y = delWatermarkOfY.getText();
-//                String width = delWatermarkOfWidth.getText();
-//                String height = delWatermarkOfHeight.getText();
-//
-//                BigDecimal xValue = new BigDecimal(x);
-//                BigDecimal yValue = new BigDecimal(y);
-//                BigDecimal widthValue = new BigDecimal(width);
-//                BigDecimal heightValue = new BigDecimal(height);
-//                //四舍五入不保留小数
-//                x = xValue.divide(Handler.getScale(), 0, BigDecimal.ROUND_HALF_UP).toString();
-//                y = yValue.divide(Handler.getScale(), 0, BigDecimal.ROUND_HALF_UP).toString();
-//                width = widthValue.divide(Handler.getScale(), 0, BigDecimal.ROUND_HALF_UP).toString();
-//                height = heightValue.divide(Handler.getScale(), 0, BigDecimal.ROUND_HALF_UP).toString();
-//                LOG.info("操作步骤:消除水印 操作对象: " + currentVideo);
-//                LOG.info("消除水印 水印坐标: x {}, y {}, height {}, width: {}", x, y, height, width);
-//                targetPath = Handler.getNewFilePath(currentVideo);
-//                videoExecutor.removeWatermark(currentVideo, x, y, width, height, targetPath);
-//                //删除上一步产生的视频
-//                Handler.deleteFile(currentVideo);
-//                currentVideo = targetPath;
-//                try {
-//                    Thread.sleep(500);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//
-//            //剪切视频
-//            if (cutVideoSelected) {
-//                String start = startTime.getText();
-//                String end = endTime.getText();
-//                MultimediaInfo videoInfo = videoExecutor.getVideoInfo(currentVideo);
-//                long duration = videoInfo.getDuration(); //获取视频长度
-//                BigDecimal durationValue = new BigDecimal(String.valueOf(duration));
-//                BigDecimal endValue = new BigDecimal(end + "000");
-//                start = Handler.formatTime(Long.valueOf(start));
-//                BigDecimal standardValue= new BigDecimal("1000");
-//                //视频总长度减去要删除的秒数再除以1000在向上取整得到的就是结束秒数
-//                end = Handler.formatTime(durationValue.subtract(endValue).divide(standardValue).setScale(0, BigDecimal.ROUND_UP).longValue());
-//                targetPath = Handler.getNewFilePath(currentVideo);
-//                videoExecutor.cutVideo(currentVideo, targetPath, start, end);
-//                //删除上一步产生的视频
-//                Handler.deleteFile(currentVideo);
-//                currentVideo = targetPath;
-//                try {
-//                    Thread.sleep(500);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//
-//            //添加滤镜效果
-//            if (addFilterSelected) {
-//                String selected = MyChoiceBox.getSelected();
-//                if (selected.equals("复古风")) {
-//                    targetPath = Handler.getNewFilePath(currentVideo);
-//                    videoExecutor.ancientStyleFilter(currentVideo, targetPath);
-//                    //删除上一步产生的视频
-//                    Handler.deleteFile(currentVideo);
-//                    currentVideo = targetPath;
-//                    try {
-//                        Thread.sleep(500);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//                if (selected.equals("镜像")) {
-//                    targetPath = Handler.getNewFilePath(currentVideo);
-//                    videoExecutor.mirror(currentVideo, targetPath);
-//                    //删除上一步产生的视频
-//                    Handler.deleteFile(currentVideo);
-//                    currentVideo = targetPath;
-//                    try {
-//                        Thread.sleep(500);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//                if (selected.equals("多路拼接")) {
-//                    targetPath = Handler.getNewFilePath(currentVideo);
-//                    videoExecutor.spliceVideo(currentVideo, currentVideo, currentVideo, currentVideo, targetPath);
-//                    //删除上一步产生的视频
-//                    Handler.deleteFile(currentVideo);
-//                    currentVideo = targetPath;
-//                    try {
-//                        Thread.sleep(500);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//                if (selected.equals("Ps滤镜")) {
-//                    targetPath = Handler.getNewFilePath(currentVideo);
-//                    videoExecutor.revisionCurveByPs(currentVideo, acvPath.getText(), targetPath);
-//                    //删除上一步产生的视频
-//                    Handler.deleteFile(currentVideo);
-//                    currentVideo = targetPath;
-//                    try {
-//                        Thread.sleep(500);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//                if (selected.equals("锐化")) {
-//                    targetPath = Handler.getNewFilePath(currentVideo);
-//                    System.out.println("操作步骤:设置锐化效果 操作对象: " + targetPath);
-//                    videoExecutor.sharpen(currentVideo, targetPath);
-//                    //删除上一步产生的视频
-//                    Handler.deleteFile(currentVideo);
-//                    currentVideo = targetPath;
-//                    try {
-//                        Thread.sleep(500);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//                if (selected.equals("黑白")) {
-//                    targetPath = Handler.getNewFilePath(currentVideo);
-//                    System.out.println("操作步骤:设置黑白效果 操作对象: " + targetPath);
-//                    videoExecutor.blackWhite(currentVideo, targetPath);
-//                    //删除上一步产生的视频
-//                    Handler.deleteFile(currentVideo);
-//                    currentVideo = targetPath;
-//                    try {
-//                        Thread.sleep(500);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//                if (selected.equals("浮雕效果")) {
-//                    targetPath = Handler.getNewFilePath(currentVideo);
-//                    System.out.println("操作步骤:设置浮雕效果 操作对象: " + targetPath);
-//                    videoExecutor.reliefEffect(currentVideo, targetPath);
-//                    //删除上一步产生的视频
-//                    Handler.deleteFile(currentVideo);
-//                    currentVideo = targetPath;
-//                    try {
-//                        Thread.sleep(500);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//                if (selected.equals("模糊处理")) {
-//                    targetPath = Handler.getNewFilePath(currentVideo);
-//                    System.out.println("操作步骤:设置模糊处理 操作对象: " + targetPath);
-//                    videoExecutor.blur(currentVideo, targetPath);
-//                    //删除上一步产生的视频
-//                    Handler.deleteFile(currentVideo);
-//                    currentVideo = targetPath;
-//                    try {
-//                        Thread.sleep(500);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//                if (selected.equals("色彩变幻")) {
-//                    targetPath = Handler.getNewFilePath(currentVideo);
-//                    LOG.info("操作步骤:设置色彩变幻 操作对象: {}", targetPath);
-//                    videoExecutor.colorChange(currentVideo, targetPath);
-//                    //删除上一步产生的视频
-//                    Handler.deleteFile(currentVideo);
-//                    currentVideo = targetPath;
-//                    try {
-//                        Thread.sleep(500);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            }
-//            //提升视频播放速度
-//            if (addFramerateSelected) {
-//                targetPath = Handler.getNewFilePath(currentVideo);
-//                String videoFrameRate = addFramerateTextField.getText();
-//                String audioFrameRate = addFramerateTextField.getText();
-//                videoExecutor.addVideoAudioFramerate(currentVideo, targetPath, videoFrameRate, audioFrameRate);
-//                //删除上一步产生的视频
-//                Handler.deleteFile(currentVideo);
-//                currentVideo = targetPath;
-//                try {
-//                    Thread.sleep(500);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//            //降低视频播放速度
-//            if (reduceFramerateSelected) {
-//                targetPath = Handler.getNewFilePath(currentVideo);
-//                String videoFrameRate = reduceFramerateTextField.getText();
-//                videoExecutor.reduceFramerate(currentVideo, targetPath, videoFrameRate);
-//                //删除上一步产生的视频
-//                Handler.deleteFile(currentVideo);
-//                currentVideo = targetPath;
-//                try {
-//                    Thread.sleep(500);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//            //背景虚化
-//            if (blurBackgroundSelected) {
-//                targetPath = Handler.getNewFilePath(currentVideo);
-//                videoExecutor.blurBackground(currentVideo, targetPath);
-//                //删除上一步产生的视频
-//                Handler.deleteFile(currentVideo);
-//                currentVideo = targetPath;
-//                try {
-//                    Thread.sleep(500);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//
-//            if (setCoverSelected) {
-//                String imgPath = coverPath.getText();
-//                //封面路径为空
-//                if(null == imgPath || "".equals(imgPath)) {
-//                    //是否勾选获取图片及获取封面功能
-//                    if(getCoverSelected) {
-//                        imgPath = Handler.getCoverPathList().get(0);
-//                    } else {
-//                        new RuntimeException("未勾选获取图片或未选择封面文件");
-//                    }
-//                }
-//                //TODO 宽和高暂时没有
-//                //String height = coverHeight.getText();
-//                //String width = coverWidth.getText();
-//                LOG.info("操作步骤:设置封面 操作对象: {}", currentVideo);
-//                targetPath = Handler.getNewFilePath(currentVideo);
-//                videoExecutor.setCover(currentVideo, imgPath, targetPath);
-//                //删除上一步产生的视频
-//                Handler.deleteFile(currentVideo);
-//                currentVideo = targetPath;
-//                try {
-//                    Thread.sleep(500);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//
-//            //刷新左侧视频列表
-//            processedList.add(currentVideo);
-//            MyHome.setLeft(null, processedList);
-//            //选择视频地址并让播放组件播放视频
-//            MyMediaPlayer.chooseFile(new File(currentVideo));
-//        });
-
-
         //批量处理
-//        dealWithBath.setOnAction(event -> {
-//            LOG.info("批量处理");
-//            if(null == Handler.getListView("unProcessed")) {
-//                MyAlertBox.display("程序提示", "请导入视频!");
-//                return;
-//            }
-//
-//            List<String> filePathList = Handler.getListView("unProcessed").getFilePathList();
-//            if (null == filePathList || filePathList.size() == 0) {
-//                MyAlertBox.display("程序提示", "未选择视频!");
-//                return;
-//            }
-//
-//            //清除封面路径缓存
-//            Handler.clearCoverPathList();
-//
-//            Map<String, String> config = Handler.readProp();
-//            String targetPath = config.get("targetPath");
-//            if(null == targetPath || "".equals(targetPath)) {
-//                MyAlertBox.display("程序提示", "请设置生成文件路径!");
-//                return;
-//            }
-//            //copy文件到生成文件夹下
-//            List<String> targetPathList = Handler.batchCopyFile(filePathList, targetPath);
-//
-//            //转换为线程安全的list,所有线程每个步骤产生的视频路径都存放在这个集合
-//            List<String> allPathList = Collections.synchronizedList(new ArrayList<>());
-//
-//            //要删除的多余文件(会出现多线程添加元素)
-//            Set<String> deletePathSet = new CopyOnWriteArraySet(targetPathList);
-//
-//            boolean addWatermarkSelected = addWatermark.isSelected();
-//            boolean delWatermarkSelected = delWatermark.isSelected();
-//            boolean cutVideoSelected = cutVideo.isSelected();
-//            boolean getCoverSelected = getCover.isSelected();
-//            boolean setCoverSelected = setCover.isSelected();
-//            boolean addFilterSelected = addFilter.isSelected();
-//            boolean addFramerateSelected = addFramerate.isSelected();
-//            boolean reduceFramerateSelected = reduceFramerate.isSelected();
-//            // boolean mergeVideoSelected = mergeVideo.isSelected();
-//            boolean blurBackgroundSelected = blurBackground.isSelected();
-//            boolean addVideoSelected = addVideo.isSelected();
-//
-//            //不可点击批量处理按钮
-//            dealWithBath.setDisable(true);
-//
-//            ExecutorService executorService = MyExecutorService.getMyExecutorService();
-//            filePathList.forEach(path -> {
-//                Thread thread = new Thread(()->{
-//
-//                    String currentPath = path;
-//
-//                    //截取图片
-//                    if(getCoverSelected) {
-//                        String time = cutVideoTime.getText();
-//                        time = Handler.formatTime(Long.valueOf(time));
-//                        try {
-//                            LOG.info("操作步骤: 批量截取图片 操作对象: {}", currentPath);
-//                            String target = Handler.getNewFilePath("D:\\MaXinHai\\file\\1.png");
-//                            videoExecutor.cutVideoImage(currentPath, target, time);
-//                            Thread.sleep(500);
-//                            Handler.addCoverPath(target);
-//                        } catch (InterruptedException e) {
-//                            e.printStackTrace();
-//                        }
-//                    }
-//                    //添加片头片尾
-//                    if(addVideoSelected) {
-//                        String startVideoPath = startVideoText.getText();
-//                        String endVideoPath = endVideoText.getText();
-//                        try {
-//                            String target = Handler.getNewFilePath(currentPath);
-//                            LOG.info("操作步骤:批量添加片头片尾 操作对象: {}", currentPath);
-//                            videoExecutor.mergeVideo(startVideoPath, currentPath, endVideoPath, target);
-//                            Thread.sleep(500);
-//                            deletePathSet.add(currentPath);
-//                            allPathList.add(currentPath);
-//                            currentPath = target;
-//                        } catch (InterruptedException e) {
-//                            LOG.info("批量添加片头片尾出错! {}", e.getMessage());
-//                            e.printStackTrace();
-//                        }
-//                    }
-//                    //添加水印
-//                    if (addWatermarkSelected) {
-//                        String x = addWatermarkOfX.getText();
-//                        String y = addWatermarkOfY.getText();
-//                        String text = addWatermarkOfContent.getText();
-//                        try {
-//                            String target = Handler.getNewFilePath(currentPath);
-//                            LOG.info("操作步骤:加水印 操作对象: {}", currentPath);
-//                            videoExecutor.addWatermarkByFont(text, 30, "微软雅黑", x, y, currentPath, target);
-//                            deletePathSet.add(currentPath);
-//                            allPathList.add(currentPath);
-//                            currentPath = target;
-//                            Thread.sleep(500);
-//                        } catch (InterruptedException e) {
-//                            LOG.info("批量添加水印失败! {}", e.getMessage());
-//                            e.printStackTrace();
-//                        }
-//                    }
-//                    if (delWatermarkSelected) {
-//                        String x = delWatermarkOfX.getText();
-//                        String y = delWatermarkOfY.getText();
-//                        String width = delWatermarkOfWidth.getText();
-//                        String height = delWatermarkOfHeight.getText();
-//                        BigDecimal xValue = new BigDecimal(x);
-//                        BigDecimal yValue = new BigDecimal(y);
-//                        BigDecimal widthValue = new BigDecimal(width);
-//                        BigDecimal heightValue = new BigDecimal(height);
-//                        try {
-//                            //先计算比例，才能去拿值
-//                            MyMediaPlayer.calculationRatio(new File(currentPath));
-//                            x = xValue.divide(Handler.getScale(), 0, BigDecimal.ROUND_HALF_UP).toString();
-//                            y = yValue.divide(Handler.getScale(), 0, BigDecimal.ROUND_HALF_UP).toString();
-//                            width = widthValue.divide(Handler.getScale(), 0, BigDecimal.ROUND_HALF_UP).toString();
-//                            height = heightValue.divide(Handler.getScale(), 0, BigDecimal.ROUND_HALF_UP).toString();
-//
-//                            String target = Handler.getNewFilePath(currentPath);
-//                            LOG.info("操作步骤:消除水印 操作对象: {}", currentPath);
-//                            videoExecutor.removeWatermark(currentPath, x, y, width, height, target);
-//                            Thread.sleep(500);
-//                            deletePathSet.add(currentPath);
-//                            allPathList.add(currentPath);
-//                            currentPath = target;
-//                        } catch (InterruptedException e) {
-//                            LOG.info("批量消除水印出错! {}", e.getMessage());
-//                            e.printStackTrace();
-//                        }
-//                    }
-//                    if (cutVideoSelected) {
-//                        String start = startTime.getText();
-//                        String end = endTime.getText();
-//                        String startPoint = null;
-//                        String endPoint = null;
-//                        try {
-//                            MultimediaInfo videoInfo = videoExecutor.getVideoInfo(currentPath);
-//                            long duration = videoInfo.getDuration(); //获取视频长度
-//                            BigDecimal durationValue = new BigDecimal(String.valueOf(duration));
-//                            BigDecimal endValue = new BigDecimal(end + "000");
-//                            startPoint = Handler.formatTime(Long.valueOf(start));
-//                            BigDecimal standardValue= new BigDecimal("1000");
-//                            //视频总长度减去要删除的秒数再除以1000在向上取整得到的就是结束秒数
-//                            endPoint = Handler.formatTime(durationValue.subtract(endValue).divide(standardValue).setScale(0, BigDecimal.ROUND_UP).longValue());
-//                            String target = Handler.getNewFilePath(currentPath);
-//                            LOG.info("操作步骤:剪切视频 操作对象: {}", currentPath);
-//                            videoExecutor.cutVideo(currentPath, target, startPoint, endPoint);
-//                            Thread.sleep(500);
-//                            deletePathSet.add(currentPath);
-//                            allPathList.add(currentPath);
-//                            currentPath = target;
-//                        } catch (InterruptedException e) {
-//                            LOG.info("批量剪切视频出错! {}", e.getMessage());
-//                            e.printStackTrace();
-//                        }
-//                    }
-//                    if (addFilterSelected) {
-//                        String selected = MyChoiceBox.getSelected();
-//                        if (selected.equals("镜像")) {
-//                            try {
-//                                String target = Handler.getNewFilePath(currentPath);
-//                                LOG.info("操作步骤:设置镜像效果 操作对象: {}", currentPath);
-//                                videoExecutor.mirror(currentPath, target);
-//                                Thread.sleep(500);
-//                                deletePathSet.add(currentPath);
-//                                allPathList.add(currentPath);
-//                                currentPath = target;
-//                            } catch (InterruptedException e) {
-//                                LOG.info("批量设置镜像效果出错! {}", e.getMessage());
-//                                e.printStackTrace();
-//                            }
-//                        }
-//                        if (selected.equals("复古风")) {
-//                            try {
-//                                String target = Handler.getNewFilePath(currentPath);
-//                                LOG.info("操作步骤:设置复古风效果 操作对象: {}", currentPath);
-//                                videoExecutor.ancientStyleFilter(currentPath, target);
-//                                Thread.sleep(500);
-//                                deletePathSet.add(currentPath);
-//                                allPathList.add(currentPath);
-//                                currentPath = target;
-//                            } catch (InterruptedException e) {
-//                                LOG.info("批量设置复古风效果出错! {}", e.getMessage());
-//                                e.printStackTrace();
-//                            }
-//                        }
-//                        if (selected.equals("多路拼接")) {
-//                            try {
-//                                String target = Handler.getNewFilePath(currentPath);
-//                                LOG.info("操作步骤:设置多路拼接效果 操作对象: {}", currentPath);
-//                                videoExecutor.spliceVideo(currentPath, currentPath, currentPath, currentPath, target);
-//                                Thread.sleep(500);
-//                                deletePathSet.add(currentPath);
-//                                allPathList.add(currentPath);
-//                                currentPath = target;
-//                            } catch (InterruptedException e) {
-//                                LOG.info("批量设置多路拼接效果出错 {}", e.getMessage());
-//                                e.printStackTrace();
-//                            }
-//                        }
-//                        if (selected.equals("Ps滤镜")) {
-//                            try {
-//                                String target = Handler.getNewFilePath(currentPath);
-//                                LOG.info("操作步骤: 根据Ps预设文件设置效果 操作对象: {}", currentPath);
-//                                videoExecutor.revisionCurveByPs(currentPath, acvPath.getText(), target);
-//                                deletePathSet.add(currentPath);
-//                                Thread.sleep(500);
-//                                allPathList.add(currentPath);
-//                                currentPath = target;
-//                            } catch (InterruptedException e) {
-//                                LOG.info("批量根据Ps预设文件设置效果出错! {}", e.getMessage());
-//                                e.printStackTrace();
-//                            }
-//                        }
-//                        if (selected.equals("锐化")) {
-//                            try {
-//                                String target = Handler.getNewFilePath(currentPath);
-//                                LOG.info("操作步骤:设置锐化效果 操作对象: {}", currentPath);
-//                                videoExecutor.sharpen(currentPath, target);
-//                                deletePathSet.add(currentPath);
-//                                Thread.sleep(500);
-//                                allPathList.add(currentPath);
-//                                currentPath = target;
-//                            } catch (InterruptedException e) {
-//                                LOG.info("批量设置锐化效果出错! {}", e.getMessage());
-//                                e.printStackTrace();
-//                            }
-//                        }
-//                        if (selected.equals("黑白")) {
-//                            try {
-//                                String target = Handler.getNewFilePath(currentPath);
-//                                LOG.info("操作步骤:设置黑白效果 操作对象: {}", currentPath);
-//                                videoExecutor.blackWhite(currentPath, target);
-//                                deletePathSet.add(currentPath);
-//                                Thread.sleep(500);
-//                                allPathList.add(currentPath);
-//                                currentPath = target;
-//                            } catch (InterruptedException e) {
-//                                LOG.info("批量设置黑白效果出错 {}", e.getMessage());
-//                                e.printStackTrace();
-//                            }
-//                        }
-//                        if (selected.equals("浮雕效果")) {
-//                            try {
-//                                String target = Handler.getNewFilePath(currentPath);
-//                                LOG.info("操作步骤:设置浮雕效果 操作对象: {}", currentPath);
-//                                videoExecutor.reliefEffect(currentPath, target);
-//                                deletePathSet.add(currentPath);
-//                                Thread.sleep(500);
-//                                allPathList.add(currentPath);
-//                                currentPath = target;
-//                            } catch (InterruptedException e) {
-//                                LOG.info("批量设置浮雕效果出错! {}", e.getMessage());
-//                                e.printStackTrace();
-//                            }
-//
-//                        }
-//                        if (selected.equals("模糊处理")) {
-//                            try {
-//                                String target = Handler.getNewFilePath(currentPath);
-//                                LOG.info("操作步骤:设置模糊处理 操作对象: {}", currentPath);
-//                                videoExecutor.blur(currentPath, target);
-//                                deletePathSet.add(currentPath);
-//                                Thread.sleep(500);
-//                                allPathList.add(currentPath);
-//                                currentPath = target;
-//                            } catch (InterruptedException e) {
-//                                LOG.info("批量设置模糊处理出错!  {}", e.getMessage());
-//                                e.printStackTrace();
-//                            }
-//
-//                        }
-//                        if (selected.equals("色彩变幻")) {
-//                            try {
-//                                String target = Handler.getNewFilePath(currentPath);
-//                                LOG.info("操作步骤:设置色彩变幻 操作对象: {}", currentPath);
-//                                videoExecutor.colorChange(currentPath, target);
-//                                deletePathSet.add(currentPath);
-//                                Thread.sleep(500);
-//                                allPathList.add(currentPath);
-//                                currentPath = target;
-//                            } catch (InterruptedException e) {
-//                                LOG.info("批量设置色彩变幻出错! {}", e.getMessage());
-//                                e.printStackTrace();
-//                            }
-//                        }
-//                    }
-//
-//                    //增加视频帧率
-//                    if (addFramerateSelected) {
-//                        LOG.info("增加视频速率");
-//                        String frameRate = addFramerateTextField.getText();
-//                        try {
-//                            String target = Handler.getNewFilePath(currentPath);
-//                            LOG.info("操作步骤:增加视频速率 操作对象: {}", currentPath);
-//                            videoExecutor.addFramerate(currentPath, target, frameRate);
-//                            Thread.sleep(500);
-//                            deletePathSet.add(currentPath);
-//                            allPathList.add(currentPath);
-//                            currentPath = target;
-//                        } catch (InterruptedException e) {
-//                            LOG.info("批量设置镜像效果增加视频速率 {}", e.getMessage());
-//                            e.printStackTrace();
-//                        }
-//
-//                    }
-//
-//                    //降低视频帧率
-//                    if (reduceFramerateSelected) {
-//                        String frameRate = reduceFramerateTextField.getText();
-//                        try {
-//                            String target = Handler.getNewFilePath(currentPath);
-//                            LOG.info("操作步骤:降低视频帧率 操作对象: {}", currentPath);
-//                            videoExecutor.reduceFramerate(currentPath, target, frameRate);
-//                            deletePathSet.add(currentPath);
-//                            Thread.sleep(500);
-//                            allPathList.add(currentPath);
-//                            currentPath = target;
-//                        } catch (InterruptedException e) {
-//                            LOG.info("批量降低视频帧率! {}", e.getMessage());
-//                            e.printStackTrace();
-//                        }
-//
-//                    }
-//
-//                    //模糊视频背景
-//                    if (blurBackgroundSelected) {
-//                        try {
-//                            String target = Handler.getNewFilePath(currentPath);
-//                            LOG.info("操作步骤:设置模糊视频背景 操作对象: {}", currentPath);
-//                            videoExecutor.blurBackground(currentPath, target);
-//                            Thread.sleep(500);
-//                            deletePathSet.add(currentPath);
-//                            allPathList.add(currentPath);
-//                            currentPath = target;
-//                        } catch (Exception e) {
-//                            LOG.info("批量设置模糊视频背景出错! {}", e.getMessage());
-//                            e.printStackTrace();
-//                        }
-//                    }
-//
-//                    //设置封面
-//                    if (setCoverSelected) {
-//                        String imgPath = coverPath.getText();
-//                        if(null == imgPath || "".equals(imgPath)) {
-//                            new RuntimeException("未设置封面文件!");
-//                        }
-//                        //TODO 宽和高暂时没有
-//                        //String height = coverHeight.getText();
-//                        //String width = coverWidth.getText();
-//                        try {
-//                            String target = Handler.getNewFilePath(currentPath);
-//                            LOG.info("操作步骤:批量设置封面 操作对象: {}", currentPath);
-//                            videoExecutor.setCover(currentPath, imgPath, target);
-//                            Thread.sleep(500);
-//                            deletePathSet.add(currentPath);
-//                            allPathList.add(currentPath);
-//                            currentPath = target;
-//                        } catch (InterruptedException e) {
-//                            LOG.info("批量设置封面出错! {}", e.getMessage());
-//                            e.printStackTrace();
-//                        }
-//                    }
-//
-//                });
-//                executorService.execute(thread);
-//            });
-//
-//            //判断线程池里的线程是否全部执行完毕
-//            try {
-//                while(true){
-//                    if(executorService.isTerminated()){
-//                        System.out.println("所有的子线程都结束了！");
-//                        break;
-//                    }
-//                    Thread.sleep(1000);
-//                }
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//
-//            //所有线程产生的视频路径减去所有线程要删除的视频路径就是最终的视频
-//            allPathList.removeAll(deletePathSet);
-//
-//            MyHome.setLeft(null, allPathList);
-//            File videoFile = new File(targetPathList.get(0));
-//            //播放第一个视频并让播放组件播放视频
-//            MyMediaPlayer.chooseFile(videoFile);
-//            LOG.info("开始删除多余文件...");
-//            deletePathSet.forEach(delPath -> {
-//                Handler.deleteFile(delPath);
-//            });
-//            LOG.info("删除多余文件完毕...");
-//            dealWithBath.setDisable(false);
-//        });
-
-
-        //批量处理
-        dealWithBath.setOnAction(even -> {
+        dealWithBath.setOnAction(event -> {
             LOG.info("批量处理");
             if(null == Handler.getListView("unProcessed")) {
                 MyAlertBox.display("程序提示", "请导入视频!");
                 return;
             }
+
             List<String> filePathList = Handler.getListView("unProcessed").getFilePathList();
             if (null == filePathList || filePathList.size() == 0) {
                 MyAlertBox.display("程序提示", "未选择视频!");
@@ -1416,174 +694,169 @@ public class MyFunction {
                 MyAlertBox.display("程序提示", "请设置生成文件路径!");
                 return;
             }
-            dealWithBath.setDisable(true);
 
             //copy文件到生成文件夹下
             List<String> targetPathList = Handler.batchCopyFile(filePathList, targetPath);
-            //要删除的多余文件
-            Set<String> deletePathSet = new HashSet<>(targetPathList);
+
+            //转换为线程安全的list,所有线程每个步骤产生的视频路径都存放在这个集合
+            List<String> allPathList = Collections.synchronizedList(new ArrayList<>());
+
+            //要删除的多余文件(会出现多线程添加元素)
+            Set<String> deletePathSet = new CopyOnWriteArraySet(targetPathList);
+
+            final int count = filePathList.size();
+            final CountDownLatch endGate = new CountDownLatch(count);
+
+            boolean addWatermarkSelected = addWatermark.isSelected();
+            boolean delWatermarkSelected = delWatermark.isSelected();
+            boolean cutVideoSelected = cutVideo.isSelected();
+            boolean getCoverSelected = getCover.isSelected();
+            boolean setCoverSelected = setCover.isSelected();
+            boolean addFilterSelected = addFilter.isSelected();
+            boolean addFramerateSelected = addFramerate.isSelected();
+            boolean reduceFramerateSelected = reduceFramerate.isSelected();
+            // boolean mergeVideoSelected = mergeVideo.isSelected();
+            boolean blurBackgroundSelected = blurBackground.isSelected();
+            boolean addVideoSelected = addVideo.isSelected();
+
+            //不可点击批量处理按钮
+            dealWithBath.setDisable(true);
 
             //计算进度条step
-            batchProgressBar.calculationStep(Handler.getCheckBoxList());
+            batchProgressBar.calculationStep(Handler.getCheckBoxList().size(), filePathList.size());
 
             //显示进度条并给初始值
             batchProgressBar.setVisible(true);
             batchProgressBar.setValue(0.0);
             batchProgressBar.setLabel("开始执行");
 
-            new Thread(()->{
-                boolean addWatermarkSelected = addWatermark.isSelected();
-                boolean delWatermarkSelected = delWatermark.isSelected();
-                boolean cutVideoSelected = cutVideo.isSelected();
-                boolean getCoverSelected = getCover.isSelected();
-                boolean setCoverSelected = setCover.isSelected();
-                boolean addFilterSelected = addFilter.isSelected();
-                boolean addFramerateSelected = addFramerate.isSelected();
-                boolean reduceFramerateSelected = reduceFramerate.isSelected();
-                // boolean mergeVideoSelected = mergeVideo.isSelected();
-                boolean blurBackgroundSelected = blurBackground.isSelected();
-                boolean addVideoSelected = addVideo.isSelected();
+            ExecutorService executorService = MyExecutorService.getTaskExecutor();
+            filePathList.forEach(path -> {
+                Thread thread = new Thread(()->{
+                    final  VideoExecutor executor = new VideoExecutor();
+                    String currentPath = path;
 
-                //截取图片
-                if(getCoverSelected) {
-                    String time = cutVideoTime.getText();
-                    time = Handler.formatTime(Long.valueOf(time));
-                    ListIterator<String> iterator = targetPathList.listIterator();
-                    try {
-                        while (iterator.hasNext()) {
-                            String path = iterator.next();
-                            Platform.runLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    batchProgressBar.autoAdd();
-                                    batchProgressBar.setLabel("正在批量截取视频图片 " + Handler.getFileName(path));
-                                }
-                            });
-                            LOG.info("操作步骤: 批量截取图片 操作对象: {}", path);
+                    //截取图片
+                    if(getCoverSelected) {
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                batchProgressBar.autoAdd();
+                                batchProgressBar.setLabel("正在批量截取视频图片 " + Handler.getFileName(path));
+                            }
+                        });
+                        String time = cutVideoTime.getText();
+                        time = Handler.formatTime(Long.valueOf(time));
+                        try {
+                            LOG.info("操作步骤: 批量截取图片 操作对象: {}", currentPath);
                             String target = Handler.getNewFilePath("D:\\MaXinHai\\file\\1.png");
-                            videoExecutor.cutVideoImage(path, target, time);
+                            executor.cutVideoImage(currentPath, target, time);
                             Thread.sleep(500);
                             Handler.addCoverPath(target);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
                         }
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
                     }
-                }
-
-                //添加片头片尾
-                if(addVideoSelected) {
-                    String startVideoPath = startVideoText.getText();
-                    String endVideoPath = endVideoText.getText();
-                    ListIterator<String> iterator = targetPathList.listIterator();
-                    try {
-                        while (iterator.hasNext()) {
-                            String path = iterator.next();
-                            Platform.runLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    batchProgressBar.autoAdd();
-                                    batchProgressBar.setLabel("正在批量添加片头片尾 " + Handler.getFileName(path));
-                                }
-                            });
-                            String target = Handler.getNewFilePath(path);
-                            LOG.info("操作步骤:批量添加片头片尾 操作对象: {}", path);
-                            videoExecutor.mergeVideo(startVideoPath, path, endVideoPath, target);
-                            Thread.sleep(500);
-                            deletePathSet.add(path);
-                            iterator.set(target);
-                        }
-                    } catch (InterruptedException e) {
-                        LOG.info("批量添加片头片尾出错! {}", e.getMessage());
-                        e.printStackTrace();
-                    }
-                }
-
-                //添加水印
-                if (addWatermarkSelected) {
-                    ListIterator<String> iterator = targetPathList.listIterator();
-                    String x = addWatermarkOfX.getText();
-                    String y = addWatermarkOfY.getText();
-                    String text = addWatermarkOfContent.getText();
-                    try {
-                        while (iterator.hasNext()) {
-                            String path = iterator.next();
-                            Platform.runLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    batchProgressBar.autoAdd();
-                                    batchProgressBar.setLabel("正在批量添加水印 " + Handler.getFileName(path));
-                                }
-                            });
-                            String target = Handler.getNewFilePath(path);
-                            LOG.info("操作步骤:加水印 操作对象: {}", path);
-                            videoExecutor.addWatermarkByFont(text, 30, "微软雅黑", x, y, path, target);
-                            //videoExecutor.addWatermarkByFont(path, x, y, null, null, null, text, null, target);
-                            iterator.set(target);
-                            deletePathSet.add(path);
-                            Thread.sleep(500);
-                        }
-                    } catch (InterruptedException e) {
-                        LOG.info("批量添加水印失败! {}", e.getMessage());
-                        e.printStackTrace();
-                    }
-                }
-                if (delWatermarkSelected) {
-                    ListIterator<String> iterator = targetPathList.listIterator();
-                    String x = delWatermarkOfX.getText();
-                    String y = delWatermarkOfY.getText();
-                    String width = delWatermarkOfWidth.getText();
-                    String height = delWatermarkOfHeight.getText();
-                    BigDecimal xValue = new BigDecimal(x);
-                    BigDecimal yValue = new BigDecimal(y);
-                    BigDecimal widthValue = new BigDecimal(width);
-                    BigDecimal heightValue = new BigDecimal(height);
-                    try {
-                        while (iterator.hasNext()) {
-                            String path = iterator.next();
-                            Platform.runLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    batchProgressBar.autoAdd();
-                                    batchProgressBar.setLabel("正在批量消除水印 " + Handler.getFileName(path));
-                                }
-                            });
-
+                    //删除水印
+                    if (delWatermarkSelected) {
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                batchProgressBar.autoAdd();
+                                batchProgressBar.setLabel("正在批量消除水印 " + Handler.getFileName(path));
+                            }
+                        });
+                        String x = delWatermarkOfX.getText();
+                        String y = delWatermarkOfY.getText();
+                        String width = delWatermarkOfWidth.getText();
+                        String height = delWatermarkOfHeight.getText();
+                        BigDecimal xValue = new BigDecimal(x);
+                        BigDecimal yValue = new BigDecimal(y);
+                        BigDecimal widthValue = new BigDecimal(width);
+                        BigDecimal heightValue = new BigDecimal(height);
+                        try {
                             //先计算比例，才能去拿值
-                            MyMediaPlayer.calculationRatio(new File(path));
+                            MyMediaPlayer.calculationRatio(new File(currentPath));
                             x = xValue.divide(Handler.getScale(), 0, BigDecimal.ROUND_HALF_UP).toString();
                             y = yValue.divide(Handler.getScale(), 0, BigDecimal.ROUND_HALF_UP).toString();
                             width = widthValue.divide(Handler.getScale(), 0, BigDecimal.ROUND_HALF_UP).toString();
                             height = heightValue.divide(Handler.getScale(), 0, BigDecimal.ROUND_HALF_UP).toString();
 
-                            String target = Handler.getNewFilePath(path);
-                            LOG.info("操作步骤:消除水印 操作对象: {}", path);
-                            videoExecutor.removeWatermark(path, x, y, width, height, target);
+                            String target = Handler.getNewFilePath(currentPath);
+                            LOG.info("操作步骤:消除水印 操作对象: {}", currentPath);
+                            executor.removeWatermark(currentPath, x, y, width, height, target);
                             Thread.sleep(500);
-                            deletePathSet.add(path);
-                            iterator.set(target);
+                            deletePathSet.add(currentPath);
+                            allPathList.add(target);
+                            currentPath = target;
+                        } catch (InterruptedException e) {
+                            LOG.info("批量消除水印出错! {}", e.getMessage());
+                            e.printStackTrace();
                         }
-                    } catch (InterruptedException e) {
-                        LOG.info("批量消除水印出错! {}", e.getMessage());
-                        e.printStackTrace();
                     }
-                }
-                if (cutVideoSelected) {
-                    ListIterator<String> iterator = targetPathList.listIterator();
-                    String start = startTime.getText();
-                    String end = endTime.getText();
-                    String startPoint = null;
-                    String endPoint = null;
-                    try {
-                        while (iterator.hasNext()) {
-                            String path = iterator.next();
-                            Platform.runLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    batchProgressBar.autoAdd();
-                                    batchProgressBar.setLabel("正在批量剪切视频 " + Handler.getFileName(path));
-                                }
-                            });
-                            MultimediaInfo videoInfo = videoExecutor.getVideoInfo(path);
+                    //添加水印
+                    if (addWatermarkSelected) {
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                batchProgressBar.autoAdd();
+                                batchProgressBar.setLabel("正在批量添加水印 " + Handler.getFileName(path));
+                            }
+                        });
+                        String x = addWatermarkOfX.getText();
+                        String y = addWatermarkOfY.getText();
+                        String text = addWatermarkOfContent.getText();
+                        try {
+                            String target = Handler.getNewFilePath(currentPath);
+                            LOG.info("操作步骤:加水印 操作对象: {}", currentPath);
+                            executor.addWatermarkByFont(text, 30, "微软雅黑", x, y, currentPath, target);
+                            deletePathSet.add(currentPath);
+                            allPathList.add(target);
+                            currentPath = target;
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            LOG.info("批量添加水印失败! {}", e.getMessage());
+                            e.printStackTrace();
+                        }
+                    }
+                    //添加片头片尾
+                    if(addVideoSelected) {
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                batchProgressBar.autoAdd();
+                                batchProgressBar.setLabel("正在批量添加片头片尾 " + Handler.getFileName(path));
+                            }
+                        });
+                        String startVideoPath = startVideoText.getText();
+                        String endVideoPath = endVideoText.getText();
+                        try {
+                            String target = Handler.getNewFilePath(currentPath);
+                            LOG.info("操作步骤:批量添加片头片尾 操作对象: {}", currentPath);
+                            executor.mergeVideo(startVideoPath, currentPath, endVideoPath, target);
+                            Thread.sleep(500);
+                            deletePathSet.add(currentPath);
+                            allPathList.add(target);
+                            currentPath = target;
+                        } catch (InterruptedException e) {
+                            LOG.info("批量添加片头片尾出错! {}", e.getMessage());
+                            e.printStackTrace();
+                        }
+                    }
+                    if (cutVideoSelected) {
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                batchProgressBar.autoAdd();
+                                batchProgressBar.setLabel("正在批量剪切视频 " + Handler.getFileName(path));
+                            }
+                        });
+                        String start = startTime.getText();
+                        String end = endTime.getText();
+                        String startPoint = null;
+                        String endPoint = null;
+                        try {
+                            MultimediaInfo videoInfo = videoExecutor.getVideoInfo(currentPath);
                             long duration = videoInfo.getDuration(); //获取视频长度
                             BigDecimal durationValue = new BigDecimal(String.valueOf(duration));
                             BigDecimal endValue = new BigDecimal(end + "000");
@@ -1591,325 +864,300 @@ public class MyFunction {
                             BigDecimal standardValue= new BigDecimal("1000");
                             //视频总长度减去要删除的秒数再除以1000在向上取整得到的就是结束秒数
                             endPoint = Handler.formatTime(durationValue.subtract(endValue).divide(standardValue).setScale(0, BigDecimal.ROUND_UP).longValue());
-                            String target = Handler.getNewFilePath(path);
-                            LOG.info("操作步骤:剪切视频 操作对象: {}", path);
-                            videoExecutor.cutVideo(path, target, startPoint, endPoint);
+                            String target = Handler.getNewFilePath(currentPath);
+                            LOG.info("操作步骤:剪切视频 操作对象: {}", currentPath);
+                            executor.cutVideo(currentPath, target, startPoint, endPoint);
                             Thread.sleep(500);
-                            deletePathSet.add(path);
-                            iterator.set(target);
-                        }
-                    } catch (InterruptedException e) {
-                        LOG.info("批量剪切视频出错! {}", e.getMessage());
-                        e.printStackTrace();
-                    }
-                }
-                if (addFilterSelected) {
-                    ListIterator<String> iterator = targetPathList.listIterator();
-                    String selected = MyChoiceBox.getSelected();
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            batchProgressBar.autoAdd();
-                            batchProgressBar.setLabel("正在批量添加滤镜,滤镜效果:" + selected);
-                        }
-                    });
-                    if (selected.equals("镜像")) {
-                        try {
-                            while (iterator.hasNext()) {
-                                String path = iterator.next();
-                                String target = Handler.getNewFilePath(path);
-                                LOG.info("操作步骤:设置镜像效果 操作对象: {}", path);
-                                videoExecutor.mirror(path, target);
-                                Thread.sleep(500);
-                                deletePathSet.add(path);
-                                iterator.set(target);
-                            }
+                            deletePathSet.add(currentPath);
+                            allPathList.add(target);
+                            currentPath = target;
                         } catch (InterruptedException e) {
-                            LOG.info("批量设置镜像效果出错! {}", e.getMessage());
+                            LOG.info("批量剪切视频出错! {}", e.getMessage());
                             e.printStackTrace();
                         }
                     }
-                    if (selected.equals("复古风")) {
-                        try {
-                            while (iterator.hasNext()) {
-                                String path = iterator.next();
-                                String target = Handler.getNewFilePath(path);
-                                LOG.info("操作步骤:设置复古风效果 操作对象: {}", path);
-                                videoExecutor.ancientStyleFilter(path, target);
-                                Thread.sleep(500);
-                                deletePathSet.add(path);
-                                iterator.set(target);
+                    if (addFilterSelected) {
+                        String selected = MyChoiceBox.getSelected();
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                batchProgressBar.autoAdd();
+                                batchProgressBar.setLabel("正在批量添加滤镜,滤镜效果:" + selected);
                             }
-                        } catch (InterruptedException e) {
-                            LOG.info("批量设置复古风效果出错! {}", e.getMessage());
-                            e.printStackTrace();
-                        }
-                    }
-                    if (selected.equals("多路拼接")) {
-                        try {
-                            while (iterator.hasNext()) {
-                                String path = iterator.next();
-                                String target = Handler.getNewFilePath(path);
-                                LOG.info("操作步骤:设置多路拼接效果 操作对象: {}", path);
-                                videoExecutor.spliceVideo(path, path, path, path, target);
+                        });
+                        if (selected.equals("镜像")) {
+                            try {
+                                String target = Handler.getNewFilePath(currentPath);
+                                LOG.info("操作步骤:设置镜像效果 操作对象: {}", currentPath);
+                                executor.mirror(currentPath, target);
                                 Thread.sleep(500);
-                                deletePathSet.add(path);
-                                iterator.set(target);
+                                deletePathSet.add(currentPath);
+                                allPathList.add(target);
+                                currentPath = target;
+                            } catch (InterruptedException e) {
+                                LOG.info("批量设置镜像效果出错! {}", e.getMessage());
+                                e.printStackTrace();
                             }
-                        } catch (InterruptedException e) {
-                            LOG.info("批量设置多路拼接效果出错 {}", e.getMessage());
-                            e.printStackTrace();
                         }
-                    }
-                    if (selected.equals("Ps滤镜")) {
-                        try {
-                            while (iterator.hasNext()) {
-                                String path = iterator.next();
-                                String target = Handler.getNewFilePath(path);
-                                LOG.info("操作步骤: 根据Ps预设文件设置效果 操作对象: {}", path);
-                                videoExecutor.revisionCurveByPs(path, acvPath.getText(), target);
-                                deletePathSet.add(path);
-                                iterator.set(target);
+                        if (selected.equals("复古风")) {
+                            try {
+                                String target = Handler.getNewFilePath(currentPath);
+                                LOG.info("操作步骤:设置复古风效果 操作对象: {}", currentPath);
+                                executor.ancientStyleFilter(currentPath, target);
                                 Thread.sleep(500);
+                                deletePathSet.add(currentPath);
+                                allPathList.add(target);
+                                currentPath = target;
+                            } catch (InterruptedException e) {
+                                LOG.info("批量设置复古风效果出错! {}", e.getMessage());
+                                e.printStackTrace();
                             }
-                        } catch (InterruptedException e) {
-                            LOG.info("批量根据Ps预设文件设置效果出错! {}", e.getMessage());
-                            e.printStackTrace();
                         }
-                    }
-                    if (selected.equals("锐化")) {
-                        try {
-                            while (iterator.hasNext()) {
-                                String path = iterator.next();
-                                String target = Handler.getNewFilePath(path);
-                                LOG.info("操作步骤:设置锐化效果 操作对象: {}", path);
-                                videoExecutor.sharpen(path, target);
-                                iterator.set(target);
-                                deletePathSet.add(path);
+                        if (selected.equals("多路拼接")) {
+                            try {
+                                String target = Handler.getNewFilePath(currentPath);
+                                LOG.info("操作步骤:设置多路拼接效果 操作对象: {}", currentPath);
+                                executor.spliceVideo(currentPath, currentPath, currentPath, currentPath, target);
                                 Thread.sleep(500);
+                                deletePathSet.add(currentPath);
+                                allPathList.add(target);
+                                currentPath = target;
+                            } catch (InterruptedException e) {
+                                LOG.info("批量设置多路拼接效果出错 {}", e.getMessage());
+                                e.printStackTrace();
                             }
-                        } catch (InterruptedException e) {
-                            LOG.info("批量设置锐化效果出错! {}", e.getMessage());
-                            e.printStackTrace();
                         }
-                    }
-                    if (selected.equals("黑白")) {
-                        try {
-                            while (iterator.hasNext()) {
-                                String path = iterator.next();
-                                String target = Handler.getNewFilePath(path);
-                                LOG.info("操作步骤:设置黑白效果 操作对象: {}", path);
-                                videoExecutor.blackWhite(path, target);
-                                iterator.set(target);
-                                deletePathSet.add(path);
+                        if (selected.equals("Ps滤镜")) {
+                            try {
+                                String target = Handler.getNewFilePath(currentPath);
+                                LOG.info("操作步骤: 根据Ps预设文件设置效果 操作对象: {}", currentPath);
+                                executor.revisionCurveByPs(currentPath, acvPath.getText(), target);
+                                deletePathSet.add(currentPath);
                                 Thread.sleep(500);
+                                allPathList.add(target);
+                                currentPath = target;
+                            } catch (InterruptedException e) {
+                                LOG.info("批量根据Ps预设文件设置效果出错! {}", e.getMessage());
+                                e.printStackTrace();
                             }
-                        } catch (InterruptedException e) {
-                            LOG.info("批量设置黑白效果出错 {}", e.getMessage());
-                            e.printStackTrace();
                         }
-                    }
-                    if (selected.equals("浮雕效果")) {
-                        try {
-                            while (iterator.hasNext()) {
-                                String path = iterator.next();
-                                String target = Handler.getNewFilePath(path);
-                                LOG.info("操作步骤:设置浮雕效果 操作对象: {}", path);
-                                videoExecutor.reliefEffect(path, target);
-                                iterator.set(target);
-                                deletePathSet.add(path);
+                        if (selected.equals("锐化")) {
+                            try {
+                                String target = Handler.getNewFilePath(currentPath);
+                                LOG.info("操作步骤:设置锐化效果 操作对象: {}", currentPath);
+                                executor.sharpen(currentPath, target);
+                                deletePathSet.add(currentPath);
                                 Thread.sleep(500);
+                                allPathList.add(target);
+                                currentPath = target;
+                            } catch (InterruptedException e) {
+                                LOG.info("批量设置锐化效果出错! {}", e.getMessage());
+                                e.printStackTrace();
                             }
-                        } catch (InterruptedException e) {
-                            LOG.info("批量设置浮雕效果出错! {}", e.getMessage());
-                            e.printStackTrace();
                         }
+                        if (selected.equals("黑白")) {
+                            try {
+                                String target = Handler.getNewFilePath(currentPath);
+                                LOG.info("操作步骤:设置黑白效果 操作对象: {}", currentPath);
+                                executor.blackWhite(currentPath, target);
+                                deletePathSet.add(currentPath);
+                                Thread.sleep(500);
+                                allPathList.add(target);
+                                currentPath = target;
+                            } catch (InterruptedException e) {
+                                LOG.info("批量设置黑白效果出错 {}", e.getMessage());
+                                e.printStackTrace();
+                            }
+                        }
+                        if (selected.equals("浮雕效果")) {
+                            try {
+                                String target = Handler.getNewFilePath(currentPath);
+                                LOG.info("操作步骤:设置浮雕效果 操作对象: {}", currentPath);
+                                executor.reliefEffect(currentPath, target);
+                                deletePathSet.add(currentPath);
+                                Thread.sleep(500);
+                                allPathList.add(target);
+                                currentPath = target;
+                            } catch (InterruptedException e) {
+                                LOG.info("批量设置浮雕效果出错! {}", e.getMessage());
+                                e.printStackTrace();
+                            }
 
-                    }
-                    if (selected.equals("模糊处理")) {
-                        try {
-                            while (iterator.hasNext()) {
-                                String path = iterator.next();
-                                String target = Handler.getNewFilePath(path);
-                                LOG.info("操作步骤:设置模糊处理 操作对象: {}", path);
-                                videoExecutor.blur(path, target);
-                                iterator.set(target);
-                                deletePathSet.add(path);
-                                Thread.sleep(500);
-                            }
-                        } catch (InterruptedException e) {
-                            LOG.info("批量设置模糊处理出错!  {}", e.getMessage());
-                            e.printStackTrace();
                         }
-
-                    }
-                    if (selected.equals("色彩变幻")) {
-                        try {
-                            while (iterator.hasNext()) {
-                                String path = iterator.next();
-                                String target = Handler.getNewFilePath(path);
-                                LOG.info("操作步骤:设置色彩变幻 操作对象: {}", path);
-                                videoExecutor.colorChange(path, target);
-                                iterator.set(target);
-                                deletePathSet.add(path);
+                        if (selected.equals("模糊处理")) {
+                            try {
+                                String target = Handler.getNewFilePath(currentPath);
+                                LOG.info("操作步骤:设置模糊处理 操作对象: {}", currentPath);
+                                executor.blur(currentPath, target);
+                                deletePathSet.add(currentPath);
                                 Thread.sleep(500);
+                                allPathList.add(target);
+                                currentPath = target;
+                            } catch (InterruptedException e) {
+                                LOG.info("批量设置模糊处理出错!  {}", e.getMessage());
+                                e.printStackTrace();
                             }
-                        } catch (InterruptedException e) {
-                            LOG.info("批量设置色彩变幻出错! {}", e.getMessage());
-                            e.printStackTrace();
+
+                        }
+                        if (selected.equals("色彩变幻")) {
+                            try {
+                                String target = Handler.getNewFilePath(currentPath);
+                                LOG.info("操作步骤:设置色彩变幻 操作对象: {}", currentPath);
+                                executor.colorChange(currentPath, target);
+                                deletePathSet.add(currentPath);
+                                Thread.sleep(500);
+                                allPathList.add(target);
+                                currentPath = target;
+                            } catch (InterruptedException e) {
+                                LOG.info("批量设置色彩变幻出错! {}", e.getMessage());
+                                e.printStackTrace();
+                            }
                         }
                     }
-                }
 
-                //增加视频帧率
-                if (addFramerateSelected) {
-                    LOG.info("增加视频速率");
-                    String frameRate = addFramerateTextField.getText();
-                    ListIterator<String> iterator = targetPathList.listIterator();
-                    try {
-                        while (iterator.hasNext()) {
-                            String path = iterator.next();
-                            Platform.runLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    batchProgressBar.autoAdd();
-                                    batchProgressBar.setLabel("正在批量增加视频速率 " + Handler.getFileName(path));
-                                }
-                            });
-                            String target = Handler.getNewFilePath(path);
-                            LOG.info("操作步骤:增加视频速率 操作对象: {}", path);
-                            videoExecutor.addFramerate(path, target, frameRate);
+                    //增加视频帧率
+                    if (addFramerateSelected) {
+                        LOG.info("增加视频速率");
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                batchProgressBar.autoAdd();
+                                batchProgressBar.setLabel("正在批量增加视频速率 " + Handler.getFileName(path));
+                            }
+                        });
+                        String frameRate = addFrameRateTextField.getText();
+                        try {
+                            String target = Handler.getNewFilePath(currentPath);
+                            LOG.info("操作步骤:增加视频速率 操作对象: {}", currentPath);
+                            executor.addFramerate(currentPath, target, frameRate);
                             Thread.sleep(500);
-                            deletePathSet.add(path);
-                            iterator.set(target);
+                            deletePathSet.add(currentPath);
+                            allPathList.add(target);
+                            currentPath = target;
+                        } catch (InterruptedException e) {
+                            LOG.info("批量设置镜像效果增加视频速率 {}", e.getMessage());
+                            e.printStackTrace();
                         }
-                    } catch (InterruptedException e) {
-                        LOG.info("批量设置镜像效果增加视频速率 {}", e.getMessage());
-                        e.printStackTrace();
+
                     }
 
-                }
-
-                //降低视频帧率
-                if (reduceFramerateSelected) {
-                    String frameRate = reduceFramerateTextField.getText();
-                    ListIterator<String> iterator = targetPathList.listIterator();
-                    try {
-                        while (iterator.hasNext()) {
-                            String path = iterator.next();
-                            Platform.runLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    batchProgressBar.autoAdd();
-                                    batchProgressBar.setLabel("正在批量降低视频帧率 " + Handler.getFileName(path));
-                                }
-                            });
-                            String target = Handler.getNewFilePath(path);
-                            LOG.info("操作步骤:降低视频帧率 操作对象: {}", path);
-                            videoExecutor.reduceFramerate(path, target, frameRate);
-                            iterator.set(target);
-                            deletePathSet.add(path);
+                    //降低视频帧率
+                    if (reduceFramerateSelected) {
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                batchProgressBar.autoAdd();
+                                batchProgressBar.setLabel("正在批量降低视频帧率 " + Handler.getFileName(path));
+                            }
+                        });
+                        String frameRate = reduceFrameRateTextField.getText();
+                        try {
+                            String target = Handler.getNewFilePath(currentPath);
+                            LOG.info("操作步骤:降低视频帧率 操作对象: {}", currentPath);
+                            executor.reduceFramerate(currentPath, target, frameRate);
+                            deletePathSet.add(currentPath);
                             Thread.sleep(500);
+                            allPathList.add(target);
+                            currentPath = target;
+                        } catch (InterruptedException e) {
+                            LOG.info("批量降低视频帧率! {}", e.getMessage());
+                            e.printStackTrace();
                         }
-                    } catch (InterruptedException e) {
-                        LOG.info("批量降低视频帧率! {}", e.getMessage());
-                        e.printStackTrace();
+
                     }
 
-                }
-
-                //合并多个视频
-//            if (mergeVideoSelected) {
-//                String newTargetPath = Handler.getNewFilePath("D:\\MaXinHai\\file\\1.mp4");
-//                videoExecutor.mergeVideo(filePathList, newTargetPath);
-//                try {
-//                    Runtime.getRuntime().exec("cmd /c " + newTargetPath);
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-
-                //模糊视频背景
-                if (blurBackgroundSelected) {
-                    ListIterator<String> iterator = targetPathList.listIterator();
-                    try {
-                        while (iterator.hasNext()) {
-                            String path = iterator.next();
-                            Platform.runLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    batchProgressBar.autoAdd();
-                                    batchProgressBar.setLabel("正在批量模糊视频背景 " + Handler.getFileName(path));
-                                }
-                            });
-                            String target = Handler.getNewFilePath(path);
-                            LOG.info("操作步骤:设置模糊视频背景 操作对象: {}", path);
-                            videoExecutor.blurBackground(path, target);
+                    //模糊视频背景
+                    if (blurBackgroundSelected) {
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                batchProgressBar.autoAdd();
+                                batchProgressBar.setLabel("正在批量模糊视频背景 " + Handler.getFileName(path));
+                            }
+                        });
+                        try {
+                            String target = Handler.getNewFilePath(currentPath);
+                            LOG.info("操作步骤:设置模糊视频背景 操作对象: {}", currentPath);
+                            executor.blurBackground(currentPath, target);
                             Thread.sleep(500);
-                            deletePathSet.add(path);
-                            iterator.set(target);
+                            deletePathSet.add(currentPath);
+                            allPathList.add(target);
+                            currentPath = target;
+                        } catch (Exception e) {
+                            LOG.info("批量设置模糊视频背景出错! {}", e.getMessage());
+                            e.printStackTrace();
                         }
-                    } catch (Exception e) {
-                        LOG.info("批量设置模糊视频背景出错! {}", e.getMessage());
-                        e.printStackTrace();
                     }
+
+                    //设置封面
+                    if (setCoverSelected) {
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                batchProgressBar.autoAdd();
+                                batchProgressBar.setLabel("正在批量设置视频封面 " + Handler.getFileName(path));
+                            }
+                        });
+                        String imgPath = coverPath.getText();
+                        if(null == imgPath || "".equals(imgPath)) {
+                            new RuntimeException("未设置封面文件!");
+                        }
+                        //TODO 宽和高暂时没有
+                        //String height = coverHeight.getText();
+                        //String width = coverWidth.getText();
+                        try {
+                            String target = Handler.getNewFilePath(currentPath);
+                            LOG.info("操作步骤:批量设置封面 操作对象: {}", currentPath);
+                            executor.setCover(currentPath, imgPath, target);
+                            Thread.sleep(500);
+                            deletePathSet.add(currentPath);
+                            allPathList.add(target);
+                        } catch (InterruptedException e) {
+                            LOG.info("批量设置封面出错! {}", e.getMessage());
+                            e.printStackTrace();
+                        }
+                    }
+
+                    endGate.countDown();
+                    LOG.info("任务数量: {}", endGate.getCount());
+                });
+                executorService.execute(thread);
+            });
+
+            new Thread(()->{
+                //判断线程池里的线程是否全部执行完毕
+                try {
+                    endGate.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
 
-                //设置封面
-                if (setCoverSelected) {
-                    ListIterator<String> iterator = targetPathList.listIterator();
-                    String imgPath = coverPath.getText();
-                    if(null == imgPath || "".equals(imgPath)) {
-                        new RuntimeException("未设置封面文件!");
+                LOG.info("所有视频: {}", allPathList);
+                LOG.info("要删除的视频: {}", deletePathSet);
+                //所有线程产生的视频路径减去所有线程要删除的视频路径就是最终的视频
+                allPathList.removeAll(deletePathSet);
+
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        MyHome.setLeft(null, allPathList);
+                        File videoFile = new File(targetPathList.get(0));
+                        //播放第一个视频并让播放组件播放视频
+                        MyMediaPlayer.chooseFile(videoFile);
+                        batchProgressBar.setValue(1);
+                        batchProgressBar.setLabel("执行完毕!");
+                        dealWithBath.setDisable(false);
                     }
-                    //TODO 宽和高暂时没有
-                    //String height = coverHeight.getText();
-                    //String width = coverWidth.getText();
-                    try {
-                        while (iterator.hasNext()) {
-                            String path = iterator.next();
-                            Platform.runLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    batchProgressBar.autoAdd();
-                                    batchProgressBar.setLabel("正在批量设置视频封面 " + Handler.getFileName(path));
-                                }
-                            });
-                            String target = Handler.getNewFilePath(path);
-                            LOG.info("操作步骤:批量设置封面 操作对象: {}", path);
-                            videoExecutor.setCover(path, imgPath, target);
-                            Thread.sleep(500);
-                            deletePathSet.add(path);
-                            iterator.set(target);
-                        }
-                    } catch (InterruptedException e) {
-                        LOG.info("批量设置封面出错! {}", e.getMessage());
-                        e.printStackTrace();
-                    }
-                }
+                });
 
                 LOG.info("开始删除多余文件...");
                 deletePathSet.forEach(delPath -> {
                     Handler.deleteFile(delPath);
                 });
                 LOG.info("删除多余文件完毕...");
-
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        MyHome.setLeft(null, targetPathList);
-                        File videoFile = new File(targetPathList.get(0));
-                        //播放第一个视频并让播放组件播放视频
-                        MyMediaPlayer.chooseFile(videoFile);
-                        dealWithBath.setDisable(false);
-
-                        batchProgressBar.setValue(1);
-                        batchProgressBar.setLabel("执行完毕!");
-                    }
-                });
-
             }).start();
         });
+
         dealWithBox.getChildren().addAll(dealWithSingle, dealWithBath);
 
         //跳转场景后，恢复用户数据
@@ -1921,13 +1169,14 @@ public class MyFunction {
         vbox.getChildren().addAll(setCoverBox, setCoverBox1); //设置视频封面
         vbox.getChildren().addAll(getCoverBox); //截图图片
         vbox.getChildren().addAll(addFilterBox); //添加滤镜效果
-        vbox.getChildren().addAll(addFramerateBox, reduceFramerateBox); //视频加速 减速
+        vbox.getChildren().addAll(addFrameRateBox, reduceFrameRateBox); //视频加速 减速
         //vbox.getChildren().addAll(mergeVideoBox); //合并多个视频
         vbox.getChildren().addAll(blurBackgroundBox); //视频背景虚化
         vbox.getChildren().addAll(addWatermarkBox, addWatermarkBox1, /*addWatermarkBox2,*/ addWatermarkBox3); //添加水印
         vbox.getChildren().addAll(addVideoBox, addVideoBox1, addVideoBox2); //添加片头片尾
         vbox.getChildren().addAll(dealWithBox); //处理按钮
-        vbox.getChildren().addAll(singleSchedule, batchSchedule); //任务进度条
+        vbox.getChildren().addAll(singleSchedule); //任务进度条
+        vbox.getChildren().addAll(batchSchedule);
         return vbox;
     }
 
@@ -2057,7 +1306,7 @@ public class MyFunction {
                 }
             }
         });
-        addFramerateTextField.textProperty().addListener(new ChangeListener<String>() {
+        addFrameRateTextField.textProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
                 if(null != newValue && !"".equals(newValue)) {
@@ -2068,7 +1317,7 @@ public class MyFunction {
                 }
             }
         });
-        reduceFramerateTextField.textProperty().addListener(new ChangeListener<String>() {
+        reduceFrameRateTextField.textProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
                 if(null != newValue && !"".equals(newValue)) {
@@ -2309,14 +1558,14 @@ public class MyFunction {
         }
         //视频加速
         if(addFramerateSelected) {
-            String frameRate = addFramerateTextField.getText();
+            String frameRate = addFrameRateTextField.getText();
             List<String> data = new ArrayList<>(1);
             data.add(frameRate);
             Handler.putUserOperating("视频加速", data);
         }
         //视频减速
         if(reduceFramerateSelected) {
-            String frameRate = reduceFramerateTextField.getText();
+            String frameRate = reduceFrameRateTextField.getText();
             List<String> data = new ArrayList<>(1);
             data.add(frameRate);
             Handler.putUserOperating("视频减速", data);
@@ -2398,14 +1647,14 @@ public class MyFunction {
             addFramerate.setSelected(true);
             List<String> data = allUserOperatingCache.get("视频加速");
             if (!EmptyUtils.isEmpty(data)) {
-                addFramerateTextField.setText(data.get(0));
+                addFrameRateTextField.setText(data.get(0));
             }
         }
         if(allUserOperatingCache.containsKey("视频减速")) {
             reduceFramerate.setSelected(true);
             List<String> data = allUserOperatingCache.get("视频减速");
             if (!EmptyUtils.isEmpty(data)) {
-                reduceFramerateTextField.setText(data.get(0));
+                reduceFrameRateTextField.setText(data.get(0));
             }
         }
         if(allUserOperatingCache.containsKey("背景虚化")) {

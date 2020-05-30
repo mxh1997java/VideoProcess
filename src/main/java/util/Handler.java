@@ -725,7 +725,7 @@ public class Handler {
             new RuntimeException(targetFolderPath + "不是文件夹!");
         }
 
-        ExecutorService service = MyExecutorService.getMyExecutorService();
+        ExecutorService service = MyExecutorService.getTaskExecutor();
         Integer flag = 0;
         File[] files = sourceFolder.listFiles();
         try {
