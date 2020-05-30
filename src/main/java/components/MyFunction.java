@@ -361,7 +361,7 @@ public class MyFunction {
             singleProgressBar.setValue(0.0);
             singleProgressBar.setLabel("开始执行");
 
-            new Thread(()->{
+            Thread task = new Thread(()->{
                 boolean addWatermarkSelected = addWatermark.isSelected();
                 boolean delWatermarkSelected = delWatermark.isSelected();
                 boolean cutVideoSelected = cutVideo.isSelected();
@@ -668,7 +668,8 @@ public class MyFunction {
 //                        myProgressBar.setVisible(false);
                     }
                 });
-            }).start();
+            });
+            MyExecutorService.getTaskExecutor().execute(task);
         });
 
         //批量处理
@@ -732,7 +733,7 @@ public class MyFunction {
 
             ExecutorService executorService = MyExecutorService.getTaskExecutor();
             filePathList.forEach(path -> {
-                Thread thread = new Thread(()->{
+                Thread task = new Thread(()->{
                     final  VideoExecutor executor = new VideoExecutor();
                     String currentPath = path;
 
@@ -742,7 +743,7 @@ public class MyFunction {
                             @Override
                             public void run() {
                                 batchProgressBar.autoAdd();
-                                batchProgressBar.setLabel("正在批量截取视频图片 " + Handler.getFileName(path));
+                                batchProgressBar.setLabel("正在截取视频图片 " + Handler.getFileName(path));
                             }
                         });
                         String time = cutVideoTime.getText();
@@ -755,6 +756,8 @@ public class MyFunction {
                             Handler.addCoverPath(target);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
+                        } finally {
+                            dealWithBath.setDisable(false);
                         }
                     }
                     //删除水印
@@ -763,7 +766,7 @@ public class MyFunction {
                             @Override
                             public void run() {
                                 batchProgressBar.autoAdd();
-                                batchProgressBar.setLabel("正在批量消除水印 " + Handler.getFileName(path));
+                                batchProgressBar.setLabel("正在消除水印 " + Handler.getFileName(path));
                             }
                         });
                         String x = delWatermarkOfX.getText();
@@ -792,6 +795,8 @@ public class MyFunction {
                         } catch (InterruptedException e) {
                             LOG.info("批量消除水印出错! {}", e.getMessage());
                             e.printStackTrace();
+                        } finally {
+                            dealWithBath.setDisable(false);
                         }
                     }
                     //添加水印
@@ -800,7 +805,7 @@ public class MyFunction {
                             @Override
                             public void run() {
                                 batchProgressBar.autoAdd();
-                                batchProgressBar.setLabel("正在批量添加水印 " + Handler.getFileName(path));
+                                batchProgressBar.setLabel("正在添加水印 " + Handler.getFileName(path));
                             }
                         });
                         String x = addWatermarkOfX.getText();
@@ -817,6 +822,8 @@ public class MyFunction {
                         } catch (InterruptedException e) {
                             LOG.info("批量添加水印失败! {}", e.getMessage());
                             e.printStackTrace();
+                        } finally {
+                            dealWithBath.setDisable(false);
                         }
                     }
                     //添加片头片尾
@@ -825,7 +832,7 @@ public class MyFunction {
                             @Override
                             public void run() {
                                 batchProgressBar.autoAdd();
-                                batchProgressBar.setLabel("正在批量添加片头片尾 " + Handler.getFileName(path));
+                                batchProgressBar.setLabel("正在添加片头片尾 " + Handler.getFileName(path));
                             }
                         });
                         String startVideoPath = startVideoText.getText();
@@ -841,6 +848,8 @@ public class MyFunction {
                         } catch (InterruptedException e) {
                             LOG.info("批量添加片头片尾出错! {}", e.getMessage());
                             e.printStackTrace();
+                        } finally {
+                            dealWithBath.setDisable(false);
                         }
                     }
                     if (cutVideoSelected) {
@@ -848,7 +857,7 @@ public class MyFunction {
                             @Override
                             public void run() {
                                 batchProgressBar.autoAdd();
-                                batchProgressBar.setLabel("正在批量剪切视频 " + Handler.getFileName(path));
+                                batchProgressBar.setLabel("正在剪切视频 " + Handler.getFileName(path));
                             }
                         });
                         String start = startTime.getText();
@@ -874,6 +883,8 @@ public class MyFunction {
                         } catch (InterruptedException e) {
                             LOG.info("批量剪切视频出错! {}", e.getMessage());
                             e.printStackTrace();
+                        } finally {
+                            dealWithBath.setDisable(false);
                         }
                     }
                     if (addFilterSelected) {
@@ -882,7 +893,7 @@ public class MyFunction {
                             @Override
                             public void run() {
                                 batchProgressBar.autoAdd();
-                                batchProgressBar.setLabel("正在批量添加滤镜,滤镜效果:" + selected);
+                                batchProgressBar.setLabel("正在添加滤镜,滤镜效果:" + selected);
                             }
                         });
                         if (selected.equals("镜像")) {
@@ -996,6 +1007,8 @@ public class MyFunction {
                             } catch (InterruptedException e) {
                                 LOG.info("批量设置模糊处理出错!  {}", e.getMessage());
                                 e.printStackTrace();
+                            } finally {
+                                dealWithBath.setDisable(false);
                             }
 
                         }
@@ -1011,6 +1024,8 @@ public class MyFunction {
                             } catch (InterruptedException e) {
                                 LOG.info("批量设置色彩变幻出错! {}", e.getMessage());
                                 e.printStackTrace();
+                            } finally {
+                                dealWithBath.setDisable(false);
                             }
                         }
                     }
@@ -1022,7 +1037,7 @@ public class MyFunction {
                             @Override
                             public void run() {
                                 batchProgressBar.autoAdd();
-                                batchProgressBar.setLabel("正在批量增加视频速率 " + Handler.getFileName(path));
+                                batchProgressBar.setLabel("正在增加视频速率 " + Handler.getFileName(path));
                             }
                         });
                         String frameRate = addFrameRateTextField.getText();
@@ -1037,8 +1052,9 @@ public class MyFunction {
                         } catch (InterruptedException e) {
                             LOG.info("批量设置镜像效果增加视频速率 {}", e.getMessage());
                             e.printStackTrace();
+                        } finally {
+                            dealWithBath.setDisable(false);
                         }
-
                     }
 
                     //降低视频帧率
@@ -1047,7 +1063,7 @@ public class MyFunction {
                             @Override
                             public void run() {
                                 batchProgressBar.autoAdd();
-                                batchProgressBar.setLabel("正在批量降低视频帧率 " + Handler.getFileName(path));
+                                batchProgressBar.setLabel("正在降低视频帧率 " + Handler.getFileName(path));
                             }
                         });
                         String frameRate = reduceFrameRateTextField.getText();
@@ -1062,8 +1078,9 @@ public class MyFunction {
                         } catch (InterruptedException e) {
                             LOG.info("批量降低视频帧率! {}", e.getMessage());
                             e.printStackTrace();
+                        } finally {
+                            dealWithBath.setDisable(false);
                         }
-
                     }
 
                     //模糊视频背景
@@ -1072,7 +1089,7 @@ public class MyFunction {
                             @Override
                             public void run() {
                                 batchProgressBar.autoAdd();
-                                batchProgressBar.setLabel("正在批量模糊视频背景 " + Handler.getFileName(path));
+                                batchProgressBar.setLabel("正在模糊视频背景 " + Handler.getFileName(path));
                             }
                         });
                         try {
@@ -1086,6 +1103,8 @@ public class MyFunction {
                         } catch (Exception e) {
                             LOG.info("批量设置模糊视频背景出错! {}", e.getMessage());
                             e.printStackTrace();
+                        } finally {
+                            dealWithBath.setDisable(false);
                         }
                     }
 
@@ -1095,7 +1114,7 @@ public class MyFunction {
                             @Override
                             public void run() {
                                 batchProgressBar.autoAdd();
-                                batchProgressBar.setLabel("正在批量设置视频封面 " + Handler.getFileName(path));
+                                batchProgressBar.setLabel("正在设置视频封面 " + Handler.getFileName(path));
                             }
                         });
                         String imgPath = coverPath.getText();
@@ -1115,16 +1134,18 @@ public class MyFunction {
                         } catch (InterruptedException e) {
                             LOG.info("批量设置封面出错! {}", e.getMessage());
                             e.printStackTrace();
+                        } finally {
+                            dealWithBath.setDisable(false);
                         }
                     }
 
                     endGate.countDown();
                     LOG.info("任务数量: {}", endGate.getCount());
                 });
-                executorService.execute(thread);
+                executorService.execute(task);
             });
 
-            new Thread(()->{
+            Thread uploadUI = new Thread(()->{
                 //判断线程池里的线程是否全部执行完毕
                 try {
                     endGate.await();
@@ -1155,7 +1176,8 @@ public class MyFunction {
                     Handler.deleteFile(delPath);
                 });
                 LOG.info("删除多余文件完毕...");
-            }).start();
+            });
+            executorService.execute(uploadUI);
         });
 
         dealWithBox.getChildren().addAll(dealWithSingle, dealWithBath);
