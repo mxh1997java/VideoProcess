@@ -20,6 +20,7 @@ import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.EmptyUtils;
 import util.Handler;
 import ws.schild.jave.MultimediaInfo;
 
@@ -45,6 +46,9 @@ public class MyMediaPlayer {
     private static Label lbCurrentTime = new Label();
 
     public static BorderPane getMediaPlayer() {
+        if(EmptyUtils.isNotEmpty(Handler.getCurrentVideoPath())) {
+            source = Handler.getCurrentVideoPath();
+        }
         media = new Media(new File(source).toURI().toString());
         mplayer = new MediaPlayer(media);
         mView = new MediaView(mplayer);

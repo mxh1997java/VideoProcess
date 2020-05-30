@@ -100,11 +100,15 @@ public class MyMenuBar {
         MenuItem home = new MenuItem("首页");
         home.setOnAction((ActionEvent even) -> {
             Scene homeScene = MyHome.getHome(primaryStage);
+            //保存首页功能区域已勾选选项和填入的数据
+            MyFunction.saveUserOperatingCache();
             primaryStage.setScene(homeScene);
         });
         MenuItem config = new MenuItem("配置");
         config.setOnAction((ActionEvent even) -> {
             Scene configScene = ConfigPage.getConfigPage(primaryStage);
+            //保存首页功能区域已勾选选项和填入的数据
+            MyFunction.saveUserOperatingCache();
             primaryStage.setScene(configScene);
         });
         menuView.getItems().addAll(home, config);

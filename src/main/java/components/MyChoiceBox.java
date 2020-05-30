@@ -26,6 +26,27 @@ public class MyChoiceBox {
     private static String selected;
 
     /**
+     * 下拉框对象
+     */
+    private static ChoiceBox<String> choiceBox;
+
+    /**
+     * 设置默认选项
+     * @param itemIndex
+     */
+    public static void selectItem(int itemIndex) {
+        choiceBox.getSelectionModel().select(itemIndex);
+    }
+
+    /**
+     * 设置默认选项
+     * @param item
+     */
+    public static void selectItem(String item) {
+        choiceBox.getSelectionModel().select(item);
+    }
+
+    /**
      * 传入下拉框选项集合返回下拉框组件
      * @param list
      * @return
@@ -36,7 +57,8 @@ public class MyChoiceBox {
         // 集合转数组
         String[] strs = new String[list.size()];
         list.toArray(strs);
-        final ChoiceBox<String> choiceBox = new ChoiceBox<String>(observableList);
+        //final ChoiceBox<String>
+        choiceBox = new ChoiceBox<String>(observableList);
         choiceBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             public void changed(ObservableValue ov, Number value, Number new_value) {
                 LOG.info("选择: " + strs[new_value.intValue()]);
@@ -59,7 +81,8 @@ public class MyChoiceBox {
         // 集合转数组
         String[] strs = new String[list.size()];
         list.toArray(strs);
-        final ChoiceBox<String> choiceBox = new ChoiceBox<String>(observableList);
+        //final ChoiceBox<String>
+        choiceBox = new ChoiceBox<String>(observableList);
         choiceBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             public void changed(ObservableValue ov, Number value, Number new_value) {
                 LOG.info("选择: " + strs[new_value.intValue()]);

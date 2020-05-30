@@ -3,7 +3,6 @@ package util;
 import components.MyAlertBox;
 import components.MyListView;
 import executor.VideoExecutor;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +10,6 @@ import processor.FFMPEGExecutor;
 import task.CopyFileTask;
 import task.MyExecutorService;
 import ws.schild.jave.MultimediaInfo;
-
 import java.io.*;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
@@ -38,7 +36,7 @@ public class Handler {
     private static Set<String> fileTypeSet = new HashSet<>();
 
     /**
-     * 存储页面数据
+     * 存储页面数据（已处理视频栏和未处理视频栏数据）
      */
     private static Map<String, List<String>> dataListMap = new HashMap<>();
 
@@ -94,6 +92,65 @@ public class Handler {
      * 功能区域复选框选择结果
      */
     private static List<Boolean> checkBoxList = new ArrayList<>();
+
+    /**
+     * 功能区域用户操作缓存
+     */
+    private static Map<String, List<String>> userOperatingCache = new HashMap<>();
+
+    /**
+     * 当前播放的视频
+     */
+    private static String currentVideoPath = null;
+
+    /**
+     * 获取当前播放的视频路径
+     * @return
+     */
+    public static String getCurrentVideoPath() {
+        return currentVideoPath;
+    }
+
+    /**
+     * 设置当前播放的视频路径
+     * @param currentVideoPath
+     */
+    public static void setCurrentVideoPath(String currentVideoPath) {
+        Handler.currentVideoPath = currentVideoPath;
+    }
+
+    /**
+     * 根据functionName存放用户数据 如:删除水印 x、y、width、height
+     * @param functionName
+     * @param cache
+     */
+    public static void putUserOperating(String functionName, List<String> cache) {
+        userOperatingCache.put(functionName, cache);
+    }
+
+    /**
+     * 根据functionName获取用户数据 如:删除水印
+     * @param functionName
+     * @return
+     */
+    public static List<String> getUserOperatingCache(String functionName) {
+        return userOperatingCache.get(functionName);
+    }
+
+    /**
+     * 清空用户操作缓存
+     */
+    public static void clearUserOperatingCache() {
+        userOperatingCache.clear();
+    }
+
+    /**
+     * 获取所有用户操作缓存
+     * @return
+     */
+    public static Map<String, List<String>> getAllUserOperatingCache() {
+        return userOperatingCache;
+    }
 
     /**
      * 添加复选框选择结果

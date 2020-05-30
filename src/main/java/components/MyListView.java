@@ -114,6 +114,7 @@ public class MyListView {
                 .addListener((ObservableValue<? extends String> ov, String old_val, String new_val) -> {
                     LOG.info("您点了第{}项，视频名称是{}", listView.getSelectionModel().getSelectedIndex(), listView.getSelectionModel().getSelectedItem());
                     currentVideoPath = filePathList.get(listView.getSelectionModel().getSelectedIndex());
+                    Handler.setCurrentVideoPath(currentVideoPath);
                     label.setText(currentVideoPath);
 
                     //选择视频地址并让播放组件播放视频
