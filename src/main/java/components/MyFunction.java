@@ -117,15 +117,11 @@ public class MyFunction {
         //添加水印
         HBox addWatermarkBox = new HBox();
         addWatermarkBox.setPadding(new Insets(5, 5, 5, 5));
-        //CheckBox addWatermark = new CheckBox("添加水印");
-        addListener(addWatermark);
         HBox addWatermarkBox1 = new HBox();
         addWatermarkBox1.setPadding(new Insets(5, 5, 5, 5));
         Label watermarkXAxisLabel = new Label(" 水印x轴: ");
-        //TextField addWatermarkOfX = new TextField();
         addWatermarkOfX.setPrefWidth(100);
         Label watermarkYAxisLabel = new Label(" 水印y轴: ");
-        //TextField addWatermarkOfY = new TextField();
         addWatermarkOfY.setPrefWidth(100);
 //        HBox addWatermarkBox2 = new HBox();
 //        addWatermarkBox2.setPadding(new Insets(5, 5, 5, 5));
@@ -138,35 +134,26 @@ public class MyFunction {
         HBox addWatermarkBox3 = new HBox();
         addWatermarkBox3.setPadding(new Insets(5, 5, 5, 5));
         Label watermarkContentLabel = new Label(" 水印内容: ");
-        //TextField addWatermarkOfContent = new TextField();
         addWatermarkOfContent.setPrefWidth(150);
         addWatermarkBox.getChildren().addAll(addWatermark);
         addWatermarkBox1.getChildren().addAll(watermarkXAxisLabel, addWatermarkOfX);
         addWatermarkBox1.getChildren().addAll(watermarkYAxisLabel, addWatermarkOfY);
-//        addWatermarkBox2.getChildren().addAll(watermarkWidthLabel, addWatermarkOfWidth);
-//        addWatermarkBox2.getChildren().addAll(watermarkHeightLabel, addWatermarkOfHeight);
         addWatermarkBox3.getChildren().addAll(watermarkContentLabel, addWatermarkOfContent);
 
         //删除水印
         HBox delWatermarkBox = new HBox();
         delWatermarkBox.setPadding(new Insets(5, 5, 5, 5));
-        //CheckBox delWatermark = new CheckBox("删除水印");
-        addListener(delWatermark);
         HBox delWatermarkBox1 = new HBox();
         delWatermarkBox1.setPadding(new Insets(5, 5, 5, 5));
         Label deleteWatermarkXAxisLabel = new Label(" 水印x轴: ");
-        //TextField delWatermarkOfX = new TextField();
         delWatermarkOfX.setPrefWidth(100);
         Label deleteWatermarkYAxisLabel = new Label(" 水印y轴: ");
-        //TextField delWatermarkOfY = new TextField();
         delWatermarkOfY.setPrefWidth(100);
         HBox delWatermarkBox2 = new HBox();
         delWatermarkBox2.setPadding(new Insets(5, 5, 5, 5));
         Label deleteWatermarkWidthLabel = new Label(" 水印宽度: ");
-        //TextField delWatermarkOfWidth = new TextField();
         delWatermarkOfWidth.setPrefWidth(100);
         Label deleteWatermarkHeightLabel = new Label(" 水印高度: ");
-        //TextField delWatermarkOfHeight = new TextField();
         delWatermarkOfHeight.setPrefWidth(100);
 
         //将删除水印文本框对象放入缓存
@@ -201,18 +188,12 @@ public class MyFunction {
         //截取视频
         HBox cutVideoBox = new HBox();
         cutVideoBox.setPadding(new Insets(5, 5, 5, 5));
-        //CheckBox cutVideo = new CheckBox("去头去尾");
-        addListener(cutVideo);
         HBox cutVideoBox1 = new HBox();
         cutVideoBox1.setPadding(new Insets(5, 5, 5, 5));
         Label startTimeLabel = new Label(" 开头删除");
-        //TextField startTime = new TextField();
         startTime.setPrefWidth(50);
-        addListener(startTime);
         Label startTimeLabel1 = new Label("秒");
         Label endTimeLabel = new Label("  结尾删除");
-        //TextField endTime = new TextField();
-        addListener(endTime);
         endTime.setPrefWidth(50);
         Label endTimeLabel1 = new Label("秒");
         cutVideoBox.getChildren().addAll(cutVideo);
@@ -223,12 +204,9 @@ public class MyFunction {
         //设置视频封面
         HBox setCoverBox = new HBox();
         setCoverBox.setPadding(new Insets(5, 5, 5, 5));
-        //CheckBox setCover = new CheckBox("设置封面");
-        addListener(setCover);
         HBox setCoverBox1 = new HBox();
         setCoverBox1.setPadding(new Insets(5, 5, 5, 5));
         Label coverPathLabel = new Label(" 封面路径: ");
-        //TextField coverPath = new TextField();
         coverPath.setPrefWidth(150);
         Button imgChooserButton = new Button("请选择");
         imgChooserButton.setOnAction(even -> {
@@ -253,25 +231,15 @@ public class MyFunction {
         //获取视频封面
         HBox getCoverBox = new HBox();
         getCoverBox.setPadding(new Insets(5, 5, 5, 5));
-        //CheckBox getCover = new CheckBox("截取图片");
-        addListener(getCover);
-        //HBox getCoverBox1 = new HBox();
         Label cutVideoTimeLabel = new Label(" 视频时间: ");
-        //TextField cutVideoTime = new TextField();
         cutVideoTime.setPrefWidth(100);
         getCoverBox.getChildren().addAll(getCover, cutVideoTimeLabel, cutVideoTime);
-        //getCoverBox1.getChildren().addAll(cutVideoTimeLabel, cutVideoTime);
 
 
         //添加滤镜
         HBox addFilterBox = new HBox();
         addFilterBox.setPadding(new Insets(5, 5, 5, 5));
-        //CheckBox addFilter = new CheckBox(" 添加滤镜 ");
-        addListener(addFilter);
-        List<String> itemList = Handler.getFilterList();
-        //TextField acvPath = new TextField();
         acvPath.setVisible(false);
-        //Button psChooserButton = new Button("请选择");
         psChooserButton.setOnAction(even -> {
             File file = MyChooser.getAllFileChooser().showOpenDialog(primaryStage);
             if (file != null) {
@@ -280,17 +248,13 @@ public class MyFunction {
             }
         });
         psChooserButton.setVisible(false);
-        //ChoiceBox<String> choiceBox = MyChoiceBox.getChoiceBox(itemList, psChooserButton);
         addFilterBox.getChildren().addAll(addFilter, choiceBox, psChooserButton);
 
 
         //视频加速
         HBox addFramerateBox = new HBox();
         addFramerateBox.setPadding(new Insets(5));
-        //CheckBox addFramerate = new CheckBox(" 视频加速 ");
-        addListener(addFramerate);
         Label addFramerateLabel = new Label("加速倍数: ");
-        //TextField addFramerateTextField = new TextField();
         addFramerateTextField.setPrefWidth(100);
         addFramerateBox.getChildren().addAll(addFramerate, addFramerateLabel, addFramerateTextField);
 
@@ -298,10 +262,7 @@ public class MyFunction {
         //视频减速
         HBox reduceFramerateBox = new HBox();
         reduceFramerateBox.setPadding(new Insets(5,5,5,5));
-        //CheckBox reduceFramerate = new CheckBox(" 视频减速 ");
-        addListener(reduceFramerate);
         Label reduceFramerateLabel = new Label(" 减速倍数: ");
-        //TextField reduceFramerateTextField = new TextField();
         reduceFramerateTextField.setPrefWidth(100);
         reduceFramerateBox.getChildren().addAll(reduceFramerate, reduceFramerateLabel, reduceFramerateTextField);
 
@@ -325,19 +286,14 @@ public class MyFunction {
         //视频背景虚化
         HBox blurBackgroundBox = new HBox();
         blurBackgroundBox.setPadding(new Insets(5,5,5,5));
-        //CheckBox blurBackground = new CheckBox(" 背景虚化 ");
-        addListener(blurBackground);
         blurBackgroundBox.getChildren().addAll(blurBackground);
 
         //添加片头片尾
         HBox addVideoBox = new HBox();
         addVideoBox.setPadding(new Insets(5,5,5,5));
-        //CheckBox addVideo = new CheckBox("添加片头片尾");
-        addListener(addVideo);
         HBox addVideoBox1 = new HBox();
         addVideoBox1.setPadding(new Insets(5));
         Label startVideoLabel = new Label(" 片头: ");
-        //TextField startVideoText = new TextField(); //"请选择片头"
         Button startVideoButton = new Button("请选择");
         startVideoButton.setOnAction(even -> {
             File file = MyChooser.getFileChooser().showOpenDialog(primaryStage);
@@ -349,7 +305,6 @@ public class MyFunction {
         HBox addVideoBox2 = new HBox();
         addVideoBox2.setPadding(new Insets(5,5,5,5));
         Label endVideoLabel = new Label(" 片尾: ");
-        //TextField endVideoText = new TextField(); //"请选择片尾"
         Button endVideoButton = new Button("请选择");
         endVideoButton.setOnAction(even -> {
             File file = MyChooser.getFileChooser().showOpenDialog(primaryStage);
@@ -1977,12 +1932,9 @@ public class MyFunction {
     }
 
 
-    /**
-     * 给复选框添加监听事件
-     * @param checkBox
-     */
-    private static void addListener(CheckBox checkBox) {
-        checkBox.selectedProperty().addListener(new ChangeListener<Boolean>() {
+    static {
+        //给复选框添加监听事件
+        addWatermark.selectedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
                 if(newValue) {
@@ -1993,15 +1945,97 @@ public class MyFunction {
                 LOG.info("当前选择结果: {}, 复选框选择结果: {}", newValue, Handler.getCheckBoxList().size());
             }
         });
-    }
+        delWatermark.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if(newValue) {
+                    Handler.addSelect(newValue);
+                } else {
+                    Handler.removeSelect();
+                }
+                LOG.info("当前选择结果: {}, 复选框选择结果: {}", newValue, Handler.getCheckBoxList().size());
+            }
+        });
+        cutVideo.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if(newValue) {
+                    Handler.addSelect(newValue);
+                } else {
+                    Handler.removeSelect();
+                }
+                LOG.info("当前选择结果: {}, 复选框选择结果: {}", newValue, Handler.getCheckBoxList().size());
+            }
+        });
+        setCover.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if(newValue) {
+                    Handler.addSelect(newValue);
+                } else {
+                    Handler.removeSelect();
+                }
+                LOG.info("当前选择结果: {}, 复选框选择结果: {}", newValue, Handler.getCheckBoxList().size());
+            }
+        });
+        getCover.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if(newValue) {
+                    Handler.addSelect(newValue);
+                } else {
+                    Handler.removeSelect();
+                }
+                LOG.info("当前选择结果: {}, 复选框选择结果: {}", newValue, Handler.getCheckBoxList().size());
+            }
+        });
+        addFilter.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if(newValue) {
+                    Handler.addSelect(newValue);
+                } else {
+                    Handler.removeSelect();
+                }
+                LOG.info("当前选择结果: {}, 复选框选择结果: {}", newValue, Handler.getCheckBoxList().size());
+            }
+        });
+        addFramerate.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if(newValue) {
+                    Handler.addSelect(newValue);
+                } else {
+                    Handler.removeSelect();
+                }
+                LOG.info("当前选择结果: {}, 复选框选择结果: {}", newValue, Handler.getCheckBoxList().size());
+            }
+        });
+        reduceFramerate.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if(newValue) {
+                    Handler.addSelect(newValue);
+                } else {
+                    Handler.removeSelect();
+                }
+                LOG.info("当前选择结果: {}, 复选框选择结果: {}", newValue, Handler.getCheckBoxList().size());
+            }
+        });
+        blurBackground.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if(newValue) {
+                    Handler.addSelect(newValue);
+                } else {
+                    Handler.removeSelect();
+                }
+                LOG.info("当前选择结果: {}, 复选框选择结果: {}", newValue, Handler.getCheckBoxList().size());
+            }
+        });
 
-
-    /**
-     * 给文本框添加监听事件
-     * @param textField
-     */
-    private static void addListener(TextField textField) {
-        textField.textProperty().addListener(new ChangeListener<String>() {
+        //给文本框添加监听事件
+        startTime.textProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
                 if(null != newValue && !"".equals(newValue)) {
@@ -2009,12 +2043,54 @@ public class MyFunction {
                     if(!isNumber) {
                         MyAlertBox.display("文本框提示", "输入内容不是整数！");
                     }
-
+                }
+            }
+        });
+        endTime.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                if(null != newValue && !"".equals(newValue)) {
+                    boolean isNumber = Handler.isNumber(newValue);
+                    if(!isNumber) {
+                        MyAlertBox.display("文本框提示", "输入内容不是整数！");
+                    }
+                }
+            }
+        });
+        addFramerateTextField.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                if(null != newValue && !"".equals(newValue)) {
+                    boolean isNumber = Handler.isNumber(newValue);
+                    if(!isNumber) {
+                        MyAlertBox.display("文本框提示", "输入内容不是整数！");
+                    }
+                }
+            }
+        });
+        reduceFramerateTextField.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                if(null != newValue && !"".equals(newValue)) {
+                    boolean isNumber = Handler.isNumber(newValue);
+                    if(!isNumber) {
+                        MyAlertBox.display("文本框提示", "输入内容不是整数！");
+                    }
+                }
+            }
+        });
+        cutVideoTime.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                if(null != newValue && !"".equals(newValue)) {
+                    boolean isNumber = Handler.isNumber(newValue);
+                    if(!isNumber) {
+                        MyAlertBox.display("文本框提示", "输入内容不是整数！");
+                    }
                 }
             }
         });
     }
-
 
     /**
      * 是否配置targetPath路径
