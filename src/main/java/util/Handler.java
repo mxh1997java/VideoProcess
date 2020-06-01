@@ -30,6 +30,29 @@ public class Handler {
 
     private static final Logger LOG = LoggerFactory.getLogger(Handler.class);
 
+
+    /**
+     * 增加视频播放速度选项集合
+     * @return
+     */
+    public static List<String> getAddFrameRateItemList() {
+        List<String> itemList = new ArrayList<>();
+        itemList.add("2.0");
+        itemList.add("3.0");
+        itemList.add("4.0");
+        return itemList;
+    }
+
+    /**
+     * 降低视频播放速度选项集合
+     * @return
+     */
+    public static List<String> getReduceFrameRateItemList() {
+        List<String> itemList = new ArrayList<>();
+        itemList.add("0.5");
+        return itemList;
+    }
+
     /**
      * 程序可处理视频类型
      */

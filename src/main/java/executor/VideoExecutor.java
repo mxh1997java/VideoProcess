@@ -16,6 +16,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -519,7 +520,7 @@ public class VideoExecutor {
             String line;
             while ((line = reader.readLine()) != null) {
                 lineNR++;
-                LOG.info("ffmpeg执行信息: " + line);
+                LOG.info("镜像: " + line);
                 // TODO: Implement additional input stream parsing
             }
         } catch (IOException e) {
@@ -729,7 +730,7 @@ public class VideoExecutor {
      * @description ffmpeg -i input.mp4 -vf "setpts=0.5*PTS" output.mp4
      * @return void
      */
-    public void addFramerate(String sourcePath, String targetPath, String framerate) {
+    public void addFrameRate(String sourcePath, String targetPath, String framerate) {
         FFMPEGExecutor ffmpeg = this.locator.createExecutor();
         ffmpeg.addArgument("-i");
         ffmpeg.addArgument(sourcePath);
@@ -816,7 +817,7 @@ public class VideoExecutor {
      * @description ffmpeg -i input.mp4 -vf "setpts=2.0*PTS" output.mp4
      * @return void
      */
-    public void reduceFramerate(String sourcePath, String targetPath, String framerate) {
+    public void reduceFrameRate(String sourcePath, String targetPath, String framerate) {
         FFMPEGExecutor ffmpeg = this.locator.createExecutor();
         ffmpeg.addArgument("-i");
         ffmpeg.addArgument(sourcePath);
@@ -849,22 +850,71 @@ public class VideoExecutor {
 
 
     /**
+     * 功能描述 降低视频音频播放速度
+     * @author xinhai.ma
+     * @date 2020/5/8 21:58
+     * @param sourcePath :
+     * @param targetPath :
+     * @param frameRate :  视频帧率音频帧率（倍数） 2、0.5
+     * @desccription ffmpeg -i 1.mp4 -filter_complex "[0:v]setpts=0.5*PTS[v];[0:a]atempo=2.0[a]" -map "[v]" -map "[a]" 11quanbu.mp4
+     * @return void
+     */
+    public void reduceVideoAudioFrameRate(String sourcePath, String targetPath, String frameRate) {
+        BigDecimal frameRate1 = new BigDecimal(frameRate);
+        BigDecimal frameRate2 = new BigDecimal("1");
+        String videoFrameRate = frameRate2.divide(frameRate1, 1, BigDecimal.ROUND_UP).toString();
+
+        FFMPEGExecutor ffmpeg = this.locator.createExecutor();
+        ffmpeg.addArgument("-i");
+        ffmpeg.addArgument(sourcePath);
+        ffmpeg.addArgument("-filter_complex");
+        ffmpeg.addArgument("\"[0:v]setpts=" + videoFrameRate + "*PTS[v];[0:a]atempo=" + frameRate + "[a]\" -map \"[v]\" -map \"[a]\"");
+        ffmpeg.addArgument(targetPath);
+        try {
+            ffmpeg.execute();
+            LOG.info("加速视频音频播放速度执行完毕: " + targetPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            RBufferedReader reader = new RBufferedReader(
+                    new InputStreamReader(ffmpeg.getErrorStream()));
+            int step = 0;
+            int lineNR = 0;
+            String line;
+            while ((line = reader.readLine()) != null) {
+                lineNR++;
+                LOG.info("ffmpeg执行信息: " + line);
+                // TODO: Implement additional input stream parsing
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            ffmpeg.destroy();
+        }
+    }
+
+
+    /**
      * 功能描述 加速视频音频播放速度
      * @author xinhai.ma
      * @date 2020/5/8 21:58
      * @param sourcePath :
      * @param targetPath :
-     * @param videoFramerate :  视频帧率（倍数）
-     * @param audioFramerate :  音频帧率（倍数）
+     * @param frameRate :  视频帧率音频帧率（倍数） 2、0.5
      * @desccription ffmpeg -i 1.mp4 -filter_complex "[0:v]setpts=0.5*PTS[v];[0:a]atempo=2.0[a]" -map "[v]" -map "[a]" 11quanbu.mp4
      * @return void
      */
-    public void addVideoAudioFramerate(String sourcePath, String targetPath, String videoFramerate, String audioFramerate) {
+    public void addVideoAudioFrameRate(String sourcePath, String targetPath, String frameRate) {
+        BigDecimal frameRate1 = new BigDecimal(frameRate);
+        BigDecimal frameRate2 = new BigDecimal("1");
+        String videoFrameRate = frameRate2.divide(frameRate1, 1, BigDecimal.ROUND_UP).toString();
+
         FFMPEGExecutor ffmpeg = this.locator.createExecutor();
         ffmpeg.addArgument("-i");
         ffmpeg.addArgument(sourcePath);
         ffmpeg.addArgument("-filter_complex");
-        ffmpeg.addArgument("\"[0:v]setpts=0.5*PTS[v];[0:a]atempo=2.0[a]\" -map \"[v]\" -map \"[a]\"");
+        ffmpeg.addArgument("\"[0:v]setpts=" + videoFrameRate + "*PTS[v];[0:a]atempo=" + frameRate + "[a]\" -map \"[v]\" -map \"[a]\"");
         ffmpeg.addArgument(targetPath);
         try {
             ffmpeg.execute();
@@ -1120,7 +1170,7 @@ public class VideoExecutor {
             String line;
             while ((line = reader.readLine()) != null) {
                 lineNR++;
-                LOG.info("ffmpeg执行信息: " + line);
+                LOG.info("背景虚化: " + line);
                 // TODO: Implement additional input stream parsing
             }
         } catch (IOException e) {
@@ -1158,7 +1208,7 @@ public class VideoExecutor {
             String line;
             while ((line = reader.readLine()) != null) {
                 lineNR++;
-                LOG.info("ffmpeg执行信息: " + line);
+                LOG.info("色彩变幻: ", line);
                 // TODO: Implement additional input stream parsing
             }
         } catch (IOException e) {
@@ -1196,7 +1246,7 @@ public class VideoExecutor {
             String line;
             while ((line = reader.readLine()) != null) {
                 lineNR++;
-                LOG.debug("Input Line ({}): {}", lineNR, line);
+                LOG.debug("模糊处理: {}", line);
                 // TODO: Implement additional input stream parsing
             }
         } catch (IOException e) {
@@ -1234,7 +1284,7 @@ public class VideoExecutor {
             String line;
             while ((line = reader.readLine()) != null) {
                 lineNR++;
-                LOG.info("ffmpeg执行信息: " + line);
+                LOG.info("水平翻转: " + line);
                 // TODO: Implement additional input stream parsing
             }
         } catch (IOException e) {
@@ -1271,7 +1321,7 @@ public class VideoExecutor {
             String line;
             while ((line = reader.readLine()) != null) {
                 lineNR++;
-                LOG.info("ffmpeg执行信息: " + line);
+                LOG.info("垂直翻转: " + line);
                 // TODO: Implement additional input stream parsing
             }
         } catch (IOException e) {
@@ -1308,7 +1358,7 @@ public class VideoExecutor {
             String line;
             while ((line = reader.readLine()) != null) {
                 lineNR++;
-                LOG.debug("Input Line ({}): {}", lineNR, line);
+                LOG.debug("浮雕效果: {}", line);
                 // TODO: Implement additional input stream parsing
             }
         } catch (IOException e) {

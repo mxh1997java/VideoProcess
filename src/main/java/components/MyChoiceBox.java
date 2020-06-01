@@ -23,18 +23,18 @@ public class MyChoiceBox {
     /**
      * 选择的选项
      */
-    private static String selected;
+    private String selected;
 
     /**
      * 下拉框对象
      */
-    private static ChoiceBox<String> choiceBox;
+    private ChoiceBox<String> choiceBox;
 
     /**
      * 设置默认选项
      * @param itemIndex
      */
-    public static void selectItem(int itemIndex) {
+    public void selectItem(int itemIndex) {
         choiceBox.getSelectionModel().select(itemIndex);
     }
 
@@ -42,7 +42,7 @@ public class MyChoiceBox {
      * 设置默认选项
      * @param item
      */
-    public static void selectItem(String item) {
+    public void selectItem(String item) {
         choiceBox.getSelectionModel().select(item);
     }
 
@@ -51,7 +51,7 @@ public class MyChoiceBox {
      * @param list
      * @return
      */
-    public static ChoiceBox<String> getChoiceBox(List<String> list) {
+    public ChoiceBox<String> getChoiceBox(List<String> list) {
         ObservableList<String> observableList = FXCollections.observableArrayList();
         observableList.addAll(list);
         // 集合转数组
@@ -75,7 +75,7 @@ public class MyChoiceBox {
      * @param button 按钮(根据被选子项的变化控制按钮的显示)
      * @return
      */
-    public static ChoiceBox<String> getChoiceBox(List<String> list, Button button) {
+    public ChoiceBox<String> getChoiceBox(List<String> list, Button button) {
         ObservableList<String> observableList = FXCollections.observableArrayList();
         observableList.addAll(list);
         // 集合转数组
@@ -102,7 +102,7 @@ public class MyChoiceBox {
      * @date 2020/5/9 16:26
      * @return java.lang.String
      */
-    public static String getSelected() {
+    public String getSelected() {
         return selected;
     }
 

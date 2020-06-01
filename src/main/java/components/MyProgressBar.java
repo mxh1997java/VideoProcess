@@ -6,7 +6,6 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.HBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -57,6 +56,9 @@ public class MyProgressBar {
      * @param value
      */
     public void setValue(double value) {
+        if(value == 0) {
+            total = 0.0;
+        }
         progressBar.setProgress(value);
     }
 
@@ -97,15 +99,12 @@ public class MyProgressBar {
 
     /**
      * 计算进度条步长
-     * @param checkBoxList
+     * @param stepTotal
      * @return
      */
-    public void calculationStep(List<Boolean> checkBoxList) {
-        if(null == checkBoxList || checkBoxList.size() == 0) {
-            new RuntimeException("checkBoxList为空!无法计算进度条step!");
-        }
+    public void calculationStep(int stepTotal) {
         BigDecimal dividend = new BigDecimal("1");
-        BigDecimal divisor = new BigDecimal(checkBoxList.size());
+        BigDecimal divisor = new BigDecimal(stepTotal);
         LOG.info("进度组件: 计算进度条步长 除数: {}", divisor);
         LOG.info("被除数: {}, 除数: {}, 结果: {}", dividend, divisor, dividend.divide(divisor, 2, BigDecimal.ROUND_UP).doubleValue());
         step = dividend.divide(divisor, 2, BigDecimal.ROUND_UP).doubleValue();
@@ -133,6 +132,7 @@ public class MyProgressBar {
             new RuntimeException("未计算进度条step!");
         }
         total += step;
+        LOG.info("进度条进度: {}", total);
         setValue(total);
     }
 

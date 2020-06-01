@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
-
 import executor.VideoExecutor;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -41,8 +40,6 @@ public class MyFunction {
 
     private static final Logger LOG = LoggerFactory.getLogger(MyFunction.class);
 
-    private static VideoExecutor videoExecutor = new VideoExecutor();
-
     /**
      * 已处理视频地址集合
      */
@@ -51,13 +48,13 @@ public class MyFunction {
     /**
      * 单个任务进度条
      */
-    private static MyProgressBar singleProgressBar = new MyProgressBar("单个视频进度: ");
+    private static MyProgressBar singleProgressBar = new MyProgressBar("单个视频: ");
     private static HBox singleSchedule = singleProgressBar.getProgressBar();
 
     /**
      * 批量任务进度条
      */
-    private static MyProgressBar batchProgressBar = new MyProgressBar("批量视频进度: ");
+    private static MyProgressBar batchProgressBar = new MyProgressBar("批量视频: ");
     private static HBox batchSchedule = batchProgressBar.getProgressBar();
 
 
@@ -86,13 +83,16 @@ public class MyFunction {
     private static CheckBox addFilter = new CheckBox(" 添加滤镜 ");
     private static TextField acvPath = new TextField();
     private static Button psChooserButton = new Button("请选择");
-    private static ChoiceBox<String> choiceBox = MyChoiceBox.getChoiceBox(Handler.getFilterList(), psChooserButton);
+    private static MyChoiceBox filterSelectionBox = new MyChoiceBox();
+    private static ChoiceBox<String> filterChoiceBox = filterSelectionBox.getChoiceBox(Handler.getFilterList(), psChooserButton);
 
-    private static CheckBox addFramerate = new CheckBox(" 视频加速 ");
-    private static TextField addFrameRateTextField = new TextField();
+    private static CheckBox addFrameRate = new CheckBox(" 视频加速 ");
+    private static MyChoiceBox addFrameRateSelectionBox = new MyChoiceBox();
+    private static ChoiceBox<String> addFrameRateChoiceBox = addFrameRateSelectionBox.getChoiceBox(Handler.getAddFrameRateItemList());
 
-    private static CheckBox reduceFramerate = new CheckBox(" 视频减速 ");
-    private static TextField reduceFrameRateTextField = new TextField();
+    private static CheckBox reduceFrameRate = new CheckBox(" 视频减速 ");
+    private static MyChoiceBox reduceFrameRateSelectionBox = new MyChoiceBox();
+    private static ChoiceBox<String> reduceFrameRateChoiceBox = reduceFrameRateSelectionBox.getChoiceBox(Handler.getReduceFrameRateItemList());
 
     private static CheckBox blurBackground = new CheckBox(" 背景虚化 ");
 
@@ -105,7 +105,7 @@ public class MyFunction {
         // 创建一个垂直箱子
         VBox vbox = new VBox();
         vbox.setStyle("-fx-border-style: solid inside");
-        vbox.setMaxSize(400, 700);
+        vbox.setMaxSize(400, 730);
         vbox.setMinSize(300, 670);
 
         // 创建一个水平箱子
@@ -249,23 +249,21 @@ public class MyFunction {
             }
         });
         psChooserButton.setVisible(false);
-        addFilterBox.getChildren().addAll(addFilter, choiceBox, psChooserButton);
+        addFilterBox.getChildren().addAll(addFilter, filterChoiceBox, psChooserButton);
 
 
         //视频加速
         HBox addFrameRateBox = new HBox();
         addFrameRateBox.setPadding(new Insets(5));
         Label addFrameRateLabel = new Label("加速倍数: ");
-        addFrameRateTextField.setPrefWidth(100);
-        addFrameRateBox.getChildren().addAll(addFramerate, addFrameRateLabel, addFrameRateTextField);
+        addFrameRateBox.getChildren().addAll(addFrameRate, addFrameRateLabel, addFrameRateChoiceBox);
 
 
         //视频减速
         HBox reduceFrameRateBox = new HBox();
         reduceFrameRateBox.setPadding(new Insets(5,5,5,5));
         Label reduceFrameRateLabel = new Label(" 减速倍数: ");
-        reduceFrameRateTextField.setPrefWidth(100);
-        reduceFrameRateBox.getChildren().addAll(reduceFramerate, reduceFrameRateLabel, reduceFrameRateTextField);
+        reduceFrameRateBox.getChildren().addAll(reduceFrameRate, reduceFrameRateLabel, reduceFrameRateChoiceBox);
 
         //合并视频
 //        HBox mergeVideoBox = new HBox();
@@ -343,6 +341,10 @@ public class MyFunction {
             }
 
             if(cutVideo.isSelected()) {
+                if(EmptyUtils.isEmpty(Handler.getListView("unProcessed").getCurrentVideoPath())) {
+                    MyAlertBox.display("提示", "请选择视频");
+                    return;
+                }
                 //校验剪切视频参数是否合法
                 boolean flag = Handler.checkCutTime(startTime.getText(), endTime.getText(), Handler.getListView("unProcessed").getCurrentVideoPath());
                 if(flag) {
@@ -362,20 +364,21 @@ public class MyFunction {
             singleProgressBar.setLabel("开始执行");
 
             Thread task = new Thread(()->{
+                final VideoExecutor videoExecutor = new VideoExecutor();
+
                 boolean addWatermarkSelected = addWatermark.isSelected();
                 boolean delWatermarkSelected = delWatermark.isSelected();
                 boolean cutVideoSelected = cutVideo.isSelected();
                 boolean setCoverSelected = setCover.isSelected();
                 boolean addFilterSelected = addFilter.isSelected();
-                boolean addFramerateSelected = addFramerate.isSelected();
-                boolean reduceFramerateSelected = reduceFramerate.isSelected();
-                //boolean mergeVideoSelected = mergeVideo.isSelected();
+                boolean addFrameRateSelected = addFrameRate.isSelected();
+                boolean reduceFrameRateSelected = reduceFrameRate.isSelected();
                 boolean blurBackgroundSelected = blurBackground.isSelected();
                 boolean getCoverSelected = getCover.isSelected();
                 boolean addVideoSelected = addVideo.isSelected();
 
                 //功能区域每个复选框绑定了监听事件
-                singleProgressBar.calculationStep(Handler.getCheckBoxList());
+                singleProgressBar.calculationStep(Handler.getCheckBoxList().size());
 
                 //当前播放器播放的视频地址
                 String currentVideo = Handler.getListView("unProcessed").getCurrentVideoPath();
@@ -412,7 +415,10 @@ public class MyFunction {
                         Runtime.getRuntime().exec("cmd /c " + targetPath);
                         //把封面路径写入缓存
                         Handler.addCoverPath(targetPath);
+                        Thread.sleep(500);
                     } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
@@ -432,6 +438,7 @@ public class MyFunction {
                     videoExecutor.mergeVideo(startVideoPath, currentVideo, endVideoPath, targetPath);
                     Handler.deleteFile(currentVideo);
                     pathList.add(targetPath);
+                    currentVideo = targetPath;
                     try {
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
@@ -469,6 +476,7 @@ public class MyFunction {
                     //删除上一步产生的视频
                     Handler.deleteFile(currentVideo);
                     pathList.add(targetPath);
+                    currentVideo = targetPath;
                     try {
                         Thread.sleep(500);
                     } catch (Exception e) {
@@ -495,6 +503,8 @@ public class MyFunction {
                     String targetPath = Handler.getNewFilePath(currentVideo);
                     videoExecutor.addWatermarkByFont(text, 30, "微软雅黑", x, y, currentVideo, targetPath);
                     pathList.add(targetPath);
+                    Handler.deleteFile(currentVideo);
+                    currentVideo = targetPath;
                     try {
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
@@ -526,6 +536,7 @@ public class MyFunction {
                     //删除上一步产生的视频
                     Handler.deleteFile(currentVideo);
                     pathList.add(targetPath);
+                    currentVideo = targetPath;
                     try {
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
@@ -542,11 +553,132 @@ public class MyFunction {
                             singleProgressBar.setLabel("正在添加滤镜");
                         }
                     });
-                    String selected = MyChoiceBox.getSelected();
-                    filterDealWith(selected, currentVideo, acvPath, pathList);
+                    String selected = filterSelectionBox.getSelected();
+                    if (selected.equals("复古风")) {
+                        String targetPath = Handler.getNewFilePath(currentVideo);
+                        videoExecutor.ancientStyleFilter(currentVideo, targetPath);
+                        //删除上一步产生的视频
+                        Handler.deleteFile(currentVideo);
+                        pathList.add(targetPath);
+                        currentVideo = targetPath;
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    if (selected.equals("镜像")) {
+                        String targetPath = Handler.getNewFilePath(currentVideo);
+                        videoExecutor.mirror(currentVideo, targetPath);
+                        //删除上一步产生的视频
+                        Handler.deleteFile(currentVideo);
+                        pathList.add(targetPath);
+                        currentVideo = targetPath;
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    if (selected.equals("多路拼接")) {
+                        String targetPath = Handler.getNewFilePath(currentVideo);
+                        videoExecutor.spliceVideo(currentVideo, currentVideo, currentVideo, currentVideo, targetPath);
+                        //删除上一步产生的视频
+                        Handler.deleteFile(currentVideo);
+                        pathList.add(targetPath);
+                        currentVideo = targetPath;
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    if (selected.equals("Ps滤镜")) {
+                        String targetPath = Handler.getNewFilePath(currentVideo);
+                        videoExecutor.revisionCurveByPs(currentVideo, acvPath.getText(), targetPath);
+                        //删除上一步产生的视频
+                        Handler.deleteFile(currentVideo);
+                        pathList.add(targetPath);
+                        currentVideo = targetPath;
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    if (selected.equals("锐化")) {
+                        String targetPath = Handler.getNewFilePath(currentVideo);
+                        LOG.info("操作步骤:设置锐化效果 操作对象: {}", targetPath);
+                        videoExecutor.sharpen(currentVideo, targetPath);
+                        //删除上一步产生的视频
+                        Handler.deleteFile(currentVideo);
+                        pathList.add(targetPath);
+                        currentVideo = targetPath;
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    if (selected.equals("黑白")) {
+                        String targetPath = Handler.getNewFilePath(currentVideo);
+                        System.out.println("操作步骤:设置黑白效果 操作对象: " + targetPath);
+                        videoExecutor.blackWhite(currentVideo, targetPath);
+                        //删除上一步产生的视频
+                        Handler.deleteFile(currentVideo);
+                        pathList.add(targetPath);
+                        currentVideo = targetPath;
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    if (selected.equals("浮雕效果")) {
+                        String targetPath = Handler.getNewFilePath(currentVideo);
+                        System.out.println("操作步骤:设置浮雕效果 操作对象: " + targetPath);
+                        videoExecutor.reliefEffect(currentVideo, targetPath);
+                        //删除上一步产生的视频
+                        Handler.deleteFile(currentVideo);
+                        pathList.add(targetPath);
+                        currentVideo = targetPath;
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    if (selected.equals("模糊处理")) {
+                        String targetPath = Handler.getNewFilePath(currentVideo);
+                        System.out.println("操作步骤:设置模糊处理 操作对象: " + targetPath);
+                        videoExecutor.blur(currentVideo, targetPath);
+                        //删除上一步产生的视频
+                        Handler.deleteFile(currentVideo);
+                        pathList.add(targetPath);
+                        currentVideo = targetPath;
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    if (selected.equals("色彩变幻")) {
+                        String targetPath = Handler.getNewFilePath(currentVideo);
+                        LOG.info("操作步骤:设置色彩变幻 操作对象: {}", targetPath);
+                        videoExecutor.colorChange(currentVideo, targetPath);
+                        //删除上一步产生的视频
+                        Handler.deleteFile(currentVideo);
+                        pathList.add(targetPath);
+                        currentVideo = targetPath;
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
                 //提升视频播放速度
-                if (addFramerateSelected) {
+                if (addFrameRateSelected) {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
@@ -555,12 +687,12 @@ public class MyFunction {
                         }
                     });
                     String targetPath = Handler.getNewFilePath(currentVideo);
-                    String videoFrameRate = addFrameRateTextField.getText();
-                    String audioFrameRate = addFrameRateTextField.getText();
-                    videoExecutor.addVideoAudioFramerate(currentVideo, targetPath, videoFrameRate, audioFrameRate);
+                    String frameRate = addFrameRateSelectionBox.getSelected();
+                    videoExecutor.addVideoAudioFrameRate(currentVideo, targetPath, frameRate);
                     //删除上一步产生的视频
                     Handler.deleteFile(currentVideo);
                     pathList.add(targetPath);
+                    currentVideo = targetPath;
                     try {
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
@@ -568,7 +700,7 @@ public class MyFunction {
                     }
                 }
                 //降低视频播放速度
-                if (reduceFramerateSelected) {
+                if (reduceFrameRateSelected) {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
@@ -577,11 +709,12 @@ public class MyFunction {
                         }
                     });
                     String targetPath = Handler.getNewFilePath(currentVideo);
-                    String videoFrameRate = reduceFrameRateTextField.getText();
-                    videoExecutor.reduceFramerate(currentVideo, targetPath, videoFrameRate);
+                    String frameRate = reduceFrameRateSelectionBox.getSelected();
+                    videoExecutor.reduceVideoAudioFrameRate(currentVideo, targetPath, frameRate);
                     //删除上一步产生的视频
                     Handler.deleteFile(currentVideo);
                     pathList.add(targetPath);
+                    currentVideo = targetPath;
                     try {
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
@@ -602,6 +735,7 @@ public class MyFunction {
                     //删除上一步产生的视频
                     Handler.deleteFile(currentVideo);
                     pathList.add(targetPath);
+                    currentVideo = targetPath;
                     try {
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
@@ -636,6 +770,7 @@ public class MyFunction {
                     //删除上一步产生的视频
                     Handler.deleteFile(currentVideo);
                     pathList.add(targetPath);
+                    currentVideo = targetPath;
                     try {
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
@@ -649,6 +784,7 @@ public class MyFunction {
                     public void run() {
                         //不是视频截图 就刷新已处理视频栏
                         if(pathList.size() > 0) {
+                            LOG.info("产生的视频: {}", pathList);
                             String videoPath = pathList.get(pathList.size() - 1);
                             //刷新左侧视频列表
                             processedList.add(videoPath);
@@ -660,12 +796,13 @@ public class MyFunction {
                         singleProgressBar.setVisible(true);
                         singleProgressBar.setValue(1.0);
                         singleProgressBar.setLabel("处理完毕");
-//                        try {
-//                            Thread.sleep(5000);
-//                        } catch (InterruptedException e) {
-//                            e.printStackTrace();
-//                        }
-//                        myProgressBar.setVisible(false);
+                        try {
+                            Thread.sleep(5000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        singleProgressBar.setValue(0.0);
+                        singleProgressBar.setVisible(false);
                     }
                 });
             });
@@ -714,9 +851,8 @@ public class MyFunction {
             boolean getCoverSelected = getCover.isSelected();
             boolean setCoverSelected = setCover.isSelected();
             boolean addFilterSelected = addFilter.isSelected();
-            boolean addFramerateSelected = addFramerate.isSelected();
-            boolean reduceFramerateSelected = reduceFramerate.isSelected();
-            // boolean mergeVideoSelected = mergeVideo.isSelected();
+            boolean addFrameRateSelected = addFrameRate.isSelected();
+            boolean reduceFrameRateSelected = reduceFrameRate.isSelected();
             boolean blurBackgroundSelected = blurBackground.isSelected();
             boolean addVideoSelected = addVideo.isSelected();
 
@@ -756,8 +892,6 @@ public class MyFunction {
                             Handler.addCoverPath(target);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
-                        } finally {
-                            dealWithBath.setDisable(false);
                         }
                     }
                     //删除水印
@@ -795,8 +929,6 @@ public class MyFunction {
                         } catch (InterruptedException e) {
                             LOG.info("批量消除水印出错! {}", e.getMessage());
                             e.printStackTrace();
-                        } finally {
-                            dealWithBath.setDisable(false);
                         }
                     }
                     //添加水印
@@ -822,8 +954,6 @@ public class MyFunction {
                         } catch (InterruptedException e) {
                             LOG.info("批量添加水印失败! {}", e.getMessage());
                             e.printStackTrace();
-                        } finally {
-                            dealWithBath.setDisable(false);
                         }
                     }
                     //添加片头片尾
@@ -848,8 +978,6 @@ public class MyFunction {
                         } catch (InterruptedException e) {
                             LOG.info("批量添加片头片尾出错! {}", e.getMessage());
                             e.printStackTrace();
-                        } finally {
-                            dealWithBath.setDisable(false);
                         }
                     }
                     if (cutVideoSelected) {
@@ -865,7 +993,14 @@ public class MyFunction {
                         String startPoint = null;
                         String endPoint = null;
                         try {
-                            MultimediaInfo videoInfo = videoExecutor.getVideoInfo(currentPath);
+                            File file = new File(currentPath);
+                            boolean flag = file.exists();
+                            while (!flag) {
+                                LOG.info("文件不存在:{}", currentPath);
+                                Thread.sleep(1000);
+                                flag = file.exists();
+                            }
+                            MultimediaInfo videoInfo = executor.getVideoInfo(currentPath);
                             long duration = videoInfo.getDuration(); //获取视频长度
                             BigDecimal durationValue = new BigDecimal(String.valueOf(duration));
                             BigDecimal endValue = new BigDecimal(end + "000");
@@ -883,12 +1018,10 @@ public class MyFunction {
                         } catch (InterruptedException e) {
                             LOG.info("批量剪切视频出错! {}", e.getMessage());
                             e.printStackTrace();
-                        } finally {
-                            dealWithBath.setDisable(false);
                         }
                     }
                     if (addFilterSelected) {
-                        String selected = MyChoiceBox.getSelected();
+                        String selected = filterSelectionBox.getSelected();
                         Platform.runLater(new Runnable() {
                             @Override
                             public void run() {
@@ -958,9 +1091,9 @@ public class MyFunction {
                                 LOG.info("操作步骤:设置锐化效果 操作对象: {}", currentPath);
                                 executor.sharpen(currentPath, target);
                                 deletePathSet.add(currentPath);
-                                Thread.sleep(500);
                                 allPathList.add(target);
                                 currentPath = target;
+                                Thread.sleep(500);
                             } catch (InterruptedException e) {
                                 LOG.info("批量设置锐化效果出错! {}", e.getMessage());
                                 e.printStackTrace();
@@ -972,9 +1105,9 @@ public class MyFunction {
                                 LOG.info("操作步骤:设置黑白效果 操作对象: {}", currentPath);
                                 executor.blackWhite(currentPath, target);
                                 deletePathSet.add(currentPath);
-                                Thread.sleep(500);
                                 allPathList.add(target);
                                 currentPath = target;
+                                Thread.sleep(500);
                             } catch (InterruptedException e) {
                                 LOG.info("批量设置黑白效果出错 {}", e.getMessage());
                                 e.printStackTrace();
@@ -986,9 +1119,9 @@ public class MyFunction {
                                 LOG.info("操作步骤:设置浮雕效果 操作对象: {}", currentPath);
                                 executor.reliefEffect(currentPath, target);
                                 deletePathSet.add(currentPath);
-                                Thread.sleep(500);
                                 allPathList.add(target);
                                 currentPath = target;
+                                Thread.sleep(500);
                             } catch (InterruptedException e) {
                                 LOG.info("批量设置浮雕效果出错! {}", e.getMessage());
                                 e.printStackTrace();
@@ -1001,9 +1134,9 @@ public class MyFunction {
                                 LOG.info("操作步骤:设置模糊处理 操作对象: {}", currentPath);
                                 executor.blur(currentPath, target);
                                 deletePathSet.add(currentPath);
-                                Thread.sleep(500);
                                 allPathList.add(target);
                                 currentPath = target;
+                                Thread.sleep(500);
                             } catch (InterruptedException e) {
                                 LOG.info("批量设置模糊处理出错!  {}", e.getMessage());
                                 e.printStackTrace();
@@ -1018,20 +1151,18 @@ public class MyFunction {
                                 LOG.info("操作步骤:设置色彩变幻 操作对象: {}", currentPath);
                                 executor.colorChange(currentPath, target);
                                 deletePathSet.add(currentPath);
-                                Thread.sleep(500);
                                 allPathList.add(target);
                                 currentPath = target;
+                                Thread.sleep(500);
                             } catch (InterruptedException e) {
                                 LOG.info("批量设置色彩变幻出错! {}", e.getMessage());
                                 e.printStackTrace();
-                            } finally {
-                                dealWithBath.setDisable(false);
                             }
                         }
                     }
 
                     //增加视频帧率
-                    if (addFramerateSelected) {
+                    if (addFrameRateSelected) {
                         LOG.info("增加视频速率");
                         Platform.runLater(new Runnable() {
                             @Override
@@ -1040,25 +1171,23 @@ public class MyFunction {
                                 batchProgressBar.setLabel("正在增加视频速率 " + Handler.getFileName(path));
                             }
                         });
-                        String frameRate = addFrameRateTextField.getText();
+                        String frameRate = addFrameRateSelectionBox.getSelected();
                         try {
                             String target = Handler.getNewFilePath(currentPath);
                             LOG.info("操作步骤:增加视频速率 操作对象: {}", currentPath);
-                            executor.addFramerate(currentPath, target, frameRate);
-                            Thread.sleep(500);
+                            executor.addVideoAudioFrameRate(currentPath, target, frameRate);
                             deletePathSet.add(currentPath);
                             allPathList.add(target);
                             currentPath = target;
+                            Thread.sleep(500);
                         } catch (InterruptedException e) {
                             LOG.info("批量设置镜像效果增加视频速率 {}", e.getMessage());
                             e.printStackTrace();
-                        } finally {
-                            dealWithBath.setDisable(false);
                         }
                     }
 
                     //降低视频帧率
-                    if (reduceFramerateSelected) {
+                    if (reduceFrameRateSelected) {
                         Platform.runLater(new Runnable() {
                             @Override
                             public void run() {
@@ -1066,20 +1195,18 @@ public class MyFunction {
                                 batchProgressBar.setLabel("正在降低视频帧率 " + Handler.getFileName(path));
                             }
                         });
-                        String frameRate = reduceFrameRateTextField.getText();
+                        String frameRate = reduceFrameRateSelectionBox.getSelected();
                         try {
                             String target = Handler.getNewFilePath(currentPath);
                             LOG.info("操作步骤:降低视频帧率 操作对象: {}", currentPath);
-                            executor.reduceFramerate(currentPath, target, frameRate);
+                            executor.reduceVideoAudioFrameRate(currentPath, target, frameRate);
                             deletePathSet.add(currentPath);
-                            Thread.sleep(500);
                             allPathList.add(target);
                             currentPath = target;
+                            Thread.sleep(500);
                         } catch (InterruptedException e) {
                             LOG.info("批量降低视频帧率! {}", e.getMessage());
                             e.printStackTrace();
-                        } finally {
-                            dealWithBath.setDisable(false);
                         }
                     }
 
@@ -1096,15 +1223,13 @@ public class MyFunction {
                             String target = Handler.getNewFilePath(currentPath);
                             LOG.info("操作步骤:设置模糊视频背景 操作对象: {}", currentPath);
                             executor.blurBackground(currentPath, target);
-                            Thread.sleep(500);
                             deletePathSet.add(currentPath);
                             allPathList.add(target);
                             currentPath = target;
+                            Thread.sleep(500);
                         } catch (Exception e) {
                             LOG.info("批量设置模糊视频背景出错! {}", e.getMessage());
                             e.printStackTrace();
-                        } finally {
-                            dealWithBath.setDisable(false);
                         }
                     }
 
@@ -1128,14 +1253,12 @@ public class MyFunction {
                             String target = Handler.getNewFilePath(currentPath);
                             LOG.info("操作步骤:批量设置封面 操作对象: {}", currentPath);
                             executor.setCover(currentPath, imgPath, target);
-                            Thread.sleep(500);
                             deletePathSet.add(currentPath);
                             allPathList.add(target);
+                            Thread.sleep(500);
                         } catch (InterruptedException e) {
                             LOG.info("批量设置封面出错! {}", e.getMessage());
                             e.printStackTrace();
-                        } finally {
-                            dealWithBath.setDisable(false);
                         }
                     }
 
@@ -1152,7 +1275,6 @@ public class MyFunction {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-
                 LOG.info("所有视频: {}", allPathList);
                 LOG.info("要删除的视频: {}", deletePathSet);
                 //所有线程产生的视频路径减去所有线程要删除的视频路径就是最终的视频
@@ -1162,12 +1284,19 @@ public class MyFunction {
                     @Override
                     public void run() {
                         MyHome.setLeft(null, allPathList);
-                        File videoFile = new File(targetPathList.get(0));
+                        File videoFile = new File(allPathList.get(0));
                         //播放第一个视频并让播放组件播放视频
                         MyMediaPlayer.chooseFile(videoFile);
                         batchProgressBar.setValue(1);
                         batchProgressBar.setLabel("执行完毕!");
                         dealWithBath.setDisable(false);
+                        try {
+                            Thread.sleep(5000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        batchProgressBar.setVisible(false);
+                        batchProgressBar.setValue(0.0);
                     }
                 });
 
@@ -1271,7 +1400,7 @@ public class MyFunction {
                 LOG.info("当前选择结果: {}, 复选框选择结果: {}", newValue, Handler.getCheckBoxList().size());
             }
         });
-        addFramerate.selectedProperty().addListener(new ChangeListener<Boolean>() {
+        addFrameRate.selectedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
                 if(newValue) {
@@ -1282,7 +1411,7 @@ public class MyFunction {
                 LOG.info("当前选择结果: {}, 复选框选择结果: {}", newValue, Handler.getCheckBoxList().size());
             }
         });
-        reduceFramerate.selectedProperty().addListener(new ChangeListener<Boolean>() {
+        reduceFrameRate.selectedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
                 if(newValue) {
@@ -1328,28 +1457,6 @@ public class MyFunction {
                 }
             }
         });
-        addFrameRateTextField.textProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                if(null != newValue && !"".equals(newValue)) {
-                    boolean isNumber = Handler.isNumber(newValue);
-                    if(!isNumber) {
-                        MyAlertBox.display("文本框提示", "输入内容不是整数！");
-                    }
-                }
-            }
-        });
-        reduceFrameRateTextField.textProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                if(null != newValue && !"".equals(newValue)) {
-                    boolean isNumber = Handler.isNumber(newValue);
-                    if(!isNumber) {
-                        MyAlertBox.display("文本框提示", "输入内容不是整数！");
-                    }
-                }
-            }
-        });
         cutVideoTime.textProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
@@ -1376,131 +1483,6 @@ public class MyFunction {
         }
     }
 
-
-    /**
-     * 视频滤镜处理
-     * @param selected
-     * @param currentVideo
-     * @param acvPath
-     * @param pathList
-     */
-    private static void filterDealWith(String selected, String currentVideo, TextField acvPath, List<String> pathList) {
-        if (selected.equals("复古风")) {
-            String targetPath = Handler.getNewFilePath(currentVideo);
-            videoExecutor.ancientStyleFilter(currentVideo, targetPath);
-            //删除上一步产生的视频
-            Handler.deleteFile(currentVideo);
-            pathList.add(targetPath);
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        if (selected.equals("镜像")) {
-            String targetPath = Handler.getNewFilePath(currentVideo);
-            videoExecutor.mirror(currentVideo, targetPath);
-            //删除上一步产生的视频
-            Handler.deleteFile(currentVideo);
-            pathList.add(targetPath);
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        if (selected.equals("多路拼接")) {
-            String targetPath = Handler.getNewFilePath(currentVideo);
-            videoExecutor.spliceVideo(currentVideo, currentVideo, currentVideo, currentVideo, targetPath);
-            //删除上一步产生的视频
-            Handler.deleteFile(currentVideo);
-            pathList.add(targetPath);
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        if (selected.equals("Ps滤镜")) {
-            String targetPath = Handler.getNewFilePath(currentVideo);
-            videoExecutor.revisionCurveByPs(currentVideo, acvPath.getText(), targetPath);
-            //删除上一步产生的视频
-            Handler.deleteFile(currentVideo);
-            pathList.add(targetPath);
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        if (selected.equals("锐化")) {
-            String targetPath = Handler.getNewFilePath(currentVideo);
-            System.out.println("操作步骤:设置锐化效果 操作对象: " + targetPath);
-            videoExecutor.sharpen(currentVideo, targetPath);
-            //删除上一步产生的视频
-            Handler.deleteFile(currentVideo);
-            pathList.add(targetPath);
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        if (selected.equals("黑白")) {
-            String targetPath = Handler.getNewFilePath(currentVideo);
-            System.out.println("操作步骤:设置黑白效果 操作对象: " + targetPath);
-            videoExecutor.blackWhite(currentVideo, targetPath);
-            //删除上一步产生的视频
-            Handler.deleteFile(currentVideo);
-            pathList.add(targetPath);
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        if (selected.equals("浮雕效果")) {
-            String targetPath = Handler.getNewFilePath(currentVideo);
-            System.out.println("操作步骤:设置浮雕效果 操作对象: " + targetPath);
-            videoExecutor.reliefEffect(currentVideo, targetPath);
-            //删除上一步产生的视频
-            Handler.deleteFile(currentVideo);
-            pathList.add(targetPath);
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        if (selected.equals("模糊处理")) {
-            String targetPath = Handler.getNewFilePath(currentVideo);
-            System.out.println("操作步骤:设置模糊处理 操作对象: " + targetPath);
-            videoExecutor.blur(currentVideo, targetPath);
-            //删除上一步产生的视频
-            Handler.deleteFile(currentVideo);
-            pathList.add(targetPath);
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        if (selected.equals("色彩变幻")) {
-            String targetPath = Handler.getNewFilePath(currentVideo);
-            LOG.info("操作步骤:设置色彩变幻 操作对象: {}", targetPath);
-            videoExecutor.colorChange(currentVideo, targetPath);
-            //删除上一步产生的视频
-            Handler.deleteFile(currentVideo);
-            pathList.add(targetPath);
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-
     /**
      * 保存用户操作数据方法
      */
@@ -1514,8 +1496,8 @@ public class MyFunction {
         boolean getCoverSelected = getCover.isSelected();
         boolean setCoverSelected = setCover.isSelected();
         boolean addFilterSelected = addFilter.isSelected();
-        boolean addFramerateSelected = addFramerate.isSelected();
-        boolean reduceFramerateSelected = reduceFramerate.isSelected();
+        boolean addFrameRateSelected = addFrameRate.isSelected();
+        boolean reduceFrameRateSelected = reduceFrameRate.isSelected();
         // boolean mergeVideoSelected = mergeVideo.isSelected();
         boolean blurBackgroundSelected = blurBackground.isSelected();
         boolean addVideoSelected = addVideo.isSelected();
@@ -1570,7 +1552,7 @@ public class MyFunction {
         //添加滤镜
         if(addFilterSelected) {
             List<String> data = new ArrayList<>(2);
-            String selected = MyChoiceBox.getSelected();
+            String selected = filterSelectionBox.getSelected();
             data.add(selected);
             if(selected.equals("Ps滤镜")) {
                 String path = acvPath.getText();
@@ -1579,15 +1561,15 @@ public class MyFunction {
             Handler.putUserOperating("添加滤镜", data);
         }
         //视频加速
-        if(addFramerateSelected) {
-            String frameRate = addFrameRateTextField.getText();
+        if(addFrameRateSelected) {
+            String frameRate = addFrameRateSelectionBox.getSelected();
             List<String> data = new ArrayList<>(1);
             data.add(frameRate);
             Handler.putUserOperating("视频加速", data);
         }
         //视频减速
-        if(reduceFramerateSelected) {
-            String frameRate = reduceFrameRateTextField.getText();
+        if(reduceFrameRateSelected) {
+            String frameRate = reduceFrameRateSelectionBox.getSelected();
             List<String> data = new ArrayList<>(1);
             data.add(frameRate);
             Handler.putUserOperating("视频减速", data);
@@ -1659,24 +1641,24 @@ public class MyFunction {
             addFilter.setSelected(true);
             List<String> data = allUserOperatingCache.get("添加滤镜");
             if (!EmptyUtils.isEmpty(data)) {
-                MyChoiceBox.selectItem(data.get(0));
+                filterSelectionBox.selectItem(data.get(0));
                 if(data.get(0).equals("Ps滤镜")) {
                     acvPath.setText(data.get(1));
                 }
             }
         }
         if(allUserOperatingCache.containsKey("视频加速")) {
-            addFramerate.setSelected(true);
+            addFrameRate.setSelected(true);
             List<String> data = allUserOperatingCache.get("视频加速");
             if (!EmptyUtils.isEmpty(data)) {
-                addFrameRateTextField.setText(data.get(0));
+                addFrameRateSelectionBox.selectItem(data.get(0));
             }
         }
         if(allUserOperatingCache.containsKey("视频减速")) {
-            reduceFramerate.setSelected(true);
+            reduceFrameRate.setSelected(true);
             List<String> data = allUserOperatingCache.get("视频减速");
             if (!EmptyUtils.isEmpty(data)) {
-                reduceFrameRateTextField.setText(data.get(0));
+                reduceFrameRateSelectionBox.selectItem(data.get(0));
             }
         }
         if(allUserOperatingCache.containsKey("背景虚化")) {

@@ -55,8 +55,8 @@ public class MyMediaPlayer {
         slTime.setPrefWidth(200);
         BorderPane pane = new BorderPane();
         //pane.setStyle("-fx-background-color: gold");
-        pane.setPrefWidth(600);
-        pane.setPrefHeight(500);
+        pane.setPrefSize(600, 500);
+        //pane.setMaxSize(600, 730);
         mView.setFitWidth(600);
         mView.setFitHeight(360);
 

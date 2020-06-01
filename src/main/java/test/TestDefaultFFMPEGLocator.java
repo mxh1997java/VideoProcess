@@ -85,10 +85,19 @@ public class TestDefaultFFMPEGLocator {
 //        String url = "https://s184.convertio.me/p/ZuM4utNbttyfzOCg0BsLtA/0fcd2080dbbfff74459f449cd8112fc2/%E4%B8%80%E5%89%AA%E6%A2%85.avi";
 //        Handler.httpDownload(url, filePath);
 
-        String sourcePath = "D:\\Users\\15735400536\\Videos\\台湾综艺\\12.mp4";
+        String sourcePath = "D:\\Users\\15735400536\\Videos\\台湾综艺\\14.mp4";
         String targetPath = "D:\\start.mp4";
-        String size = "1920x1080";
-        videoExecutor.cropVidoe(sourcePath, targetPath, size);
+        //String size = "1920x1080";
+        //videoExecutor.cropVidoe(sourcePath, targetPath, size);
+
+
+        //测试视频音频减速
+        //videoExecutor.reduceVideoAudioFrameRate(sourcePath, targetPath, "0.5");
+
+
+        targetPath = "D:\\end3.mp4";
+        //测试视频音频提速
+        videoExecutor.addVideoAudioFrameRate(sourcePath, targetPath, "4");
 
     }
 
