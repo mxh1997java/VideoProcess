@@ -888,8 +888,9 @@ public class MyFunction {
                             LOG.info("操作步骤: 批量截取图片 操作对象: {}", currentPath);
                             String target = Handler.getNewFilePath("D:\\MaXinHai\\file\\1.png");
                             executor.cutVideoImage(currentPath, target, time);
-                            Thread.sleep(500);
                             Handler.addCoverPath(target);
+                            deletePathSet.add(currentPath);
+                            Thread.sleep(500);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -922,10 +923,10 @@ public class MyFunction {
                             String target = Handler.getNewFilePath(currentPath);
                             LOG.info("操作步骤:消除水印 操作对象: {}", currentPath);
                             executor.removeWatermark(currentPath, x, y, width, height, target);
-                            Thread.sleep(500);
                             deletePathSet.add(currentPath);
                             allPathList.add(target);
                             currentPath = target;
+                            Thread.sleep(500);
                         } catch (InterruptedException e) {
                             LOG.info("批量消除水印出错! {}", e.getMessage());
                             e.printStackTrace();
@@ -971,10 +972,10 @@ public class MyFunction {
                             String target = Handler.getNewFilePath(currentPath);
                             LOG.info("操作步骤:批量添加片头片尾 操作对象: {}", currentPath);
                             executor.mergeVideo(startVideoPath, currentPath, endVideoPath, target);
-                            Thread.sleep(500);
                             deletePathSet.add(currentPath);
                             allPathList.add(target);
                             currentPath = target;
+                            Thread.sleep(500);
                         } catch (InterruptedException e) {
                             LOG.info("批量添加片头片尾出错! {}", e.getMessage());
                             e.printStackTrace();
@@ -1011,10 +1012,10 @@ public class MyFunction {
                             String target = Handler.getNewFilePath(currentPath);
                             LOG.info("操作步骤:剪切视频 操作对象: {}", currentPath);
                             executor.cutVideo(currentPath, target, startPoint, endPoint);
-                            Thread.sleep(500);
                             deletePathSet.add(currentPath);
                             allPathList.add(target);
                             currentPath = target;
+                            Thread.sleep(500);
                         } catch (InterruptedException e) {
                             LOG.info("批量剪切视频出错! {}", e.getMessage());
                             e.printStackTrace();
@@ -1034,10 +1035,10 @@ public class MyFunction {
                                 String target = Handler.getNewFilePath(currentPath);
                                 LOG.info("操作步骤:设置镜像效果 操作对象: {}", currentPath);
                                 executor.mirror(currentPath, target);
-                                Thread.sleep(500);
                                 deletePathSet.add(currentPath);
                                 allPathList.add(target);
                                 currentPath = target;
+                                Thread.sleep(500);
                             } catch (InterruptedException e) {
                                 LOG.info("批量设置镜像效果出错! {}", e.getMessage());
                                 e.printStackTrace();
@@ -1048,10 +1049,10 @@ public class MyFunction {
                                 String target = Handler.getNewFilePath(currentPath);
                                 LOG.info("操作步骤:设置复古风效果 操作对象: {}", currentPath);
                                 executor.ancientStyleFilter(currentPath, target);
-                                Thread.sleep(500);
                                 deletePathSet.add(currentPath);
                                 allPathList.add(target);
                                 currentPath = target;
+                                Thread.sleep(500);
                             } catch (InterruptedException e) {
                                 LOG.info("批量设置复古风效果出错! {}", e.getMessage());
                                 e.printStackTrace();
@@ -1062,10 +1063,10 @@ public class MyFunction {
                                 String target = Handler.getNewFilePath(currentPath);
                                 LOG.info("操作步骤:设置多路拼接效果 操作对象: {}", currentPath);
                                 executor.spliceVideo(currentPath, currentPath, currentPath, currentPath, target);
-                                Thread.sleep(500);
                                 deletePathSet.add(currentPath);
                                 allPathList.add(target);
                                 currentPath = target;
+                                Thread.sleep(500);
                             } catch (InterruptedException e) {
                                 LOG.info("批量设置多路拼接效果出错 {}", e.getMessage());
                                 e.printStackTrace();
@@ -1077,9 +1078,9 @@ public class MyFunction {
                                 LOG.info("操作步骤: 根据Ps预设文件设置效果 操作对象: {}", currentPath);
                                 executor.revisionCurveByPs(currentPath, acvPath.getText(), target);
                                 deletePathSet.add(currentPath);
-                                Thread.sleep(500);
                                 allPathList.add(target);
                                 currentPath = target;
+                                Thread.sleep(500);
                             } catch (InterruptedException e) {
                                 LOG.info("批量根据Ps预设文件设置效果出错! {}", e.getMessage());
                                 e.printStackTrace();
