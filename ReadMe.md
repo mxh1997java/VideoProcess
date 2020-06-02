@@ -14,6 +14,9 @@
             截取视频某一帧内容为图片
             设置视频封面
             多张图片合成视频
+            视频倒放
+            重置视频宽高
+            调整视频音量大小
         4. 项目所用技术: Java Fx、 FFmpeg
 
 项目结构
@@ -67,6 +70,15 @@ ffmpeg 常用命令
         	
         	镜像
         	ffmpeg -i input.flv -vf crop=iw/2:ih:0:0,split[left][tmp];[tmp]hflip[right];[left]pad=iw*2[a];[a][right]overlay=w output.flv
+        	
+        	视频倒放
+        	ffmpeg -i input.mp4 -vf reverse -y reverse.mp4
+        	
+        	//音量翻倍，写在滤镜里，例如
+            ffmpeg -i 1.wav -af volume=2 -y 2.wav
+
+            //音量翻倍，不写在滤镜中，例如
+            ffmpeg -i 1.wav -vol 2000 -y 2.wav
      
 技术链接
 --------

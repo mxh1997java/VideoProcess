@@ -1636,7 +1636,7 @@ public class VideoExecutor {
 
 
     /**
-     * 渐入
+     * 渐入（可以实现淡入淡出效果）
      * @param sourcePath
      * @param targetPath
      * @desc ffmpeg i in.mp4 -vf fade=in:0:90 out.mp4
@@ -1713,6 +1713,45 @@ public class VideoExecutor {
         }
         //添加图片到视频
         addWatermarkByImage(sourcePath, imagePath, x, y, targetPath);
+    }
+
+
+    /**
+     * 视频倒放
+     * @param sourcePath
+     * @param targetPath
+     * ffmpeg -i input.mp4 -vf reverse -y reverse.mp4
+     */
+    public void videoUpsideDown(String sourcePath, String targetPath) {
+        FFMPEGExecutor ffmpeg = this.locator.createExecutor();
+        ffmpeg.addArgument("-i");
+        ffmpeg.addArgument(sourcePath);
+        ffmpeg.addArgument("-vf");
+        ffmpeg.addArgument("reverse");
+        ffmpeg.addArgument("-y");
+        ffmpeg.addArgument(targetPath);
+        try {
+            ffmpeg.execute();
+            LOG.info("视频倒放执行完毕: " + targetPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            RBufferedReader reader = new RBufferedReader(
+                    new InputStreamReader(ffmpeg.getErrorStream()));
+            int step = 0;
+            int lineNR = 0;
+            String line;
+            while ((line = reader.readLine()) != null) {
+                lineNR++;
+                LOG.debug("Input Line ({}): {}", lineNR, line);
+                // TODO: Implement additional input stream parsing
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            ffmpeg.destroy();
+        }
     }
 
 
@@ -1887,7 +1926,7 @@ public class VideoExecutor {
 
 
     /**
-     * 裁剪视频尺寸
+     * 裁剪视频尺寸（相当于重新设置视频宽高）
      * @param sourcePath
      * @param targetPath
      * @param size 1280x720
@@ -1899,6 +1938,89 @@ public class VideoExecutor {
         ffmpeg.addArgument(sourcePath);
         ffmpeg.addArgument("-s");
         ffmpeg.addArgument(size);
+        ffmpeg.addArgument(targetPath);
+        try {
+            ffmpeg.execute();
+            LOG.info("裁剪视频尺寸: {}", targetPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            RBufferedReader reader = new RBufferedReader(
+                    new InputStreamReader(ffmpeg.getErrorStream()));
+            int step = 0;
+            int lineNR = 0;
+            String line;
+            while ((line = reader.readLine()) != null) {
+                lineNR++;
+                LOG.info("裁剪视频尺寸: {}", line);
+                // TODO: Implement additional input stream parsing
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    /**
+     * 从目标视频根据坐标宽高裁剪出新的视频
+     * @param sourcePath
+     * @param targetPath
+     * @param width
+     * @param height
+     * @param x
+     * @param y
+     *  ffmpeg -i input.mp4 -vf crop=400:400 output.mp4 -y
+     *  ffmpeg -i input.mp4 -vf crop=400:400:0:0 output.mp4 -y
+     *  crop的参数格式为w:h:x:y，
+     *  w、h为输出视频的宽和高，
+     *  x、y标记输入视频中的某点，将该点作为基准点，向右下进行裁剪得到输出视频。
+     * 	如果x y不写的话，默认居中剪切
+     */
+    public void cropVideo(String sourcePath, String targetPath, String width, String height, String x, String y) {
+        FFMPEGExecutor ffmpeg = this.locator.createExecutor();
+        ffmpeg.addArgument("-i");
+        ffmpeg.addArgument(sourcePath);
+        ffmpeg.addArgument("-vf");
+        ffmpeg.addArgument("crop=" + width + ":" + height + ":" + x + ":" + y);
+        ffmpeg.addArgument(targetPath);
+        ffmpeg.addArgument("-y");
+        try {
+            ffmpeg.execute();
+            LOG.info("裁剪视频尺寸: {}", targetPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            RBufferedReader reader = new RBufferedReader(
+                    new InputStreamReader(ffmpeg.getErrorStream()));
+            int step = 0;
+            int lineNR = 0;
+            String line;
+            while ((line = reader.readLine()) != null) {
+                lineNR++;
+                LOG.info("裁剪视频尺寸: {}", line);
+                // TODO: Implement additional input stream parsing
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    /**
+     * 增大视频音量(两倍)
+     * @param sourcePath
+     * @param targetPath
+     * ffmpeg -i 1.wav -af volume=2 -y 2.wav
+     */
+    public void increaseVolume(String sourcePath, String targetPath) {
+        FFMPEGExecutor ffmpeg = this.locator.createExecutor();
+        ffmpeg.addArgument("-i");
+        ffmpeg.addArgument(sourcePath);
+        ffmpeg.addArgument("-af");
+        ffmpeg.addArgument("volume=2");
+        ffmpeg.addArgument("-y");
         ffmpeg.addArgument(targetPath);
         try {
             ffmpeg.execute();
