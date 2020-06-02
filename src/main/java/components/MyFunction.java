@@ -841,6 +841,7 @@ public class MyFunction {
 
             //要删除的多余文件(会出现多线程添加元素)
             Set<String> deletePathSet = new CopyOnWriteArraySet(targetPathList);
+            LOG.info("要删除的文件: {}", deletePathSet);
 
             final int count = filePathList.size();
             final CountDownLatch endGate = new CountDownLatch(count);
@@ -889,7 +890,6 @@ public class MyFunction {
                             String target = Handler.getNewFilePath("D:\\MaXinHai\\file\\1.png");
                             executor.cutVideoImage(currentPath, target, time);
                             Handler.addCoverPath(target);
-                            deletePathSet.add(currentPath);
                             Thread.sleep(500);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
@@ -923,7 +923,6 @@ public class MyFunction {
                             String target = Handler.getNewFilePath(currentPath);
                             LOG.info("操作步骤:消除水印 操作对象: {}", currentPath);
                             executor.removeWatermark(currentPath, x, y, width, height, target);
-                            deletePathSet.add(currentPath);
                             allPathList.add(target);
                             currentPath = target;
                             Thread.sleep(500);

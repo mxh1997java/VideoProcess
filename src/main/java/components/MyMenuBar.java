@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-
 import executor.VideoExecutor;
 import javafx.event.ActionEvent;
 import javafx.scene.Scene;
@@ -15,6 +14,7 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import task.MyExecutorService;
+import util.EmptyUtils;
 import util.Handler;
 import view.ConfigPage;
 import view.MyHome;
@@ -38,14 +38,16 @@ public class MyMenuBar {
         selectFolder.setOnAction((ActionEvent even) -> {
             // 选择的文件夹
             File file = MyChooser.getDirectoryChooser().showDialog(primaryStage);
-            String path = file.getPath();
-            LOG.info("选择文件夹: " + path);
-            List<String> fileList = Handler.readDic(path);
-            if(fileList.size() == 0) {
-                MyAlertBox.display("菜单栏提示: ", "未在" + path + "文件夹下读取到视频文件，请重新选择!");
-                return;
+            if(EmptyUtils.isNotEmpty(file)) {
+                String path = file.getPath();
+                LOG.info("选择文件夹: {}", path);
+                List<String> fileList = Handler.readDic(path);
+                if(fileList.size() == 0) {
+                    MyAlertBox.display("菜单栏提示: ", "未在" + path + "文件夹下读取到视频文件，请重新选择!");
+                    return;
+                }
+                MyHome.setLeft(fileList, null);
             }
-            MyHome.setLeft(fileList, null);
         });
         menuFile.getItems().addAll(selectFolder);
 
@@ -55,7 +57,7 @@ public class MyMenuBar {
             List<File> list = MyChooser.getFileChooser().showOpenMultipleDialog(primaryStage);
             if (list != null) {
                 list.stream().forEach((file) -> {
-                    LOG.info("选择多个文件: " + file.getAbsolutePath());
+                    LOG.info("选择多个文件: {}", file.getAbsolutePath());
                     pathList.add(file.getAbsolutePath());
                 });
             }
@@ -67,7 +69,7 @@ public class MyMenuBar {
         selectFile.setOnAction((ActionEvent even) -> {
             File file = MyChooser.getFileChooser().showOpenDialog(primaryStage);
             if (file != null) {
-                LOG.info("选择单个文件: " + file.getAbsolutePath());
+                LOG.info("选择单个文件: {}", file.getAbsolutePath());
                 List<String> fileList = new ArrayList<>();
                 fileList.add(file.getAbsoluteFile().toString());
                 MyHome.setLeft(fileList, null);

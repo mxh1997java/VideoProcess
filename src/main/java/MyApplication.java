@@ -7,6 +7,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import task.MyExecutorService;
 import util.Handler;
 import view.MyHome;
 
@@ -32,6 +33,7 @@ public class MyApplication extends Application {
             @Override
             public void handle(WindowEvent event) {
                 System.out.print("监听到窗口关闭");
+                MyExecutorService.close();
                 System.exit(0); //关闭java虚拟机
             }
         });

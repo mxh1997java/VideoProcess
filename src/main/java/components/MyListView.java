@@ -117,7 +117,7 @@ public class MyListView {
                     label.setText(currentVideoPath);
 
                     //选择视频地址并让播放组件播放视频
-                    LOG.info("播放: " + currentVideoPath);
+                    LOG.info("播放: {}", currentVideoPath);
                     MyMediaPlayer.chooseFile(new File(currentVideoPath));
                 });
         return box;

@@ -102,7 +102,7 @@ public class Handler {
      */
     private static FFMPEGExecutor ffmpeg = null;
 
-    private static Thread screenRecordthread = null;
+    private static Thread screenRecordThread = null;
 
     private static List<String> coverPathList = new ArrayList<>();
 
@@ -240,12 +240,12 @@ public class Handler {
         coverPathList.clear();
     }
 
-    public static Thread getScreenRecordthread() {
-        return screenRecordthread;
+    public static Thread getScreenRecordThread() {
+        return screenRecordThread;
     }
 
-    public static void setScreenRecordthread(Thread screenRecordthread) {
-        Handler.screenRecordthread = screenRecordthread;
+    public static void setScreenRecordThread(Thread screenRecordThread) {
+        Handler.screenRecordThread = screenRecordThread;
     }
 
     /**

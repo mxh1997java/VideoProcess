@@ -61,7 +61,7 @@ public class MyChoiceBox {
         choiceBox = new ChoiceBox<String>(observableList);
         choiceBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             public void changed(ObservableValue ov, Number value, Number new_value) {
-                LOG.info("选择: " + strs[new_value.intValue()]);
+                LOG.info("选择: {}", strs[new_value.intValue()]);
                 selected = strs[new_value.intValue()];
             }
         });
@@ -85,7 +85,7 @@ public class MyChoiceBox {
         choiceBox = new ChoiceBox<String>(observableList);
         choiceBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             public void changed(ObservableValue ov, Number value, Number new_value) {
-                LOG.info("选择: " + strs[new_value.intValue()]);
+                LOG.info("选择: {}", strs[new_value.intValue()]);
                 selected = strs[new_value.intValue()];
                 button.setVisible(false);
                 if(selected.equals("Ps滤镜")) {
