@@ -6,6 +6,8 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.HBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.Handler;
+
 import java.math.BigDecimal;
 
 /**
@@ -47,6 +49,7 @@ public class MyProgressBar {
      * @param message
      */
     public void setLabel(String message) {
+        Handler.getSimplePath(message);
         this.message.setText(message);
     }
 

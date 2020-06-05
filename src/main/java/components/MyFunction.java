@@ -175,8 +175,7 @@ public class MyFunction {
             x = x + 200;
             y = y + 50;
             LOG.info("x: {}, y: {}, 长: {}, 宽: {}", x, y, width, height);
-            CapterScreen capterScreen = new CapterScreen();
-            capterScreen.show(x, y, width, height);
+            CapterScreen.show(x, y, width, height);
         });
         delWatermarkBox.getChildren().addAll(delWatermark);
         delWatermarkBox1.getChildren().addAll(deleteWatermarkXAxisLabel, delWatermarkOfX);
@@ -393,6 +392,9 @@ public class MyFunction {
                     return;
                 }
 
+                //copy文件到配置的文件夹路径下
+                currentVideo = Handler.copyFile(currentVideo);
+
                 //产生的视频地址都放入这里
                 List<String> pathList = new ArrayList<>();
 
@@ -521,18 +523,20 @@ public class MyFunction {
                             singleProgressBar.setLabel("正在剪切视频");
                         }
                     });
-                    String start = startTime.getText();
-                    String end = endTime.getText();
+                    int start = Integer.valueOf(startTime.getText()) + 1;
+                    int end = Integer.valueOf(endTime.getText()) + 1;
                     MultimediaInfo videoInfo = videoExecutor.getVideoInfo(currentVideo);
                     long duration = videoInfo.getDuration(); //获取视频长度
                     BigDecimal durationValue = new BigDecimal(String.valueOf(duration));
+                    BigDecimal startValue = new BigDecimal(start + "000");
                     BigDecimal endValue = new BigDecimal(end + "000");
-                    start = Handler.formatTime(Long.valueOf(start));
+                    String startPoint = Handler.formatTime(Long.valueOf(start));
                     BigDecimal standardValue= new BigDecimal("1000");
                     //视频总长度减去要删除的秒数再除以1000在向上取整得到的就是结束秒数
-                    end = Handler.formatTime(durationValue.subtract(endValue).divide(standardValue).setScale(0, BigDecimal.ROUND_UP).longValue());
+                    String endPoint = Handler.formatTime(durationValue.subtract(startValue).subtract(endValue).divide(standardValue, 0, BigDecimal.ROUND_DOWN).longValue());
                     String targetPath = Handler.getNewFilePath(currentVideo);
-                    videoExecutor.cutVideo(currentVideo, targetPath, start, end);
+                    LOG.info("操作步骤:剪切视频 操作对象: {} 开始时间: {} 结束时间: {}", currentVideo, startPoint, endPoint);
+                    videoExecutor.cutVideo(currentVideo, targetPath, startPoint, endPoint);
                     //删除上一步产生的视频
                     Handler.deleteFile(currentVideo);
                     pathList.add(targetPath);
@@ -789,8 +793,13 @@ public class MyFunction {
                             //刷新左侧视频列表
                             processedList.add(videoPath);
                             MyHome.setLeft(null, processedList);
-                            //选择视频地址并让播放组件播放视频
-                            MyMediaPlayer.chooseFile(new File(videoPath));
+                            if(addFilterSelected) {
+                                //调用第三方视频播放器
+                                Handler.transferOtherPlayer(videoPath);
+                            } else {
+                                //选择视频地址并让播放组件播放视频
+                                MyMediaPlayer.chooseFile(new File(videoPath));
+                            }
                         }
                         dealWithSingle.setDisable(false);
                         singleProgressBar.setVisible(true);
@@ -833,6 +842,11 @@ public class MyFunction {
                 return;
             }
 
+            if(filePathList.size() > MyExecutorService.TASKTOTAL) {
+                MyAlertBox.display("提示", "处理视频数量大于100,请减少视频数量!");
+                return;
+            }
+
             //copy文件到生成文件夹下
             List<String> targetPathList = Handler.batchCopyFile(filePathList, targetPath);
 
@@ -869,7 +883,7 @@ public class MyFunction {
             batchProgressBar.setLabel("开始执行");
 
             ExecutorService executorService = MyExecutorService.getTaskExecutor();
-            filePathList.forEach(path -> {
+            targetPathList.forEach(path -> {
                 Thread task = new Thread(()->{
                     final  VideoExecutor executor = new VideoExecutor();
                     String currentPath = path;
@@ -988,8 +1002,8 @@ public class MyFunction {
                                 batchProgressBar.setLabel("正在剪切视频 " + Handler.getFileName(path));
                             }
                         });
-                        String start = startTime.getText();
-                        String end = endTime.getText();
+                        int start = Integer.valueOf(startTime.getText()) + 1;
+                        int end = Integer.valueOf(endTime.getText()) + 1;
                         String startPoint = null;
                         String endPoint = null;
                         try {
@@ -1003,13 +1017,14 @@ public class MyFunction {
                             MultimediaInfo videoInfo = executor.getVideoInfo(currentPath);
                             long duration = videoInfo.getDuration(); //获取视频长度
                             BigDecimal durationValue = new BigDecimal(String.valueOf(duration));
+                            BigDecimal startValue = new BigDecimal(start + "000");
                             BigDecimal endValue = new BigDecimal(end + "000");
-                            startPoint = Handler.formatTime(Long.valueOf(start));
+                            startPoint = Handler.formatTime(start);
                             BigDecimal standardValue= new BigDecimal("1000");
                             //视频总长度减去要删除的秒数再除以1000在向上取整得到的就是结束秒数
-                            endPoint = Handler.formatTime(durationValue.subtract(endValue).divide(standardValue).setScale(0, BigDecimal.ROUND_UP).longValue());
+                            endPoint = Handler.formatTime(durationValue.subtract(startValue).subtract(endValue).divide(standardValue, 0, BigDecimal.ROUND_DOWN).longValue());
                             String target = Handler.getNewFilePath(currentPath);
-                            LOG.info("操作步骤:剪切视频 操作对象: {}", currentPath);
+                            LOG.info("操作步骤:剪切视频 操作对象: {} 开始时间: {} 结束时间: {}", currentPath, startPoint, endPoint);
                             executor.cutVideo(currentPath, target, startPoint, endPoint);
                             deletePathSet.add(currentPath);
                             allPathList.add(target);
@@ -1284,12 +1299,12 @@ public class MyFunction {
                     @Override
                     public void run() {
                         MyHome.setLeft(null, allPathList);
-                        File videoFile = new File(allPathList.get(0));
-                        //播放第一个视频并让播放组件播放视频
-                        MyMediaPlayer.chooseFile(videoFile);
                         batchProgressBar.setValue(1);
                         batchProgressBar.setLabel("执行完毕!");
                         dealWithBath.setDisable(false);
+                        File videoFile = new File(allPathList.get(0));
+                        //播放第一个视频并让播放组件播放视频
+                        MyMediaPlayer.chooseFile(videoFile);
                         try {
                             Thread.sleep(5000);
                         } catch (InterruptedException e) {

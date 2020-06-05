@@ -126,46 +126,46 @@ public class MyMenuBar {
 
         // --- Menu View
         Menu menuMore = new Menu("更多");
-//        MenuItem menuItem = new MenuItem("敬请期待");
-//        menuMore.getItems().addAll(menuItem);
-        Menu screenRecord = new Menu("屏幕录制");
-        screenRecord.setOnAction((ActionEvent even) -> {
-        });
-        MenuItem screenRecordStart = new MenuItem("开始");
-        screenRecordStart.setOnAction(event -> {
-            LOG.info("开始录制屏幕");
-            String filePath = Handler.getNewFilePath("D:\\file\\1.mp4");
-            VideoExecutor videoExecutor = new VideoExecutor();
-            ExecutorService myExecutorService = MyExecutorService.getTaskExecutor();
-            Thread thread = new Thread(() -> {
-                videoExecutor.screenRecord(filePath);
-            });
-            myExecutorService.submit(thread);
-        });
-        MenuItem screenRecordStop = new MenuItem("停止");
-        screenRecordStop.setOnAction(event -> {
-            LOG.info("关闭屏幕录制");
-            MyExecutorService.getTaskExecutor().shutdown();
-            VideoExecutor videoExecutor = new VideoExecutor();
-            videoExecutor.closeScreenRecord();
-        });
-        screenRecord.getItems().addAll(screenRecordStart, screenRecordStop);
-
-        Menu takeVideo = new Menu("拍摄视频");
-        takeVideo.setOnAction((ActionEvent even) -> {
-        });
-        MenuItem takeVideoStart = new MenuItem("开始拍摄");
-        takeVideoStart.setOnAction(event -> {
-            LOG.info("开始拍摄视频");
-            new Thread(()->{
-                String filePath = Handler.getNewFilePath("D:\\file\\1.mp4");
-                VideoExecutor videoExecutor = new VideoExecutor();
-                videoExecutor.takeVideo(filePath);
-            }).start();
-        });
-        MenuItem takeVideoEnd = new MenuItem("结束拍摄");
-        takeVideo.getItems().addAll(takeVideoStart, takeVideoEnd);
-        menuMore.getItems().addAll(screenRecord, takeVideo);
+        MenuItem menuItem = new MenuItem("敬请期待");
+        menuMore.getItems().addAll(menuItem);
+//        Menu screenRecord = new Menu("屏幕录制");
+//        screenRecord.setOnAction((ActionEvent even) -> {
+//        });
+//        MenuItem screenRecordStart = new MenuItem("开始");
+//        screenRecordStart.setOnAction(event -> {
+//            LOG.info("开始录制屏幕");
+//            String filePath = Handler.getNewFilePath("D:\\file\\1.mp4");
+//            VideoExecutor videoExecutor = new VideoExecutor();
+//            ExecutorService myExecutorService = MyExecutorService.getTaskExecutor();
+//            Thread thread = new Thread(() -> {
+//                videoExecutor.screenRecord(filePath);
+//            });
+//            myExecutorService.submit(thread);
+//        });
+//        MenuItem screenRecordStop = new MenuItem("停止");
+//        screenRecordStop.setOnAction(event -> {
+//            LOG.info("关闭屏幕录制");
+//            MyExecutorService.getTaskExecutor().shutdown();
+//            VideoExecutor videoExecutor = new VideoExecutor();
+//            videoExecutor.closeScreenRecord();
+//        });
+//        screenRecord.getItems().addAll(screenRecordStart, screenRecordStop);
+//
+//        Menu takeVideo = new Menu("拍摄视频");
+//        takeVideo.setOnAction((ActionEvent even) -> {
+//        });
+//        MenuItem takeVideoStart = new MenuItem("开始拍摄");
+//        takeVideoStart.setOnAction(event -> {
+//            LOG.info("开始拍摄视频");
+//            new Thread(()->{
+//                String filePath = Handler.getNewFilePath("D:\\file\\1.mp4");
+//                VideoExecutor videoExecutor = new VideoExecutor();
+//                videoExecutor.takeVideo(filePath);
+//            }).start();
+//        });
+//        MenuItem takeVideoEnd = new MenuItem("结束拍摄");
+//        takeVideo.getItems().addAll(takeVideoStart, takeVideoEnd);
+//        menuMore.getItems().addAll(screenRecord, takeVideo);
 
         menuBar.getMenus().addAll(menuFile, menuEdit, menuView, menuConfig, menuMore);
         return menuBar;

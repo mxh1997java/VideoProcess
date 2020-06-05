@@ -156,6 +156,8 @@ public class VideoExecutor {
      * @param startTime
      * @param endTime
      * @desc ffmpeg -ss 00:10 -t 30 -i 0.mp4 -c copy 2.mp4
+     *        ffmpeg -ss 10 -t 15 -accurate_seek -i test.mp4 -codec copy cut.mp4 剪切更精确
+     *        ffmpeg -ss 01:33:30 -i video.mp4 -vcodec copy -acodec copy -t 00:47:16 output2.mp4
      */
     public void cutVideo(String sourcePath, String targetPath, String startTime, String endTime) {
         FFMPEGExecutor ffmpeg = this.locator.createExecutor();
@@ -163,8 +165,11 @@ public class VideoExecutor {
         ffmpeg.addArgument(startTime);
         ffmpeg.addArgument("-t");
         ffmpeg.addArgument(endTime);
+        ffmpeg.addArgument("-accurate_seek");
         ffmpeg.addArgument("-i");
         ffmpeg.addArgument(sourcePath);
+        ffmpeg.addArgument("-codec");
+        ffmpeg.addArgument("copy");
         ffmpeg.addArgument(targetPath);
         ffmpeg.addArgument("-y");
         try {
@@ -1810,7 +1815,7 @@ public class VideoExecutor {
         ffmpeg.addArgument(targetPath);
         try {
             ffmpeg.execute();
-            LOG.info("提取音频完毕: " + targetPath);
+            LOG.info("提取音频完毕: {}", targetPath);
         } catch (IOException e) {
             e.printStackTrace();
         }

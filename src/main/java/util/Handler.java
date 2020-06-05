@@ -10,6 +10,8 @@ import processor.FFMPEGExecutor;
 import task.CopyFileTask;
 import task.MyExecutorService;
 import ws.schild.jave.MultimediaInfo;
+
+import java.awt.*;
 import java.io.*;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
@@ -19,6 +21,7 @@ import java.nio.channels.FileChannel;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -730,7 +733,7 @@ public class Handler {
      * @param sourceFolderPath 要复制的文件夹
      * @param targetFolderPath 目标文件夹
      */
-    public static void asynBatchCopyFile(String sourceFolderPath, String targetFolderPath) {
+    public static void asynBatchCopyFile(String sourceFolderPath, String targetFolderPath) throws RuntimeException{
         long startTime = System.currentTimeMillis();
         long endTime = 0;
         File sourceFolder = new File(sourceFolderPath);
@@ -781,7 +784,7 @@ public class Handler {
      * @param sourceFolderPath 要复制的文件夹
      * @param targetFolderPath 目标文件夹
      */
-    public static void batchCopyFile(String sourceFolderPath, String targetFolderPath) {
+    public static void batchCopyFile(String sourceFolderPath, String targetFolderPath) throws RuntimeException{
         long startTime = System.currentTimeMillis();
         File sourceFolder = new File(sourceFolderPath);
         File targetFolder = new File(targetFolderPath);
@@ -959,6 +962,58 @@ public class Handler {
             return true;
         }
         return false;
+    }
+
+
+    /**
+     * 获取屏幕宽高
+     */
+    public static Map<String, Integer> getScreenSize() {
+        // TODO Auto-generated constructor stub
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int screenWidth = (int) screenSize.getWidth();
+        int screenHeight = (int) screenSize.getHeight();
+        LOG.info("屏幕宽度：" + screenWidth + "，屏幕高度：" + screenHeight);
+        Map<String, Integer> result= new HashMap<>();
+        result.put("width", screenWidth);
+        result.put("height", screenHeight);
+        return result;
+    }
+
+
+    /**
+     * 调用第三方播放器播放视频
+     * @param targetPath
+     * @throws IOException
+     */
+    public static void transferOtherPlayer(String targetPath) {
+        Map<String, String> config = readProp();
+        if(EmptyUtils.isEmpty(config.get("ffmpegPath"))) {
+            MyAlertBox.display("提示", "未配置第三方视频播放器!");
+            return;
+        }
+        String ffmpegPath = ffmpegPath = config.get("ffmpegPath");;
+        try {
+            //通过cmd命令点用第三方播放器播放视频
+            Runtime.getRuntime().exec(ffmpegPath + " " + targetPath);
+        } catch (IOException e) {
+            MyAlertBox.display("提示", "调用第三方播放器失败!");
+            e.printStackTrace();
+        }
+    }
+
+
+    /**
+     * 描述：复制文件夹到指定目录
+     * @param sourcePath
+     * @return
+     */
+    public static String copyFile(String sourcePath) {
+        Map<String, String> config = Handler.readProp();
+        String configPath = config.get("targetPath");
+        String targetPath = configPath + File.separator + getFileName(sourcePath);
+        copyFile(sourcePath, targetPath);
+        return targetPath;
     }
 
 }

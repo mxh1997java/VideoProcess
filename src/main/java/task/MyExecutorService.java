@@ -14,13 +14,15 @@ public class MyExecutorService {
 
     private static ExecutorService taskExecutor;
 
+    public static final int TASKTOTAL = 100;
+
     /**
      * 返回有界队列线程池，超出队列会抛异常
      * @return
      */
     public static ExecutorService getTaskExecutor() {
         if(null == taskExecutor) {
-            taskExecutor = new ThreadPoolExecutor(10, 10, 1L, TimeUnit.MICROSECONDS, new ArrayBlockingQueue<>(100));
+            taskExecutor = new ThreadPoolExecutor(10, 10, 1L, TimeUnit.MICROSECONDS, new ArrayBlockingQueue<>(TASKTOTAL));
         }
         return taskExecutor;
     }

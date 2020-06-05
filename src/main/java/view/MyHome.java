@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.Handler;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -45,7 +46,8 @@ public class MyHome {
         pane.setRight(MyFunction.getFunction(primaryStage));
         pane.setBottom(MyBottom.getBottom());
         // 将pane加入到scene中
-        Scene homeScene = new Scene(pane, 1366, 708);
+        Map<String, Integer> screenSize = Handler.getScreenSize();
+        Scene homeScene = new Scene(pane, screenSize.get("width"), screenSize.get("height")-55);
         return homeScene;
     }
 

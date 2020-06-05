@@ -21,12 +21,12 @@ import util.Handler;
  */
 public class CapterScreen {
 
-    Stage stage; // 切图时候的辅助舞台
-    double start_x; // 切图区域的起始位置x
-    double start_y; // 切图区域的起始位置y
-    double w; // 切图区域宽
-    double h; // 切图区域高
-    HBox hBox; // 切图区域
+    private static Stage stage; // 切图时候的辅助舞台
+    private static double start_x; // 切图区域的起始位置x
+    private static double start_y; // 切图区域的起始位置y
+    private static double w; // 切图区域宽
+    private static double h; // 切图区域高
+    private static HBox hBox; // 切图区域
 
     /**
      * 展示出截图画面
@@ -35,9 +35,13 @@ public class CapterScreen {
      * @param width
      * @param height
      */
-    public void show(int x, int y, int width, int height) {
+    public static void show(int x, int y, int width, int height) {
         // 将主舞台缩放到任务栏
         //primaryStage.setIconified(true);
+        //保证始终只有一个选取水印区域遮罩
+        if(null != stage) {
+            stage.close();
+        }
         // 创建辅助舞台，并设置场景与布局
         stage = new Stage();
         // 锚点布局采用半透明

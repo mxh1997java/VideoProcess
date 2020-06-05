@@ -46,7 +46,7 @@ public class ConfigPage {
         final TextField ffmpegPath = new TextField();
         ffmpegPath.setDisable(true);
         ffmpegPath.setPrefSize(350, 40);
-        ffmpegPath.setPromptText("请选择FFmpeg.exe路径");
+        ffmpegPath.setPromptText("请选择第三方播放器路径");
         if(null != config.get("ffmpegPath")) {
             ffmpegPath.setText(config.get("ffmpegPath"));
         }
@@ -131,7 +131,8 @@ public class ConfigPage {
         BorderPane borderPane = new BorderPane();
         borderPane.setTop(MyMenuBar.getMenuBar(primaryStage));
         borderPane.setCenter(pane);
-        Scene scene = new Scene(borderPane, 1366, 708);
+        Map<String, Integer> screenSize = Handler.getScreenSize();
+        Scene scene = new Scene(borderPane, screenSize.get("width"), screenSize.get("height")-55);
         return scene;
     }
 
