@@ -49,7 +49,6 @@ public class MyProgressBar {
      * @param message
      */
     public void setLabel(String message) {
-        Handler.getSimplePath(message);
         this.message.setText(message);
     }
 

@@ -992,7 +992,7 @@ public class Handler {
             MyAlertBox.display("提示", "未配置第三方视频播放器!");
             return;
         }
-        String ffmpegPath = ffmpegPath = config.get("ffmpegPath");;
+        String ffmpegPath = config.get("ffmpegPath");;
         try {
             //通过cmd命令点用第三方播放器播放视频
             Runtime.getRuntime().exec(ffmpegPath + " " + targetPath);
