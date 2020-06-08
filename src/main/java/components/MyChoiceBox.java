@@ -30,6 +30,12 @@ public class MyChoiceBox {
      */
     private ChoiceBox<String> choiceBox;
 
+    private String[] array = new String[0];
+
+    public void setArray(String[] array) {
+        this.array = array;
+    }
+
     /**
      * 设置默认选项
      * @param itemIndex
@@ -55,14 +61,13 @@ public class MyChoiceBox {
         ObservableList<String> observableList = FXCollections.observableArrayList();
         observableList.addAll(list);
         // 集合转数组
-        String[] strs = new String[list.size()];
-        list.toArray(strs);
-        //final ChoiceBox<String>
+        array = new String[list.size()];
         choiceBox = new ChoiceBox<String>(observableList);
         choiceBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             public void changed(ObservableValue ov, Number value, Number new_value) {
-                LOG.info("选择: {}", strs[new_value.intValue()]);
-                selected = strs[new_value.intValue()];
+                LOG.info("数组长度: {}", array.length);
+                LOG.info("选择: {}", array[new_value.intValue()]);
+                selected = array[new_value.intValue()];
             }
         });
         return choiceBox;
@@ -80,7 +85,6 @@ public class MyChoiceBox {
         observableList.addAll(list);
         // 集合转数组
         String[] strs = new String[list.size()];
-        list.toArray(strs);
         //final ChoiceBox<String>
         choiceBox = new ChoiceBox<String>(observableList);
         choiceBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {

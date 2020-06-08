@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -15,6 +17,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.EmptyUtils;
 import util.Handler;
 
 /**
@@ -111,14 +114,32 @@ public class MyListView {
         listView.setItems(data);
         listView.getSelectionModel().selectedItemProperty()
                 .addListener((ObservableValue<? extends String> ov, String old_val, String new_val) -> {
-                    LOG.info("您点了第{}项，视频名称是{}", listView.getSelectionModel().getSelectedIndex(), listView.getSelectionModel().getSelectedItem());
+                    //LOG.info("您点了第{}项，视频名称是{}", listView.getSelectionModel().getSelectedIndex(), listView.getSelectionModel().getSelectedItem());
                     currentVideoPath = filePathList.get(listView.getSelectionModel().getSelectedIndex());
                     Handler.setCurrentVideoPath(currentVideoPath);
-                    label.setText(currentVideoPath);
+
+                    //点击视频时保存上一个视频操作数据
+                    MyFunction.saveUserOperatingCache();
+                    //报操作数据放入对应的视频方案
+                    Handler.putProgram(Handler.getFileName(label.getText()), Handler.getNewAllUserOperatingCache());
+
+                    MyFunction.setProgramChoiceBox(Handler.getProgramKeys());
+
+                    //清空当前界面Function区缓存
+                    Handler.clearUserOperatingCache();
 
                     //选择视频地址并让播放组件播放视频
                     LOG.info("播放: {}", currentVideoPath);
                     MyMediaPlayer.chooseFile(new File(currentVideoPath));
+
+                    MyFunction.clearUserOperating();
+
+                    //如果有操作方案，设置操作方案
+                    Map<String, List<String>> program = Handler.getProgram(Handler.getFileName(currentVideoPath));
+                    if(EmptyUtils.isNotEmpty(program)) {
+                        MyFunction.setUserOperating(program);
+                    }
+                    label.setText(currentVideoPath);
                 });
         return box;
     }

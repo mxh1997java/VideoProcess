@@ -12,6 +12,8 @@ import executor.VideoExecutor;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
@@ -59,6 +61,9 @@ public class MyFunction {
 
 
     //功能区域组件 start
+    private static MyChoiceBox programSelectionBox = new MyChoiceBox();
+    private static ChoiceBox<String> programChoiceBox = programSelectionBox.getChoiceBox(Handler.getProgramKeys());
+
     private static CheckBox addWatermark = new CheckBox("添加水印");
     private static TextField addWatermarkOfX = new TextField();
     private static TextField addWatermarkOfY = new TextField();
@@ -101,6 +106,21 @@ public class MyFunction {
     private static TextField endVideoText = new TextField(); //"请选择片尾"
     //功能区域组件 end
 
+
+    /**
+     * 设置操作方案下拉列表
+     * @param itemList
+     */
+    public static void setProgramChoiceBox(List<String> itemList) {
+        ObservableList<String> observableList = FXCollections.observableArrayList(itemList);
+        programChoiceBox.setItems(observableList);
+        String [] strs = new String[observableList.size()];
+        for(int i=0; i<observableList.size(); i++) {
+            strs[i] = observableList.get(i);
+        }
+        programSelectionBox.setArray(strs);
+    }
+
     public static VBox getFunction(Stage primaryStage) {
         // 创建一个垂直箱子
         VBox vbox = new VBox();
@@ -113,7 +133,7 @@ public class MyFunction {
         titleBox.setPadding(new Insets(5, 5, 5, 5));
         Text title = new Text("功能区域");
         title.setFont(Font.font(java.awt.Font.SERIF, 25));
-        titleBox.getChildren().addAll(title);
+        titleBox.getChildren().addAll(title, new Label(" 选择操作方案: "), programChoiceBox);
 
         //添加水印
         HBox addWatermarkBox = new HBox();
@@ -887,9 +907,12 @@ public class MyFunction {
                 Thread task = new Thread(()->{
                     final  VideoExecutor executor = new VideoExecutor();
                     String currentPath = path;
+                    //根据视频名字拿到对应的视频处理方案
+                    Map<String, List<String>> program = Handler.getProgram(Handler.getFileName(path));
 
                     //截取图片
                     if(getCoverSelected) {
+                        List<String> params = program.get("截取图片");
                         Platform.runLater(new Runnable() {
                             @Override
                             public void run() {
@@ -897,7 +920,8 @@ public class MyFunction {
                                 batchProgressBar.setLabel("正在截取视频图片 " + Handler.getFileName(path));
                             }
                         });
-                        String time = cutVideoTime.getText();
+                        //String time = cutVideoTime.getText();
+                        String time = params.get(0); //拿到参数
                         time = Handler.formatTime(Long.valueOf(time));
                         try {
                             LOG.info("操作步骤: 批量截取图片 操作对象: {}", currentPath);
@@ -911,6 +935,7 @@ public class MyFunction {
                     }
                     //删除水印
                     if (delWatermarkSelected) {
+                        List<String> params = program.get("删除水印");
                         Platform.runLater(new Runnable() {
                             @Override
                             public void run() {
@@ -918,10 +943,14 @@ public class MyFunction {
                                 batchProgressBar.setLabel("正在消除水印 " + Handler.getFileName(path));
                             }
                         });
-                        String x = delWatermarkOfX.getText();
-                        String y = delWatermarkOfY.getText();
-                        String width = delWatermarkOfWidth.getText();
-                        String height = delWatermarkOfHeight.getText();
+//                        String x = delWatermarkOfX.getText();
+//                        String y = delWatermarkOfY.getText();
+//                        String width = delWatermarkOfWidth.getText();
+//                        String height = delWatermarkOfHeight.getText();
+                        String x = params.get(0);
+                        String y = params.get(1);
+                        String width = params.get(2);
+                        String height = params.get(3);
                         BigDecimal xValue = new BigDecimal(x);
                         BigDecimal yValue = new BigDecimal(y);
                         BigDecimal widthValue = new BigDecimal(width);
@@ -947,6 +976,7 @@ public class MyFunction {
                     }
                     //添加水印
                     if (addWatermarkSelected) {
+                        List<String> params = program.get("添加水印");
                         Platform.runLater(new Runnable() {
                             @Override
                             public void run() {
@@ -954,9 +984,12 @@ public class MyFunction {
                                 batchProgressBar.setLabel("正在添加水印 " + Handler.getFileName(path));
                             }
                         });
-                        String x = addWatermarkOfX.getText();
-                        String y = addWatermarkOfY.getText();
-                        String text = addWatermarkOfContent.getText();
+//                        String x = addWatermarkOfX.getText();
+//                        String y = addWatermarkOfY.getText();
+//                        String text = addWatermarkOfContent.getText();
+                        String x = params.get(0);
+                        String y = params.get(1);
+                        String text = params.get(2);
                         try {
                             String target = Handler.getNewFilePath(currentPath);
                             LOG.info("操作步骤:加水印 操作对象: {}", currentPath);
@@ -972,6 +1005,7 @@ public class MyFunction {
                     }
                     //添加片头片尾
                     if(addVideoSelected) {
+                        List<String> params = program.get("添加片头片尾");
                         Platform.runLater(new Runnable() {
                             @Override
                             public void run() {
@@ -979,8 +1013,10 @@ public class MyFunction {
                                 batchProgressBar.setLabel("正在添加片头片尾 " + Handler.getFileName(path));
                             }
                         });
-                        String startVideoPath = startVideoText.getText();
-                        String endVideoPath = endVideoText.getText();
+//                        String startVideoPath = startVideoText.getText();
+//                        String endVideoPath = endVideoText.getText();
+                        String startVideoPath = params.get(0);
+                        String endVideoPath = params.get(1);
                         try {
                             String target = Handler.getNewFilePath(currentPath);
                             LOG.info("操作步骤:批量添加片头片尾 操作对象: {}", currentPath);
@@ -995,6 +1031,7 @@ public class MyFunction {
                         }
                     }
                     if (cutVideoSelected) {
+                        List<String> params = program.get("剪切视频");
                         Platform.runLater(new Runnable() {
                             @Override
                             public void run() {
@@ -1002,8 +1039,10 @@ public class MyFunction {
                                 batchProgressBar.setLabel("正在剪切视频 " + Handler.getFileName(path));
                             }
                         });
-                        int start = Integer.valueOf(startTime.getText()) + 1;
-                        int end = Integer.valueOf(endTime.getText()) + 1;
+//                        int start = Integer.valueOf(startTime.getText()) + 1;
+//                        int end = Integer.valueOf(endTime.getText()) + 1;
+                        int start = Integer.valueOf(params.get(0)) + 1;
+                        int end = Integer.valueOf(params.get(1)) + 1;
                         String startPoint = null;
                         String endPoint = null;
                         try {
@@ -1036,7 +1075,9 @@ public class MyFunction {
                         }
                     }
                     if (addFilterSelected) {
-                        String selected = filterSelectionBox.getSelected();
+                        List<String> params = program.get("添加滤镜");
+                        //String selected = filterSelectionBox.getSelected();
+                        String selected = params.get(0);
                         Platform.runLater(new Runnable() {
                             @Override
                             public void run() {
@@ -1179,6 +1220,7 @@ public class MyFunction {
                     //增加视频帧率
                     if (addFrameRateSelected) {
                         LOG.info("增加视频速率");
+                        List<String> params = program.get("视频加速");
                         Platform.runLater(new Runnable() {
                             @Override
                             public void run() {
@@ -1186,7 +1228,8 @@ public class MyFunction {
                                 batchProgressBar.setLabel("正在增加视频速率 " + Handler.getFileName(path));
                             }
                         });
-                        String frameRate = addFrameRateSelectionBox.getSelected();
+                        //String frameRate = addFrameRateSelectionBox.getSelected();
+                        String frameRate = params.get(0);
                         try {
                             String target = Handler.getNewFilePath(currentPath);
                             LOG.info("操作步骤:增加视频速率 操作对象: {}", currentPath);
@@ -1203,6 +1246,7 @@ public class MyFunction {
 
                     //降低视频帧率
                     if (reduceFrameRateSelected) {
+                        List<String> params = program.get("视频减速");
                         Platform.runLater(new Runnable() {
                             @Override
                             public void run() {
@@ -1210,7 +1254,8 @@ public class MyFunction {
                                 batchProgressBar.setLabel("正在降低视频帧率 " + Handler.getFileName(path));
                             }
                         });
-                        String frameRate = reduceFrameRateSelectionBox.getSelected();
+                        //String frameRate = reduceFrameRateSelectionBox.getSelected();
+                        String frameRate = params.get(0);
                         try {
                             String target = Handler.getNewFilePath(currentPath);
                             LOG.info("操作步骤:降低视频帧率 操作对象: {}", currentPath);
@@ -1250,6 +1295,7 @@ public class MyFunction {
 
                     //设置封面
                     if (setCoverSelected) {
+                        List<String> params = program.get("设置封面");
                         Platform.runLater(new Runnable() {
                             @Override
                             public void run() {
@@ -1257,7 +1303,8 @@ public class MyFunction {
                                 batchProgressBar.setLabel("正在设置视频封面 " + Handler.getFileName(path));
                             }
                         });
-                        String imgPath = coverPath.getText();
+                        //String imgPath = coverPath.getText();
+                        String imgPath = params.get(0);
                         if(null == imgPath || "".equals(imgPath)) {
                             new RuntimeException("未设置封面文件!");
                         }
@@ -1483,6 +1530,15 @@ public class MyFunction {
                 }
             }
         });
+
+        programChoiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                LOG.info("蛮喜欢 {}", newValue);
+                Map<String, List<String>> program = Handler.getProgram(newValue);
+                setUserOperating(program);
+            }
+        });
     }
 
     /**
@@ -1679,5 +1735,132 @@ public class MyFunction {
         if(allUserOperatingCache.containsKey("背景虚化")) {
             blurBackground.setSelected(true);
         }
+        if(allUserOperatingCache.containsKey("添加片头片尾")) {
+            addVideo.setSelected(true);
+            List<String> data = allUserOperatingCache.get("添加片头片尾");
+            if(EmptyUtils.isNotEmpty(data)) {
+                startVideoText.setText(data.get(0));
+                endVideoText.setText(data.get(1));
+            }
+        }
+    }
+
+    /**
+     * 设置用户操作
+     */
+    public static void setUserOperating(Map<String, List<String>> allUserOperatingCache) {
+        if(allUserOperatingCache.containsKey("添加水印")) {
+            addWatermark.setSelected(true);
+            List<String> data = allUserOperatingCache.get("添加水印");
+            if(!EmptyUtils.isEmpty(data)) {
+                addWatermarkOfX.setText(data.get(0));
+                addWatermarkOfY.setText(data.get(1));
+                addWatermarkOfContent.setText(data.get(2));
+            }
+        }
+        if(allUserOperatingCache.containsKey("删除水印")) {
+            delWatermark.setSelected(true);
+            List<String> data = allUserOperatingCache.get("删除水印");
+            if(!EmptyUtils.isEmpty(data)) {
+                delWatermarkOfX.setText(data.get(0));
+                delWatermarkOfY.setText(data.get(1));
+                delWatermarkOfWidth.setText(data.get(2));
+                delWatermarkOfHeight.setText(data.get(3));
+            }
+        }
+        if(allUserOperatingCache.containsKey("剪切视频")) {
+            cutVideo.setSelected(true);
+            List<String> data = allUserOperatingCache.get("剪切视频");
+            if (!EmptyUtils.isEmpty(data)) {
+                startTime.setText(data.get(0));
+                endTime.setText(data.get(1));
+            }
+        }
+        if(allUserOperatingCache.containsKey("设置封面")) {
+            setCover.setSelected(true);
+            List<String> data = allUserOperatingCache.get("设置封面");
+            if (!EmptyUtils.isEmpty(data)) {
+                coverPath.setText(data.get(0));
+            }
+        }
+        if(allUserOperatingCache.containsKey("截取图片")) {
+            getCover.setSelected(true);
+            List<String> data = allUserOperatingCache.get("截取图片");
+            if (!EmptyUtils.isEmpty(data)) {
+                cutVideoTime.setText(data.get(0));
+            }
+        }
+        if(allUserOperatingCache.containsKey("添加滤镜")) {
+            addFilter.setSelected(true);
+            List<String> data = allUserOperatingCache.get("添加滤镜");
+            if (!EmptyUtils.isEmpty(data)) {
+                filterSelectionBox.selectItem(data.get(0));
+                if(data.get(0).equals("Ps滤镜")) {
+                    acvPath.setText(data.get(1));
+                }
+            }
+        }
+        if(allUserOperatingCache.containsKey("视频加速")) {
+            addFrameRate.setSelected(true);
+            List<String> data = allUserOperatingCache.get("视频加速");
+            if (!EmptyUtils.isEmpty(data)) {
+                addFrameRateSelectionBox.selectItem(data.get(0));
+            }
+        }
+        if(allUserOperatingCache.containsKey("视频减速")) {
+            reduceFrameRate.setSelected(true);
+            List<String> data = allUserOperatingCache.get("视频减速");
+            if (!EmptyUtils.isEmpty(data)) {
+                reduceFrameRateSelectionBox.selectItem(data.get(0));
+            }
+        }
+        if(allUserOperatingCache.containsKey("背景虚化")) {
+            blurBackground.setSelected(true);
+        }
+        if(allUserOperatingCache.containsKey("添加片头片尾")) {
+            addVideo.setSelected(true);
+            List<String> data = allUserOperatingCache.get("添加片头片尾");
+            if(EmptyUtils.isNotEmpty(data)) {
+                startVideoText.setText(data.get(0));
+                endVideoText.setText(data.get(1));
+            }
+        }
+    }
+
+
+    /**
+     * 清空用户操作
+     */
+    public static void clearUserOperating() {
+        addWatermark.setSelected(false);
+        addWatermarkOfX.setText("");
+        addWatermarkOfY.setText("");
+        addWatermarkOfContent.setText("");
+        delWatermark.setSelected(false);
+        delWatermarkOfX.setText("");
+        delWatermarkOfY.setText("");
+        delWatermarkOfWidth.setText("");
+        delWatermarkOfHeight.setText("");
+        cutVideo.setSelected(false);
+        startTime.setText("");
+        endTime.setText("");
+        setCover.setSelected(false);
+        coverPath.setText("");
+        getCover.setSelected(false);
+        cutVideoTime.setText("");
+        addFilter.setSelected(false);
+        //重新设置滤镜下拉框
+        //filterChoiceBox = filterSelectionBox.getChoiceBox(Handler.getFilterList());
+        acvPath.setText("");
+        addFrameRate.setSelected(false);
+        //重新设置增加视频速率下拉框
+        //addFrameRateChoiceBox = addFrameRateSelectionBox.getChoiceBox(Handler.getAddFrameRateItemList());
+        reduceFrameRate.setSelected(false);
+        //重新设置降低视频速率下拉框
+        //reduceFrameRateChoiceBox = reduceFrameRateSelectionBox.getChoiceBox(Handler.getReduceFrameRateItemList());
+        blurBackground.setSelected(false);
+        addVideo.setSelected(false);
+        startVideoText.setText("");
+        endVideoText.setText("");
     }
 }

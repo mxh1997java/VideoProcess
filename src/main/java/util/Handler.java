@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -125,6 +126,52 @@ public class Handler {
     private static Map<String, List<String>> userOperatingCache = new HashMap<>();
 
     /**
+     * 每个视频的处理方案
+     */
+    private static Map<String, Map<String, List<String>>> dealWithProgram = new ConcurrentHashMap<String, Map<String, List<String>>>();
+
+    /**
+     * 返回程序方案名称集合
+     * @return
+     */
+    public static List<String> getProgramKeys() {
+        List<String> itemList = new ArrayList<>(dealWithProgram.keySet());
+        return itemList;
+    }
+
+    /**
+     * 根据视频名字存放对应的处理方案
+     * @param videoName
+     * @param program
+     */
+    public static void putProgram(String videoName, Map<String, List<String>> program) {
+        if(EmptyUtils.isNotEmpty(program)) {
+            LOG.info("存放配置方案:  视频名称:{} 方案:{}", videoName, program);
+            dealWithProgram.put(videoName, program);
+        }
+    }
+
+
+    /**
+     * 根据视频名字获取对应的处理方案
+     * @param videoName
+     * @return
+     */
+    public static Map<String, List<String>> getProgram(String videoName) {
+        LOG.info("获取配置方案:  视频名称:{} 方案:{}", videoName, dealWithProgram.get(videoName));
+        return dealWithProgram.get(videoName);
+    }
+
+
+    /**
+     * 清理所有的视频处理方案
+     */
+    public static void clearAllProgram() {
+        dealWithProgram.clear();
+    }
+
+
+    /**
      * 当前播放的视频
      */
     private static String currentVideoPath = null;
@@ -176,6 +223,20 @@ public class Handler {
      */
     public static Map<String, List<String>> getAllUserOperatingCache() {
         return userOperatingCache;
+    }
+
+    /**
+     * 返回一个拷贝后的新对象
+     * @return
+     */
+    public static Map<String, List<String>> getNewAllUserOperatingCache() {
+        Map<String, List<String>> cache = new HashMap<>(userOperatingCache.size());
+        if(userOperatingCache.size() > 0) {
+            userOperatingCache.forEach((k,v) -> {
+                cache.put(k, v);
+            });
+        }
+        return cache;
     }
 
     /**
