@@ -62,6 +62,7 @@ public class MyChoiceBox {
         observableList.addAll(list);
         // 集合转数组
         array = new String[list.size()];
+        list.toArray(array);
         choiceBox = new ChoiceBox<String>(observableList);
         choiceBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             public void changed(ObservableValue ov, Number value, Number new_value) {
@@ -84,15 +85,15 @@ public class MyChoiceBox {
         ObservableList<String> observableList = FXCollections.observableArrayList();
         observableList.addAll(list);
         // 集合转数组
-        String[] strs = new String[list.size()];
-        //final ChoiceBox<String>
+        array = new String[list.size()];
+        list.toArray(array);
         choiceBox = new ChoiceBox<String>(observableList);
         choiceBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             public void changed(ObservableValue ov, Number value, Number new_value) {
-                LOG.info("选择: {}", strs[new_value.intValue()]);
-                selected = strs[new_value.intValue()];
+                LOG.info("选择: {}", array[new_value.intValue()]);
+                selected = array[new_value.intValue()];
                 button.setVisible(false);
-                if(selected.equals("Ps滤镜")) {
+                if("Ps滤镜".equals(selected)) {
                     button.setVisible(true);
                 }
             }

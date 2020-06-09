@@ -34,6 +34,23 @@ public class MyMediaPlayer {
 
     private static final VideoExecutor videoExecutor = new VideoExecutor();
 
+    /**
+     * 单个任务进度条
+     */
+    private static MyProgressBar singleProgressBar = new MyProgressBar("单个视频: ");
+    private static HBox singleSchedule = singleProgressBar.getProgressBar();
+
+    /**
+     * 批量任务进度条
+     */
+    private static MyProgressBar batchProgressBar = new MyProgressBar("批量视频: ");
+    private static HBox batchSchedule = batchProgressBar.getProgressBar();
+
+    static {
+        Handler.putProgressBar("single", singleProgressBar);
+        Handler.putProgressBar("batch", batchProgressBar);
+    }
+
     private static Double endTime = new Double(36);
     private static Double currentTime = new Double(0);
     private static String source = "C:\\VideoProcess\\show.mp4";
@@ -113,7 +130,10 @@ public class MyMediaPlayer {
         pane.setBottom(paneCtl);
         Text title = new Text("预览区域");
         title.setFont(Font.font(java.awt.Font.SERIF, 25));
-        pane.setTop(title);
+        HBox topBox = new HBox();
+        topBox.setPadding(new Insets(5));
+        topBox.getChildren().addAll(title, singleSchedule, batchSchedule);
+        pane.setTop(topBox);
         return pane;
     }
 

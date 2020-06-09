@@ -26,7 +26,6 @@ import javafx.scene.media.MediaView;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import org.junit.runner.notification.RunNotifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import task.MyExecutorService;
@@ -52,14 +51,12 @@ public class MyFunction {
     /**
      * 单个任务进度条
      */
-    private static MyProgressBar singleProgressBar = new MyProgressBar("单个视频: ");
-    private static HBox singleSchedule = singleProgressBar.getProgressBar();
+    private static MyProgressBar singleProgressBar = Handler.getProgressBar("single");
 
     /**
      * 批量任务进度条
      */
-    private static MyProgressBar batchProgressBar = new MyProgressBar("批量视频: ");
-    private static HBox batchSchedule = batchProgressBar.getProgressBar();
+    private static MyProgressBar batchProgressBar = Handler.getProgressBar("batch");
 
 
     //功能区域组件 start
@@ -384,7 +381,7 @@ public class MyFunction {
             singleProgressBar.setValue(0.0);
             singleProgressBar.setLabel("开始执行");
 
-            new Thread(()->{
+            MyExecutorService.getTaskExecutor().submit(()->{
                 final VideoExecutor videoExecutor = new VideoExecutor();
 
                 boolean addWatermarkSelected = addWatermark.isSelected();
@@ -836,7 +833,7 @@ public class MyFunction {
                         singleProgressBar.setVisible(false);
                     }
                 });
-            }).start();
+            });
         });
 
         //批量处理
@@ -1390,8 +1387,6 @@ public class MyFunction {
         vbox.getChildren().addAll(addWatermarkBox, addWatermarkBox1, /*addWatermarkBox2,*/ addWatermarkBox3); //添加水印
         vbox.getChildren().addAll(addVideoBox, addVideoBox1, addVideoBox2); //添加片头片尾
         vbox.getChildren().addAll(dealWithBox); //处理按钮
-        vbox.getChildren().addAll(singleSchedule); //任务进度条
-        vbox.getChildren().addAll(batchSchedule);
         return vbox;
     }
 

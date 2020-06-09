@@ -2,6 +2,7 @@ package util;
 
 import components.MyAlertBox;
 import components.MyListView;
+import components.MyProgressBar;
 import executor.VideoExecutor;
 import javafx.scene.control.TextField;
 import org.slf4j.Logger;
@@ -10,7 +11,6 @@ import processor.FFMPEGExecutor;
 import task.CopyFileTask;
 import task.MyExecutorService;
 import ws.schild.jave.MultimediaInfo;
-
 import java.awt.*;
 import java.io.*;
 import java.math.BigDecimal;
@@ -33,6 +33,29 @@ import java.util.concurrent.ExecutorService;
 public class Handler {
 
     private static final Logger LOG = LoggerFactory.getLogger(Handler.class);
+
+    /**
+     * 进度条对象map
+     */
+    private static Map<String, MyProgressBar> progressBarMap = new HashMap<>();
+
+    /**
+     * 根据key存放进度条对象
+     * @param key
+     * @param progressBar
+     */
+    public static void putProgressBar(String key, MyProgressBar progressBar) {
+        progressBarMap.put(key, progressBar);
+    }
+
+    /**
+     * 根据key拿到进度条对象
+     * @param key
+     * @return
+     */
+    public static MyProgressBar getProgressBar(String key) {
+        return progressBarMap.get(key);
+    }
 
 
     /**
