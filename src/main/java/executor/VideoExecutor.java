@@ -76,8 +76,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -90,6 +91,11 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -177,8 +183,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -191,6 +198,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -215,26 +228,34 @@ public class VideoExecutor {
         ffmpeg.addArgument("-vf");
         ffmpeg.addArgument("\"delogo=x=" + x + ":y=" + y + ":w=" + width + ":h=" + height + ":show=0\"");
         ffmpeg.addArgument(targetPath);
+        ffmpeg.addArgument("-y");
         try {
             ffmpeg.execute();
             LOG.info("消除水印完毕! " + targetPath);
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
             String line;
             while ((line = reader.readLine()) != null) {
                 lineNR++;
-                LOG.info("ffmpeg执行信息: " + line);
+                LOG.info(Thread.currentThread().getName()+"线程ffmpeg执行信息: " + line);
                 // TODO: Implement additional input stream parsing
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -268,8 +289,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -282,6 +304,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -338,8 +366,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -352,6 +381,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != null)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -383,8 +418,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -397,6 +433,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -435,8 +477,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -449,6 +492,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -476,8 +525,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -490,6 +540,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -517,8 +573,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -531,6 +588,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -573,8 +636,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -587,6 +651,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -627,8 +697,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -641,6 +712,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -706,8 +783,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -720,6 +798,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -748,8 +832,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -762,6 +847,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -793,8 +884,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -807,6 +899,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -835,8 +933,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -849,6 +948,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -881,8 +986,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -895,6 +1001,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -927,8 +1039,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -941,6 +1054,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -984,8 +1103,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -998,6 +1118,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -1069,8 +1195,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -1083,6 +1210,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -1167,8 +1300,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -1181,6 +1315,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -1205,8 +1345,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -1219,6 +1360,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -1243,8 +1390,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -1257,6 +1405,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -1281,8 +1435,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -1295,6 +1450,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -1318,8 +1479,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -1332,6 +1494,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -1355,8 +1523,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -1369,6 +1538,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -1393,8 +1568,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -1407,6 +1583,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -1431,8 +1613,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -1445,6 +1628,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -1469,8 +1658,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -1483,6 +1673,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -1507,8 +1703,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -1521,6 +1718,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -1545,8 +1748,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -1559,6 +1763,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -1583,8 +1793,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -1597,6 +1808,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -1621,8 +1838,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -1635,6 +1853,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -1659,8 +1883,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -1673,6 +1898,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -1741,8 +1972,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -1755,6 +1987,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -1780,8 +2018,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -1794,6 +2033,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -1819,8 +2064,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -1833,6 +2079,12 @@ public class VideoExecutor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ffmpeg.destroy();
         }
     }
@@ -1860,8 +2112,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -1873,6 +2126,13 @@ public class VideoExecutor {
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         return "true";
     }
@@ -1913,8 +2173,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -1926,6 +2187,13 @@ public class VideoExecutor {
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -1950,8 +2218,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -1963,6 +2232,14 @@ public class VideoExecutor {
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            ffmpeg.destroy();
         }
     }
 
@@ -1996,8 +2273,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -2009,6 +2287,14 @@ public class VideoExecutor {
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            ffmpeg.destroy();
         }
     }
 
@@ -2033,8 +2319,9 @@ public class VideoExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        RBufferedReader reader = null;
         try {
-            RBufferedReader reader = new RBufferedReader(
+            reader = new RBufferedReader(
                     new InputStreamReader(ffmpeg.getErrorStream()));
             int step = 0;
             int lineNR = 0;
@@ -2046,6 +2333,14 @@ public class VideoExecutor {
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            try {
+                if(null != reader)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            ffmpeg.destroy();
         }
     }
 

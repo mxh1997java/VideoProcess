@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -25,6 +26,7 @@ import javafx.scene.media.MediaView;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import org.junit.runner.notification.RunNotifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import task.MyExecutorService;
@@ -382,7 +384,7 @@ public class MyFunction {
             singleProgressBar.setValue(0.0);
             singleProgressBar.setLabel("开始执行");
 
-            Thread task = new Thread(()->{
+            new Thread(()->{
                 final VideoExecutor videoExecutor = new VideoExecutor();
 
                 boolean addWatermarkSelected = addWatermark.isSelected();
@@ -834,8 +836,7 @@ public class MyFunction {
                         singleProgressBar.setVisible(false);
                     }
                 });
-            });
-            MyExecutorService.getTaskExecutor().execute(task);
+            }).start();
         });
 
         //批量处理
@@ -903,9 +904,10 @@ public class MyFunction {
             batchProgressBar.setLabel("开始执行");
 
             ExecutorService executorService = MyExecutorService.getTaskExecutor();
+            Map<String,Boolean> map = new ConcurrentHashMap<>();
             targetPathList.forEach(path -> {
-                Thread task = new Thread(()->{
-                    final  VideoExecutor executor = new VideoExecutor();
+                executorService.execute(()->{
+                    VideoExecutor executor = new VideoExecutor();
                     String currentPath = path;
                     //根据视频名字拿到对应的视频处理方案
                     Map<String, List<String>> program = Handler.getProgram(Handler.getFileName(path));
@@ -935,6 +937,7 @@ public class MyFunction {
                     }
                     //删除水印
                     if (delWatermarkSelected) {
+                        map.put(path, false);
                         List<String> params = program.get("删除水印");
                         Platform.runLater(new Runnable() {
                             @Override
@@ -969,7 +972,7 @@ public class MyFunction {
                             allPathList.add(target);
                             currentPath = target;
                             Thread.sleep(500);
-                        } catch (InterruptedException e) {
+                        } catch (Exception e) {
                             LOG.info("批量消除水印出错! {}", e.getMessage());
                             e.printStackTrace();
                         }
@@ -1050,7 +1053,7 @@ public class MyFunction {
                             boolean flag = file.exists();
                             while (!flag) {
                                 LOG.info("文件不存在:{}", currentPath);
-                                Thread.sleep(1000);
+                                Thread.sleep(500);
                                 flag = file.exists();
                             }
                             MultimediaInfo videoInfo = executor.getVideoInfo(currentPath);
@@ -1323,11 +1326,11 @@ public class MyFunction {
                             e.printStackTrace();
                         }
                     }
-
+                    map.put(path, true);
                     endGate.countDown();
+                    LOG.info("任务执行情况: {}", map);
                     LOG.info("任务数量: {}", endGate.getCount());
                 });
-                executorService.execute(task);
             });
 
             Thread uploadUI = new Thread(()->{
@@ -1361,7 +1364,6 @@ public class MyFunction {
                         batchProgressBar.setValue(0.0);
                     }
                 });
-
                 LOG.info("开始删除多余文件...");
                 deletePathSet.forEach(delPath -> {
                     Handler.deleteFile(delPath);
