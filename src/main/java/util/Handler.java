@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
 /**
+ * 主要存放了很多缓存数据
  * @author xinhai.ma
  * @description
  * @date 2020/5/9 9:11
@@ -33,6 +34,27 @@ import java.util.concurrent.ExecutorService;
 public class Handler {
 
     private static final Logger LOG = LoggerFactory.getLogger(Handler.class);
+
+    /**
+     * 是否继续执行后续操作
+     */
+    private static boolean isStop = false;
+
+    /**
+     * 获取是否继续执行标记
+     * @return
+     */
+    public static boolean getIsStop() {
+        return isStop;
+    }
+
+    /**
+     * 设置是否继续执行标记
+     * @param flag
+     */
+    public static void setIsStop(boolean flag) {
+        isStop = flag;
+    }
 
     /**
      * 进度条对象map
@@ -185,6 +207,14 @@ public class Handler {
         return dealWithProgram.get(videoName);
     }
 
+    /**
+     * 获得全部视频处理方案
+     * @return
+     */
+    public static Map<String, Map<String, List<String>>> getAllProgram() {
+        return dealWithProgram;
+    }
+
 
     /**
      * 清理所有的视频处理方案
@@ -256,7 +286,26 @@ public class Handler {
         Map<String, List<String>> cache = new HashMap<>(userOperatingCache.size());
         if(userOperatingCache.size() > 0) {
             userOperatingCache.forEach((k,v) -> {
-                cache.put(k, v);
+                if(null != v && v.size() == 1) {
+                    if(EmptyUtils.isNotEmpty(v.get(0))) {
+                        cache.put(k, v);
+                    }
+                }
+                if(null != v && v.size() == 2) {
+                    if(EmptyUtils.isNotEmpty(v.get(0)) && EmptyUtils.isNotEmpty(v.get(1))) {
+                        cache.put(k, v);
+                    }
+                }
+                if(null != v && v.size() == 3) {
+                    if(EmptyUtils.isNotEmpty(v.get(0)) && EmptyUtils.isNotEmpty(v.get(1)) && EmptyUtils.isNotEmpty(v.get(2))) {
+                        cache.put(k, v);
+                    }
+                }
+                if(null != v && v.size() == 4) {
+                    if(EmptyUtils.isNotEmpty(v.get(0)) && EmptyUtils.isNotEmpty(v.get(1)) && EmptyUtils.isNotEmpty(v.get(2)) && EmptyUtils.isNotEmpty(v.get(3))) {
+                        cache.put(k, v);
+                    }
+                }
             });
         }
         return cache;

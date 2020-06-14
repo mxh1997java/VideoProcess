@@ -111,13 +111,15 @@ public class MyFunction {
      * @param itemList
      */
     public static void setProgramChoiceBox(List<String> itemList) {
+        LOG.info("mxh 元素: {}", itemList.get(0));
         ObservableList<String> observableList = FXCollections.observableArrayList(itemList);
-        programChoiceBox.setItems(observableList);
-        String [] strs = new String[observableList.size()];
-        for(int i=0; i<observableList.size(); i++) {
-            strs[i] = observableList.get(i);
-        }
-        programSelectionBox.setArray(strs);
+        LOG.info("mxh 操作方案: {}", observableList.size());
+            programChoiceBox.setItems(observableList);
+            String [] array = new String[observableList.size()];
+            for(int i=0; i<observableList.size(); i++) {
+                array[i] = observableList.get(i);
+            }
+            programSelectionBox.setArray(array);
     }
 
     public static VBox getFunction(Stage primaryStage) {
@@ -132,7 +134,30 @@ public class MyFunction {
         titleBox.setPadding(new Insets(5, 5, 5, 5));
         Text title = new Text("功能区域");
         title.setFont(Font.font(java.awt.Font.SERIF, 25));
-        titleBox.getChildren().addAll(title, new Label(" 选择操作方案: "), programChoiceBox);
+        Button applyAll = new Button("应用全部");
+        applyAll.setOnAction(event -> {
+            //拿到视频方案
+            String selected = programSelectionBox.getSelected();
+            if(EmptyUtils.isEmpty(selected)) {
+                MyAlertBox.display("提示", "请选择方案!");
+                return;
+            }
+            //获得方案数据
+            Map<String, List<String>> program = Handler.getProgram(selected);
+            //拿到未处理视频列表
+            List<String> filePathList = Handler.getListView("unProcessed").getFilePathList();
+            //清空删除水印参数
+            if(EmptyUtils.isNotEmpty(program.get("删除水印"))) {
+                program.put("删除水印", new ArrayList<>());
+            }
+            //复制给其他视频
+            filePathList.forEach(path -> {
+                if (!path.equals(selected)) {
+                    Handler.putProgram(Handler.getFileName(path), program);
+                }
+            });
+        });
+        titleBox.getChildren().addAll(title, new Label(" 选择操作方案: "), programChoiceBox, applyAll);
 
         //添加水印
         HBox addWatermarkBox = new HBox();
@@ -355,6 +380,10 @@ public class MyFunction {
             String configPath = config.get("targetPath");
             if(null == configPath || "".equals(configPath)) {
                 MyAlertBox.display("程序提示", "请设置生成文件路径!");
+                return;
+            }
+
+            if(!checkDataSingle()) {
                 return;
             }
 
@@ -860,6 +889,10 @@ public class MyFunction {
                 return;
             }
 
+            if(!checkData()) {
+                return;
+            }
+
             if(filePathList.size() > MyExecutorService.TASKTOTAL) {
                 MyAlertBox.display("提示", "处理视频数量大于100,请减少视频数量!");
                 return;
@@ -893,7 +926,7 @@ public class MyFunction {
             dealWithBath.setDisable(true);
 
             //计算进度条step
-            batchProgressBar.calculationStep(Handler.getCheckBoxList().size(), filePathList.size());
+            batchProgressBar.calculationStep();
 
             //显示进度条并给初始值
             batchProgressBar.setVisible(true);
@@ -919,17 +952,18 @@ public class MyFunction {
                                 batchProgressBar.setLabel("正在截取视频图片 " + Handler.getFileName(path));
                             }
                         });
-                        //String time = cutVideoTime.getText();
-                        String time = params.get(0); //拿到参数
-                        time = Handler.formatTime(Long.valueOf(time));
-                        try {
-                            LOG.info("操作步骤: 批量截取图片 操作对象: {}", currentPath);
-                            String target = Handler.getNewFilePath("D:\\MaXinHai\\file\\1.png");
-                            executor.cutVideoImage(currentPath, target, time);
-                            Handler.addCoverPath(target);
-                            Thread.sleep(500);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
+                        if(EmptyUtils.isNotEmpty(params.get(0))){
+                            String time = params.get(0); //拿到参数
+                            time = Handler.formatTime(Long.valueOf(time));
+                            try {
+                                LOG.info("操作步骤: 批量截取图片 操作对象: {}", currentPath);
+                                String target = Handler.getNewFilePath("D:\\MaXinHai\\file\\1.png");
+                                executor.cutVideoImage(currentPath, target, time);
+                                Handler.addCoverPath(target);
+                                Thread.sleep(500);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
                     //删除水印
@@ -943,35 +977,33 @@ public class MyFunction {
                                 batchProgressBar.setLabel("正在消除水印 " + Handler.getFileName(path));
                             }
                         });
-//                        String x = delWatermarkOfX.getText();
-//                        String y = delWatermarkOfY.getText();
-//                        String width = delWatermarkOfWidth.getText();
-//                        String height = delWatermarkOfHeight.getText();
-                        String x = params.get(0);
-                        String y = params.get(1);
-                        String width = params.get(2);
-                        String height = params.get(3);
-                        BigDecimal xValue = new BigDecimal(x);
-                        BigDecimal yValue = new BigDecimal(y);
-                        BigDecimal widthValue = new BigDecimal(width);
-                        BigDecimal heightValue = new BigDecimal(height);
-                        try {
-                            //先计算比例，才能去拿值
-                            MyMediaPlayer.calculationRatio(new File(currentPath));
-                            x = xValue.divide(Handler.getScale(), 0, BigDecimal.ROUND_HALF_UP).toString();
-                            y = yValue.divide(Handler.getScale(), 0, BigDecimal.ROUND_HALF_UP).toString();
-                            width = widthValue.divide(Handler.getScale(), 0, BigDecimal.ROUND_HALF_UP).toString();
-                            height = heightValue.divide(Handler.getScale(), 0, BigDecimal.ROUND_HALF_UP).toString();
+                        if(null != params && EmptyUtils.isNotEmpty(params.get(0)) && EmptyUtils.isNotEmpty(params.get(1)) && EmptyUtils.isNotEmpty(params.get(2)) && EmptyUtils.isNotEmpty(params.get(3))) {
+                            String x = params.get(0);
+                            String y = params.get(1);
+                            String width = params.get(2);
+                            String height = params.get(3);
+                            BigDecimal xValue = new BigDecimal(x);
+                            BigDecimal yValue = new BigDecimal(y);
+                            BigDecimal widthValue = new BigDecimal(width);
+                            BigDecimal heightValue = new BigDecimal(height);
+                            try {
+                                //先计算比例，才能去拿值
+                                MyMediaPlayer.calculationRatio(new File(currentPath));
+                                x = xValue.divide(Handler.getScale(), 0, BigDecimal.ROUND_HALF_UP).toString();
+                                y = yValue.divide(Handler.getScale(), 0, BigDecimal.ROUND_HALF_UP).toString();
+                                width = widthValue.divide(Handler.getScale(), 0, BigDecimal.ROUND_HALF_UP).toString();
+                                height = heightValue.divide(Handler.getScale(), 0, BigDecimal.ROUND_HALF_UP).toString();
 
-                            String target = Handler.getNewFilePath(currentPath);
-                            LOG.info("操作步骤:消除水印 操作对象: {}", currentPath);
-                            executor.removeWatermark(currentPath, x, y, width, height, target);
-                            allPathList.add(target);
-                            currentPath = target;
-                            Thread.sleep(500);
-                        } catch (Exception e) {
-                            LOG.info("批量消除水印出错! {}", e.getMessage());
-                            e.printStackTrace();
+                                String target = Handler.getNewFilePath(currentPath);
+                                LOG.info("操作步骤:消除水印 操作对象: {}", currentPath);
+                                executor.removeWatermark(currentPath, x, y, width, height, target);
+                                allPathList.add(target);
+                                currentPath = target;
+                                Thread.sleep(500);
+                            } catch (Exception e) {
+                                LOG.info("批量消除水印出错! {}", e.getMessage());
+                                e.printStackTrace();
+                            }
                         }
                     }
                     //添加水印
@@ -984,23 +1016,22 @@ public class MyFunction {
                                 batchProgressBar.setLabel("正在添加水印 " + Handler.getFileName(path));
                             }
                         });
-//                        String x = addWatermarkOfX.getText();
-//                        String y = addWatermarkOfY.getText();
-//                        String text = addWatermarkOfContent.getText();
-                        String x = params.get(0);
-                        String y = params.get(1);
-                        String text = params.get(2);
-                        try {
-                            String target = Handler.getNewFilePath(currentPath);
-                            LOG.info("操作步骤:加水印 操作对象: {}", currentPath);
-                            executor.addWatermarkByFont(text, 30, "微软雅黑", x, y, currentPath, target);
-                            deletePathSet.add(currentPath);
-                            allPathList.add(target);
-                            currentPath = target;
-                            Thread.sleep(500);
-                        } catch (InterruptedException e) {
-                            LOG.info("批量添加水印失败! {}", e.getMessage());
-                            e.printStackTrace();
+                        if(EmptyUtils.isNotEmpty(params.get(0)) && EmptyUtils.isNotEmpty(params.get(1)) && EmptyUtils.isNotEmpty(params.get(2))) {
+                            String x = params.get(0);
+                            String y = params.get(1);
+                            String text = params.get(2);
+                            try {
+                                String target = Handler.getNewFilePath(currentPath);
+                                LOG.info("操作步骤:加水印 操作对象: {}", currentPath);
+                                executor.addWatermarkByFont(text, 30, "微软雅黑", x, y, currentPath, target);
+                                deletePathSet.add(currentPath);
+                                allPathList.add(target);
+                                currentPath = target;
+                                Thread.sleep(500);
+                            } catch (InterruptedException e) {
+                                LOG.info("批量添加水印失败! {}", e.getMessage());
+                                e.printStackTrace();
+                            }
                         }
                     }
                     //添加片头片尾
@@ -1013,21 +1044,21 @@ public class MyFunction {
                                 batchProgressBar.setLabel("正在添加片头片尾 " + Handler.getFileName(path));
                             }
                         });
-//                        String startVideoPath = startVideoText.getText();
-//                        String endVideoPath = endVideoText.getText();
-                        String startVideoPath = params.get(0);
-                        String endVideoPath = params.get(1);
-                        try {
-                            String target = Handler.getNewFilePath(currentPath);
-                            LOG.info("操作步骤:批量添加片头片尾 操作对象: {}", currentPath);
-                            executor.mergeVideo(startVideoPath, currentPath, endVideoPath, target);
-                            deletePathSet.add(currentPath);
-                            allPathList.add(target);
-                            currentPath = target;
-                            Thread.sleep(500);
-                        } catch (InterruptedException e) {
-                            LOG.info("批量添加片头片尾出错! {}", e.getMessage());
-                            e.printStackTrace();
+                        if(EmptyUtils.isNotEmpty(params.get(0)) && EmptyUtils.isNotEmpty(params.get(1))) {
+                            String startVideoPath = params.get(0);
+                            String endVideoPath = params.get(1);
+                            try {
+                                String target = Handler.getNewFilePath(currentPath);
+                                LOG.info("操作步骤:批量添加片头片尾 操作对象: {}", currentPath);
+                                executor.mergeVideo(startVideoPath, currentPath, endVideoPath, target);
+                                deletePathSet.add(currentPath);
+                                allPathList.add(target);
+                                currentPath = target;
+                                Thread.sleep(500);
+                            } catch (InterruptedException e) {
+                                LOG.info("批量添加片头片尾出错! {}", e.getMessage());
+                                e.printStackTrace();
+                            }
                         }
                     }
                     if (cutVideoSelected) {
@@ -1039,44 +1070,43 @@ public class MyFunction {
                                 batchProgressBar.setLabel("正在剪切视频 " + Handler.getFileName(path));
                             }
                         });
-//                        int start = Integer.valueOf(startTime.getText()) + 1;
-//                        int end = Integer.valueOf(endTime.getText()) + 1;
-                        int start = Integer.valueOf(params.get(0)) + 1;
-                        int end = Integer.valueOf(params.get(1)) + 1;
-                        String startPoint = null;
-                        String endPoint = null;
-                        try {
-                            File file = new File(currentPath);
-                            boolean flag = file.exists();
-                            while (!flag) {
-                                LOG.info("文件不存在:{}", currentPath);
+                        if(EmptyUtils.isNotEmpty(params.get(0)) && EmptyUtils.isNotEmpty(params.get(1))) {
+                            int start = Integer.valueOf(params.get(0)) + 1;
+                            int end = Integer.valueOf(params.get(1)) + 1;
+                            String startPoint = null;
+                            String endPoint = null;
+                            try {
+                                File file = new File(currentPath);
+                                boolean flag = file.exists();
+                                while (!flag) {
+                                    LOG.info("文件不存在:{}", currentPath);
+                                    Thread.sleep(500);
+                                    flag = file.exists();
+                                }
+                                MultimediaInfo videoInfo = executor.getVideoInfo(currentPath);
+                                long duration = videoInfo.getDuration(); //获取视频长度
+                                BigDecimal durationValue = new BigDecimal(String.valueOf(duration));
+                                BigDecimal startValue = new BigDecimal(start + "000");
+                                BigDecimal endValue = new BigDecimal(end + "000");
+                                startPoint = Handler.formatTime(start);
+                                BigDecimal standardValue= new BigDecimal("1000");
+                                //视频总长度减去要删除的秒数再除以1000在向上取整得到的就是结束秒数
+                                endPoint = Handler.formatTime(durationValue.subtract(startValue).subtract(endValue).divide(standardValue, 0, BigDecimal.ROUND_DOWN).longValue());
+                                String target = Handler.getNewFilePath(currentPath);
+                                LOG.info("操作步骤:剪切视频 操作对象: {} 开始时间: {} 结束时间: {}", currentPath, startPoint, endPoint);
+                                executor.cutVideo(currentPath, target, startPoint, endPoint);
+                                deletePathSet.add(currentPath);
+                                allPathList.add(target);
+                                currentPath = target;
                                 Thread.sleep(500);
-                                flag = file.exists();
+                            } catch (InterruptedException e) {
+                                LOG.info("批量剪切视频出错! {}", e.getMessage());
+                                e.printStackTrace();
                             }
-                            MultimediaInfo videoInfo = executor.getVideoInfo(currentPath);
-                            long duration = videoInfo.getDuration(); //获取视频长度
-                            BigDecimal durationValue = new BigDecimal(String.valueOf(duration));
-                            BigDecimal startValue = new BigDecimal(start + "000");
-                            BigDecimal endValue = new BigDecimal(end + "000");
-                            startPoint = Handler.formatTime(start);
-                            BigDecimal standardValue= new BigDecimal("1000");
-                            //视频总长度减去要删除的秒数再除以1000在向上取整得到的就是结束秒数
-                            endPoint = Handler.formatTime(durationValue.subtract(startValue).subtract(endValue).divide(standardValue, 0, BigDecimal.ROUND_DOWN).longValue());
-                            String target = Handler.getNewFilePath(currentPath);
-                            LOG.info("操作步骤:剪切视频 操作对象: {} 开始时间: {} 结束时间: {}", currentPath, startPoint, endPoint);
-                            executor.cutVideo(currentPath, target, startPoint, endPoint);
-                            deletePathSet.add(currentPath);
-                            allPathList.add(target);
-                            currentPath = target;
-                            Thread.sleep(500);
-                        } catch (InterruptedException e) {
-                            LOG.info("批量剪切视频出错! {}", e.getMessage());
-                            e.printStackTrace();
                         }
                     }
                     if (addFilterSelected) {
                         List<String> params = program.get("添加滤镜");
-                        //String selected = filterSelectionBox.getSelected();
                         String selected = params.get(0);
                         Platform.runLater(new Runnable() {
                             @Override
@@ -1228,19 +1258,20 @@ public class MyFunction {
                                 batchProgressBar.setLabel("正在增加视频速率 " + Handler.getFileName(path));
                             }
                         });
-                        //String frameRate = addFrameRateSelectionBox.getSelected();
-                        String frameRate = params.get(0);
-                        try {
-                            String target = Handler.getNewFilePath(currentPath);
-                            LOG.info("操作步骤:增加视频速率 操作对象: {}", currentPath);
-                            executor.addVideoAudioFrameRate(currentPath, target, frameRate);
-                            deletePathSet.add(currentPath);
-                            allPathList.add(target);
-                            currentPath = target;
-                            Thread.sleep(500);
-                        } catch (InterruptedException e) {
-                            LOG.info("批量设置镜像效果增加视频速率 {}", e.getMessage());
-                            e.printStackTrace();
+                        if(EmptyUtils.isNotEmpty(params.get(0))) {
+                            String frameRate = params.get(0);
+                            try {
+                                String target = Handler.getNewFilePath(currentPath);
+                                LOG.info("操作步骤:增加视频速率 操作对象: {}", currentPath);
+                                executor.addVideoAudioFrameRate(currentPath, target, frameRate);
+                                deletePathSet.add(currentPath);
+                                allPathList.add(target);
+                                currentPath = target;
+                                Thread.sleep(500);
+                            } catch (InterruptedException e) {
+                                LOG.info("批量设置镜像效果增加视频速率 {}", e.getMessage());
+                                e.printStackTrace();
+                            }
                         }
                     }
 
@@ -1254,19 +1285,20 @@ public class MyFunction {
                                 batchProgressBar.setLabel("正在降低视频帧率 " + Handler.getFileName(path));
                             }
                         });
-                        //String frameRate = reduceFrameRateSelectionBox.getSelected();
-                        String frameRate = params.get(0);
-                        try {
-                            String target = Handler.getNewFilePath(currentPath);
-                            LOG.info("操作步骤:降低视频帧率 操作对象: {}", currentPath);
-                            executor.reduceVideoAudioFrameRate(currentPath, target, frameRate);
-                            deletePathSet.add(currentPath);
-                            allPathList.add(target);
-                            currentPath = target;
-                            Thread.sleep(500);
-                        } catch (InterruptedException e) {
-                            LOG.info("批量降低视频帧率! {}", e.getMessage());
-                            e.printStackTrace();
+                        if(EmptyUtils.isNotEmpty(params.get(0))) {
+                            String frameRate = params.get(0);
+                            try {
+                                String target = Handler.getNewFilePath(currentPath);
+                                LOG.info("操作步骤:降低视频帧率 操作对象: {}", currentPath);
+                                executor.reduceVideoAudioFrameRate(currentPath, target, frameRate);
+                                deletePathSet.add(currentPath);
+                                allPathList.add(target);
+                                currentPath = target;
+                                Thread.sleep(500);
+                            } catch (InterruptedException e) {
+                                LOG.info("批量降低视频帧率! {}", e.getMessage());
+                                e.printStackTrace();
+                            }
                         }
                     }
 
@@ -1303,24 +1335,25 @@ public class MyFunction {
                                 batchProgressBar.setLabel("正在设置视频封面 " + Handler.getFileName(path));
                             }
                         });
-                        //String imgPath = coverPath.getText();
-                        String imgPath = params.get(0);
-                        if(null == imgPath || "".equals(imgPath)) {
-                            new RuntimeException("未设置封面文件!");
-                        }
-                        //TODO 宽和高暂时没有
-                        //String height = coverHeight.getText();
-                        //String width = coverWidth.getText();
-                        try {
-                            String target = Handler.getNewFilePath(currentPath);
-                            LOG.info("操作步骤:批量设置封面 操作对象: {}", currentPath);
-                            executor.setCover(currentPath, imgPath, target);
-                            deletePathSet.add(currentPath);
-                            allPathList.add(target);
-                            Thread.sleep(500);
-                        } catch (InterruptedException e) {
-                            LOG.info("批量设置封面出错! {}", e.getMessage());
-                            e.printStackTrace();
+                        if(EmptyUtils.isNotEmpty(params.get(0))) {
+                            String imgPath = params.get(0);
+                            if(null == imgPath || "".equals(imgPath)) {
+                                new RuntimeException("未设置封面文件!");
+                            }
+                            //TODO 宽和高暂时没有
+                            //String height = coverHeight.getText();
+                            //String width = coverWidth.getText();
+                            try {
+                                String target = Handler.getNewFilePath(currentPath);
+                                LOG.info("操作步骤:批量设置封面 操作对象: {}", currentPath);
+                                executor.setCover(currentPath, imgPath, target);
+                                deletePathSet.add(currentPath);
+                                allPathList.add(target);
+                                Thread.sleep(500);
+                            } catch (InterruptedException e) {
+                                LOG.info("批量设置封面出错! {}", e.getMessage());
+                                e.printStackTrace();
+                            }
                         }
                     }
                     map.put(path, true);
@@ -1532,8 +1565,10 @@ public class MyFunction {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
                 LOG.info("蛮喜欢 {}", newValue);
-                Map<String, List<String>> program = Handler.getProgram(newValue);
-                setUserOperating(program);
+                if(null != newValue) {
+                    Map<String, List<String>> program = Handler.getProgram(newValue);
+                    setUserOperating(program);
+                }
             }
         });
     }
@@ -1860,4 +1895,145 @@ public class MyFunction {
         startVideoText.setText("");
         endVideoText.setText("");
     }
+
+
+    /**
+     * 校验视频处理方案是否全部填写
+     * @return
+     */
+    public static boolean checkData() {
+        List<String> messageList = new ArrayList<>();
+        //拿到未处理视频列表
+        List<String> filePathList = Handler.getListView("unProcessed").getFilePathList();
+        filePathList.forEach(path -> {
+            Map<String, List<String>> program = Handler.getProgram(Handler.getFileName(path));
+            checkData(path, program, messageList);
+        });
+        MyAlertBox.display("提示", messageList);
+        return Handler.getIsStop();
+    }
+
+    /**
+     * 检测单个视频处理方案
+     * @param videoName
+     * @param program
+     */
+    public static void checkData(String videoName, Map<String, List<String>> program, List<String> messageList) {
+        if(null == program || program.size() ==0) {
+            messageList.add(Handler.getSimplePath(videoName) + "参数未填写完毕，会影响后续执行!");
+            return;
+        }
+        program.forEach((k,v) -> {
+            if(EmptyUtils.isEmpty(v.get(0)) || EmptyUtils.isEmpty(v.get(1)) || EmptyUtils.isEmpty(v.get(2)) || EmptyUtils.isEmpty(v.get(0)) || EmptyUtils.isEmpty(v.get(3))) {
+                messageList.add(Handler.getSimplePath(videoName) + " " + k + "步骤 参数未填写完毕,会影响后续执行!");
+            }
+        });
+    }
+
+
+    /**
+     * 方法描述：检查单个视频处理时参数填写情况
+     * @return
+     */
+    public static boolean checkDataSingle() {
+        boolean addWatermarkSelected = addWatermark.isSelected();
+        boolean delWatermarkSelected = delWatermark.isSelected();
+        boolean cutVideoSelected = cutVideo.isSelected();
+        boolean getCoverSelected = getCover.isSelected();
+        boolean setCoverSelected = setCover.isSelected();
+        boolean addFilterSelected = addFilter.isSelected();
+        boolean addFrameRateSelected = addFrameRate.isSelected();
+        boolean reduceFrameRateSelected = reduceFrameRate.isSelected();
+        boolean blurBackgroundSelected = blurBackground.isSelected();
+        boolean addVideoSelected = addVideo.isSelected();
+
+        List<String> messageList = new ArrayList<>();
+
+        //添加水印
+        if(addWatermarkSelected) {
+            String x = addWatermarkOfX.getText();
+            String y = addWatermarkOfY.getText();
+            String content = addWatermarkOfContent.getText();
+            if("".equals(x) || "".equals(y) || "".equals(content)) {
+                messageList.add("添加水印参数未填写完毕，会影响后续处理!");
+                Handler.setIsStop(false);
+            }
+        }
+        //删除水印
+        if(delWatermarkSelected) {
+            String x = delWatermarkOfX.getText();
+            String y = delWatermarkOfY.getText();
+            String width = delWatermarkOfWidth.getText();
+            String height = delWatermarkOfHeight.getText();
+            if("".equals(x) || "".equals(y) || "".equals(width) || "".equals(height)) {
+                messageList.add("删除水印参数未填写完毕，会影响后续处理!");
+                Handler.setIsStop(false);
+            }
+        }
+        //剪切视频(去头去尾)
+        if(cutVideoSelected) {
+            String start = startTime.getText();
+            String end = endTime.getText();
+            if("".equals(start) || "".equals(end)) {
+                messageList.add("去头去尾参数未填写完毕，会影响后续处理!");
+                Handler.setIsStop(false);
+            }
+        }
+        //设置封面
+        if(setCoverSelected) {
+            String cover = coverPath.getText();
+            if("".equals(cover)) {
+                messageList.add("设置封面参数未填写完毕，会影响后续处理!");
+                Handler.setIsStop(false);
+            }
+        }
+        //截取图片
+        if(getCoverSelected) {
+            String cutTime = cutVideoTime.getText();
+            if("".equals(cutTime)) {
+                messageList.add("截取图片参数未填写完毕，会影响后续处理!");
+                Handler.setIsStop(false);
+            }
+        }
+        //添加滤镜
+        if(addFilterSelected) {
+            String selected = filterSelectionBox.getSelected();
+            if("".equals(selected)) {
+                messageList.add("添加滤镜参数未填写完毕，会影响后续处理!");
+                Handler.setIsStop(false);
+            }
+        }
+        //视频加速
+        if(addFrameRateSelected) {
+            String frameRate = addFrameRateSelectionBox.getSelected();
+            if("".equals(frameRate)) {
+                messageList.add("视频加速参数未填写完毕，会影响后续处理!");
+                Handler.setIsStop(false);
+            }
+        }
+        //视频减速
+        if(reduceFrameRateSelected) {
+            String frameRate = reduceFrameRateSelectionBox.getSelected();
+            if("".equals(frameRate)) {
+                messageList.add("视频减速参数未填写完毕，会影响后续处理!");
+                Handler.setIsStop(false);
+            }
+        }
+        //背景虚化
+        if(blurBackgroundSelected) {
+
+        }
+        //添加片头片尾
+        if(addVideoSelected) {
+            String start = startVideoText.getText();
+            String end = endVideoText.getText();
+            if("".equals(start) || "".equals(end)) {
+                messageList.add("添加片头片尾参数未填写完毕，会影响后续处理!");
+                Handler.setIsStop(false);
+            }
+        }
+        MyAlertBox.display("提示", messageList);
+        return Handler.getIsStop();
+    }
+
 }

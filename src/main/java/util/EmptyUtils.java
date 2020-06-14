@@ -2,6 +2,7 @@ package util;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 判空工具类
@@ -32,6 +33,26 @@ public class EmptyUtils {
      */
     public static boolean isNotEmpty(Object obj){
         return obj!=null;
+    }
+
+
+    /**
+     * 功能描述：Map等于空
+     * @param map
+     * @return
+     */
+    public static boolean isEmpty(Map<Object, Object> map) {
+        return (map==null || map.size()==0);
+    }
+
+
+    /**
+     * 功能描述: Map不等于空
+     * @param map
+     * @return
+     */
+    public static boolean isNotEmpty(Map<Object, Object> map) {
+        return (map!=null && map.size()!=0);
     }
 
     /**
@@ -82,10 +103,10 @@ public class EmptyUtils {
      * @Param [list]
      * @return boolean
      */
-//    @SuppressWarnings("unchecked")
-//    public static boolean isEmpty(List list){
-//        return (list==null || list.size()==0);
-//    }
+    @SuppressWarnings("unchecked")
+    public static boolean isEmpty(List list){
+        return (list==null || list.size()==0);
+    }
 
 
     /**
@@ -94,10 +115,10 @@ public class EmptyUtils {
      * @Param [list]
      * @return boolean
      */
-//    @SuppressWarnings("unchecked")
-//    public static boolean isNotEmpty(List list){
-//        return (list != null && list.size() > 0);
-//    }
+    @SuppressWarnings("unchecked")
+    public static boolean isNotEmpty(List list){
+        return (list != null && list.size() > 0);
+    }
 
 
     /**
@@ -128,9 +149,9 @@ public class EmptyUtils {
      * @Param [obj]
      * @return boolean
      */
-    public static boolean isEmpty(Collection<?> conn) {
-        return ((conn == null) || (conn.size() <= 0));
-    }
+//    public static boolean isEmpty(Collection<?> conn) {
+//        return ((conn == null) || (conn.size() <= 0));
+//    }
 
     /**
      * 功能描述: collection集合不为空
@@ -138,9 +159,9 @@ public class EmptyUtils {
      * @Param [conn]
      * @return boolean
      */
-    public static boolean isNotEmpty(Collection<?> conn) {
-        return ((conn != null) && (conn.size() > 0));
-    }
+//    public static boolean isNotEmpty(Collection<?> conn) {
+//        return ((conn != null) && (conn.size() > 0));
+//    }
 
     /**
      * 功能描述: byte数组为空
