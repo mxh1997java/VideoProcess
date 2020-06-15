@@ -38,7 +38,7 @@ public class Handler {
     /**
      * 是否继续执行后续操作
      */
-    private static boolean isStop = false;
+    private static boolean isStop = true;
 
     /**
      * 获取是否继续执行标记

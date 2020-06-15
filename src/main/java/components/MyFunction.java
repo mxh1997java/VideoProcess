@@ -384,6 +384,7 @@ public class MyFunction {
             }
 
             if(!checkDataSingle()) {
+                Handler.setIsStop(true);
                 return;
             }
 
@@ -890,6 +891,7 @@ public class MyFunction {
             }
 
             if(!checkData()) {
+                Handler.setIsStop(true);
                 return;
             }
 
@@ -952,7 +954,7 @@ public class MyFunction {
                                 batchProgressBar.setLabel("正在截取视频图片 " + Handler.getFileName(path));
                             }
                         });
-                        if(EmptyUtils.isNotEmpty(params.get(0))){
+                        if(EmptyUtils.isNotEmpty(params) && EmptyUtils.isNotEmpty(params.get(0))){
                             String time = params.get(0); //拿到参数
                             time = Handler.formatTime(Long.valueOf(time));
                             try {
@@ -977,7 +979,7 @@ public class MyFunction {
                                 batchProgressBar.setLabel("正在消除水印 " + Handler.getFileName(path));
                             }
                         });
-                        if(null != params && EmptyUtils.isNotEmpty(params.get(0)) && EmptyUtils.isNotEmpty(params.get(1)) && EmptyUtils.isNotEmpty(params.get(2)) && EmptyUtils.isNotEmpty(params.get(3))) {
+                        if(EmptyUtils.isNotEmpty(params) && EmptyUtils.isNotEmpty(params.get(0)) && EmptyUtils.isNotEmpty(params.get(1)) && EmptyUtils.isNotEmpty(params.get(2)) && EmptyUtils.isNotEmpty(params.get(3))) {
                             String x = params.get(0);
                             String y = params.get(1);
                             String width = params.get(2);
@@ -1016,7 +1018,7 @@ public class MyFunction {
                                 batchProgressBar.setLabel("正在添加水印 " + Handler.getFileName(path));
                             }
                         });
-                        if(EmptyUtils.isNotEmpty(params.get(0)) && EmptyUtils.isNotEmpty(params.get(1)) && EmptyUtils.isNotEmpty(params.get(2))) {
+                        if(EmptyUtils.isNotEmpty(params) && EmptyUtils.isNotEmpty(params.get(0)) && EmptyUtils.isNotEmpty(params.get(1)) && EmptyUtils.isNotEmpty(params.get(2))) {
                             String x = params.get(0);
                             String y = params.get(1);
                             String text = params.get(2);
@@ -1044,7 +1046,7 @@ public class MyFunction {
                                 batchProgressBar.setLabel("正在添加片头片尾 " + Handler.getFileName(path));
                             }
                         });
-                        if(EmptyUtils.isNotEmpty(params.get(0)) && EmptyUtils.isNotEmpty(params.get(1))) {
+                        if(EmptyUtils.isNotEmpty(params) && EmptyUtils.isNotEmpty(params.get(0)) && EmptyUtils.isNotEmpty(params.get(1))) {
                             String startVideoPath = params.get(0);
                             String endVideoPath = params.get(1);
                             try {
@@ -1070,7 +1072,7 @@ public class MyFunction {
                                 batchProgressBar.setLabel("正在剪切视频 " + Handler.getFileName(path));
                             }
                         });
-                        if(EmptyUtils.isNotEmpty(params.get(0)) && EmptyUtils.isNotEmpty(params.get(1))) {
+                        if(EmptyUtils.isNotEmpty(params) && EmptyUtils.isNotEmpty(params.get(0)) && EmptyUtils.isNotEmpty(params.get(1))) {
                             int start = Integer.valueOf(params.get(0)) + 1;
                             int end = Integer.valueOf(params.get(1)) + 1;
                             String startPoint = null;
@@ -1258,7 +1260,7 @@ public class MyFunction {
                                 batchProgressBar.setLabel("正在增加视频速率 " + Handler.getFileName(path));
                             }
                         });
-                        if(EmptyUtils.isNotEmpty(params.get(0))) {
+                        if(EmptyUtils.isNotEmpty(params) && EmptyUtils.isNotEmpty(params.get(0))) {
                             String frameRate = params.get(0);
                             try {
                                 String target = Handler.getNewFilePath(currentPath);
@@ -1285,7 +1287,7 @@ public class MyFunction {
                                 batchProgressBar.setLabel("正在降低视频帧率 " + Handler.getFileName(path));
                             }
                         });
-                        if(EmptyUtils.isNotEmpty(params.get(0))) {
+                        if(EmptyUtils.isNotEmpty(params) && EmptyUtils.isNotEmpty(params.get(0))) {
                             String frameRate = params.get(0);
                             try {
                                 String target = Handler.getNewFilePath(currentPath);
@@ -1335,7 +1337,7 @@ public class MyFunction {
                                 batchProgressBar.setLabel("正在设置视频封面 " + Handler.getFileName(path));
                             }
                         });
-                        if(EmptyUtils.isNotEmpty(params.get(0))) {
+                        if(EmptyUtils.isNotEmpty(params) && EmptyUtils.isNotEmpty(params.get(0))) {
                             String imgPath = params.get(0);
                             if(null == imgPath || "".equals(imgPath)) {
                                 new RuntimeException("未设置封面文件!");
@@ -1565,7 +1567,7 @@ public class MyFunction {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
                 LOG.info("蛮喜欢 {}", newValue);
-                if(null != newValue) {
+                if(null != newValue && !"".equals(newValue)) {
                     Map<String, List<String>> program = Handler.getProgram(newValue);
                     setUserOperating(program);
                 }
@@ -1909,7 +1911,9 @@ public class MyFunction {
             Map<String, List<String>> program = Handler.getProgram(Handler.getFileName(path));
             checkData(path, program, messageList);
         });
-        MyAlertBox.display("提示", messageList);
+        if(!Handler.getIsStop()) {
+            MyAlertBox.display("提示", messageList);
+        }
         return Handler.getIsStop();
     }
 
@@ -1921,11 +1925,34 @@ public class MyFunction {
     public static void checkData(String videoName, Map<String, List<String>> program, List<String> messageList) {
         if(null == program || program.size() ==0) {
             messageList.add(Handler.getSimplePath(videoName) + "参数未填写完毕，会影响后续执行!");
+            Handler.setIsStop(false);
+            LOG.info("视频参数检查 => 视频: {}, 方案: {}", videoName, program);
             return;
         }
         program.forEach((k,v) -> {
-            if(EmptyUtils.isEmpty(v.get(0)) || EmptyUtils.isEmpty(v.get(1)) || EmptyUtils.isEmpty(v.get(2)) || EmptyUtils.isEmpty(v.get(0)) || EmptyUtils.isEmpty(v.get(3))) {
-                messageList.add(Handler.getSimplePath(videoName) + " " + k + "步骤 参数未填写完毕,会影响后续执行!");
+            if(v.size() == 1) {
+                if(EmptyUtils.isEmpty(v.get(0))) {
+                    Handler.setIsStop(false);
+                    messageList.add(Handler.getSimplePath(videoName) + " " + k + "步骤 参数未填写完毕,会影响后续执行!");
+                }
+            }
+            if(v.size() == 2) {
+                if(EmptyUtils.isEmpty(v.get(0)) || EmptyUtils.isEmpty(v.get(1))) {
+                    Handler.setIsStop(false);
+                    messageList.add(Handler.getSimplePath(videoName) + " " + k + "步骤 参数未填写完毕,会影响后续执行!");
+                }
+            }
+            if(v.size() == 3) {
+                if(EmptyUtils.isEmpty(v.get(0)) || EmptyUtils.isEmpty(v.get(1)) || EmptyUtils.isEmpty(v.get(2))) {
+                    Handler.setIsStop(false);
+                    messageList.add(Handler.getSimplePath(videoName) + " " + k + "步骤 参数未填写完毕,会影响后续执行!");
+                }
+            }
+            if(v.size() == 4) {
+                if(EmptyUtils.isEmpty(v.get(0)) || EmptyUtils.isEmpty(v.get(1)) || EmptyUtils.isEmpty(v.get(2)) || EmptyUtils.isEmpty(v.get(3))) {
+                    Handler.setIsStop(false);
+                    messageList.add(Handler.getSimplePath(videoName) + " " + k + "步骤 参数未填写完毕,会影响后续执行!");
+                }
             }
         });
     }
@@ -2032,7 +2059,9 @@ public class MyFunction {
                 Handler.setIsStop(false);
             }
         }
-        MyAlertBox.display("提示", messageList);
+        if(!Handler.getIsStop()) {
+            MyAlertBox.display("提示", messageList);
+        }
         return Handler.getIsStop();
     }
 

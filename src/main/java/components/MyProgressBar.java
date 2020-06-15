@@ -132,8 +132,12 @@ public class MyProgressBar {
     /**
      * 在多视频处理方案情况下应用的步骤计算算法
      */
-    public void calculationStep() {
+    public void calculationStep() throws RuntimeException{
         Map<String, Map<String, List<String>>> allProgram = Handler.getAllProgram();
+        LOG.info("全部视频处理方案: {}", allProgram);
+        if(allProgram.size() == 0) {
+            new RuntimeException("没有视频处理方案!");
+        }
         int stepTotal = 0;
         Iterator<Map.Entry<String, Map<String, List<String>>>> iterator = allProgram.entrySet().iterator();
         while (iterator.hasNext()) {
@@ -142,6 +146,10 @@ public class MyProgressBar {
         }
         BigDecimal dividend = new BigDecimal("1");
         BigDecimal divisor = new BigDecimal(stepTotal);
+        if(divisor.intValue() == 0) {
+            new RuntimeException("没有视频处理方案!");
+        }
+        LOG.info("步骤数量: {}", stepTotal);
         step = dividend.divide(divisor, 2, BigDecimal.ROUND_UP).doubleValue();
     }
 

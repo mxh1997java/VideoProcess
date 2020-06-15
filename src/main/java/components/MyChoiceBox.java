@@ -66,9 +66,11 @@ public class MyChoiceBox {
         choiceBox = new ChoiceBox<String>(observableList);
         choiceBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             public void changed(ObservableValue ov, Number value, Number new_value) {
-                LOG.info("数组长度: {}", array.length);
-                LOG.info("选择: {}", array[new_value.intValue()]);
-                selected = array[new_value.intValue()];
+                if(new_value.intValue() != -1) {
+                    LOG.info("数组长度: {}", array.length);
+                    LOG.info("选择: {}", new_value.intValue());
+                    selected = array[new_value.intValue()];
+                }
             }
         });
         return choiceBox;

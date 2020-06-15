@@ -1,5 +1,6 @@
 package components;
 
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -76,6 +77,8 @@ public class MyAlertBox {
             layout.getChildren().addAll(label);
         }
         HBox buttonArea = new HBox();
+        buttonArea.setPadding(new Insets(10, 100, 10, 100));
+        buttonArea.setMinSize(100, 30);
         buttonArea.getChildren().addAll(keep, stop);
         layout.getChildren().addAll(buttonArea);
         layout.setAlignment(Pos.CENTER);
